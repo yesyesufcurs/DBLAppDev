@@ -11,4 +11,10 @@
     <color name="main_medium">#2F353F</color>
     <color name="main_light">#44535F</color>
     <color name="main_dark">#22252A</color>
+    <color name="text_main">#BFFFFFFF</color>
+
+    <color name="secondary_medium">#E8E8E8</color>
+    <color name="secondary_light">#F8F8F8</color>
+    <color name="secondary_dark">#D8D8D8</color>
+    <color name="text_secondary">#BF000000</color>
 </resources>

@@ -5,8 +5,7 @@
     android:id="@+id/ConstraintLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/main_medium"
-    >
+    android:background="@color/main_medium">
 
 
     <LinearLayout
@@ -27,35 +26,28 @@
             android:id="@+id/username_in"
             android:layout_width="match_parent"
             android:layout_height="64dp"
-            android:background="@color/main_light"
-            android:layout_marginBottom="16dp">
-
-<!--            <TextView-->
-<!--                android:id="@+id/username_in_text"-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="match_parent"-->
-<!--                android:layout_marginStart="16dp"-->
-<!--                android:layout_marginEnd="16dp"-->
-<!--                android:gravity="center_vertical"-->
-<!--                android:text="Username"-->
-<!--                android:textAppearance="@style/input"-->
-<!--                app:layout_constraintStart_toStartOf="parent"-->
-<!--            />-->
-
+            android:layout_marginBottom="16dp"
+            android:background="@color/main_light">
 
             <EditText
                 android:id="@+id/username_in_text"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:ems="10"
-                android:gravity="center_vertical"
-                android:inputType="textShortMessage"
-                android:hint="Username"
-                android:textAppearance="@style/input"
-                tools:layout_editor_absoluteX="16dp"
                 android:layout_marginStart="16dp"
                 android:layout_marginEnd="16dp"
-            />
+                android:ems="10"
+                android:gravity="center_vertical"
+                android:hint="Username"
+                android:inputType="textShortMessage"
+                android:textAppearance="@style/input"
+                android:textColor="#BFFFFFFF"
+                android:textColorHighlight="#40FFFFFF"
+                android:textColorHint="#80FFFFFF"
+                android:textColorLink="@color/main_light"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -63,59 +55,62 @@
             android:id="@+id/password_in"
             android:layout_width="match_parent"
             android:layout_height="64dp"
-            android:background="@color/main_light"
-            android:layout_marginBottom="16dp">
-
-<!--            <TextView-->
-<!--                android:id="@+id/password_in_text"-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="match_parent"-->
-<!--                android:layout_marginStart="16dp"-->
-<!--                android:layout_marginEnd="16dp"-->
-<!--                android:gravity="center_vertical"-->
-<!--                android:text="Password"-->
-<!--                android:textAppearance="@style/input"-->
-<!--                app:layout_constraintStart_toStartOf="parent"-->
-<!--            />-->
+            android:layout_marginBottom="16dp"
+            android:background="@color/main_light">
 
             <EditText
                 android:id="@+id/password_in_text"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:ems="10"
-                android:gravity="center_vertical"
-                android:inputType="textPassword"
-                android:hint="Password"
-                android:textAppearance="@style/input"
-                tools:layout_editor_absoluteX="16dp"
                 android:layout_marginStart="16dp"
                 android:layout_marginEnd="16dp"
-            />
+                android:ems="10"
+                android:gravity="center_vertical"
+                android:hint="Password"
+                android:inputType="textPassword"
+                android:textAppearance="@style/input"
+                android:textColor="#BFFFFFFF"
+                android:textColorHighlight="#40FFFFFF"
+                android:textColorHint="#80FFFFFF"
+                android:textColorLink="@color/main_light"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
+<!--        <Button-->
+<!--            android:id="@+id/login_button"-->
+<!--            style="@style/Widget.AppCompat.Button"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="64dp"-->
+<!--            android:layout_marginBottom="16dp"-->
+<!--            android:background="@color/main_dark"-->
+<!--            android:text="Log in"-->
+<!--            android:textAppearance="@style/input"-->
+<!--            android:textColor="#BFFFFFFF" />-->
+
         <Button
             android:id="@+id/login_button"
+            style="?android:attr/borderlessButtonStyle"
             android:layout_width="match_parent"
             android:layout_height="64dp"
-            android:layout_marginBottom="16dp"
+            android:background="@color/main_dark"
+            android:text="Login"
             android:textAppearance="@style/input"
             android:textColor="#BFFFFFFF"
-            android:background="@color/main_dark"
-            style="?android:attr/borderlessButtonStyle"
-            android:text="Log in"
-        />
+            android:layout_marginBottom="16dp" />
 
         <Button
             android:id="@+id/register_button"
+            style="?android:attr/borderlessButtonStyle"
             android:layout_width="match_parent"
             android:layout_height="64dp"
-            android:textAppearance="@style/input"
-            android:textColor="#BFFFFFFF"
             android:background="@color/main_dark"
-            style="?android:attr/borderlessButtonStyle"
             android:text="Register"
-        />
+            android:textAppearance="@style/input"
+            android:textColor="#BFFFFFFF" />
 
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
