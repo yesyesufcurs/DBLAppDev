@@ -5,7 +5,8 @@
     android:id="@+id/ConstraintLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/main_medium">
+    android:background="?colorPrimary"
+    >
 
 
     <LinearLayout
@@ -27,7 +28,7 @@
             android:layout_width="match_parent"
             android:layout_height="64dp"
             android:layout_marginBottom="16dp"
-            android:background="@color/main_light">
+            android:background="?colorPrimaryVariant">
 
             <EditText
                 android:id="@+id/username_in_text"
@@ -40,10 +41,10 @@
                 android:hint="Username"
                 android:inputType="textShortMessage"
                 android:textAppearance="@style/input"
-                android:textColor="#BFFFFFFF"
-                android:textColorHighlight="#40FFFFFF"
-                android:textColorHint="#80FFFFFF"
-                android:textColorLink="@color/main_light"
+                android:textColor="?colorOnPrimary"
+                android:textColorHighlight="#40000000"
+                android:textColorHint="?colorOnPrimaryWeak"
+                android:textColorLink="?colorPrimaryVariant"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -56,7 +57,7 @@
             android:layout_width="match_parent"
             android:layout_height="64dp"
             android:layout_marginBottom="16dp"
-            android:background="@color/main_light">
+            android:background="?colorPrimaryVariant">
 
             <EditText
                 android:id="@+id/password_in_text"
@@ -69,10 +70,10 @@
                 android:hint="Password"
                 android:inputType="textPassword"
                 android:textAppearance="@style/input"
-                android:textColor="#BFFFFFFF"
-                android:textColorHighlight="#40FFFFFF"
-                android:textColorHint="#80FFFFFF"
-                android:textColorLink="@color/main_light"
+                android:textColor="?colorOnPrimary"
+                android:textColorHighlight="#40000000"
+                android:textColorHint="?colorOnPrimaryWeak"
+                android:textColorLink="?colorPrimaryVariant"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -96,10 +97,10 @@
             style="?android:attr/borderlessButtonStyle"
             android:layout_width="match_parent"
             android:layout_height="64dp"
-            android:background="@color/main_dark"
+            android:background="?colorPrimaryVariant"
             android:text="Login"
             android:textAppearance="@style/input"
-            android:textColor="#BFFFFFFF"
+            android:textColor="?colorOnPrimary"
             android:layout_marginBottom="16dp" />
 
         <Button
@@ -107,10 +108,10 @@
             style="?android:attr/borderlessButtonStyle"
             android:layout_width="match_parent"
             android:layout_height="64dp"
-            android:background="@color/main_dark"
+            android:background="?colorPrimaryVariant"
             android:text="Register"
             android:textAppearance="@style/input"
-            android:textColor="#BFFFFFFF" />
+            android:textColor="?colorOnPrimary" />
 
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,10 +1,14 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
+    <attr name="colorOnPrimaryWeak" format="reference|color" />
+    <attr name="colorOnPrimaryStrong" format="reference|color" />
     <!-- Base application theme. -->
     <style name="Theme.App" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
         <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/purple_200</item>
-        <item name="colorPrimaryVariant">@color/purple_700</item>
-        <item name="colorOnPrimary">@color/black</item>
+        <item name="colorPrimary">@color/dark_medium</item>
+        <item name="colorPrimaryVariant">@color/dark_light</item>
+        <item name="colorOnPrimary">@color/dark_text_medium</item>
+        <item name="colorOnPrimaryWeak">@color/dark_text_weak</item>
+        <item name="colorOnPrimaryStrong">@color/dark_text_strong</item>
         <!-- Secondary brand color. -->
         <item name="colorSecondary">@color/teal_200</item>
         <item name="colorSecondaryVariant">@color/teal_200</item>
