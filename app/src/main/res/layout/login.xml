@@ -81,37 +81,60 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-<!--        <Button-->
-<!--            android:id="@+id/login_button"-->
-<!--            style="@style/Widget.AppCompat.Button"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="64dp"-->
-<!--            android:layout_marginBottom="16dp"-->
-<!--            android:background="@color/main_dark"-->
-<!--            android:text="Log in"-->
-<!--            android:textAppearance="@style/input"-->
-<!--            android:textColor="#BFFFFFFF" />-->
-
-        <Button
-            android:id="@+id/login_button"
-            style="?android:attr/borderlessButtonStyle"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/login_button_layout"
             android:layout_width="match_parent"
             android:layout_height="64dp"
-            android:background="?colorPrimaryVariant"
-            android:text="Login"
-            android:textAppearance="@style/input"
-            android:textColor="?colorOnPrimary"
-            android:layout_marginBottom="16dp" />
+            android:layout_marginBottom="16dp"
+            android:background="?colorPrimaryDark">
 
-        <Button
-            android:id="@+id/register_button"
-            style="?android:attr/borderlessButtonStyle"
+            <Button
+                android:id="@+id/login_button"
+                style="@style/Widget.MaterialComponents.Button"
+                android:layout_width="match_parent"
+                android:layout_height="62dp"
+                android:layout_marginStart="1dp"
+                android:layout_marginTop="1dp"
+                android:layout_marginEnd="1dp"
+                android:backgroundTint="?colorPrimary"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:text="Log in"
+                android:textAppearance="@style/input"
+                android:textColor="?colorOnPrimary"
+                app:cornerRadius="0dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/register_button_layout"
             android:layout_width="match_parent"
             android:layout_height="64dp"
-            android:background="?colorPrimaryVariant"
-            android:text="Register"
-            android:textAppearance="@style/input"
-            android:textColor="?colorOnPrimary" />
+            android:background="?colorPrimaryDark">
+
+            <Button
+                android:id="@+id/register_button"
+                style="@style/Widget.MaterialComponents.Button"
+                android:layout_width="match_parent"
+                android:layout_height="62dp"
+                android:layout_marginStart="1dp"
+                android:layout_marginTop="1dp"
+                android:layout_marginEnd="1dp"
+                android:backgroundTint="?colorPrimary"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:text="Register"
+                android:textAppearance="@style/input"
+                android:textColor="?colorOnPrimary"
+                app:cornerRadius="0dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
     </LinearLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
