@@ -5,97 +5,127 @@
     android:id="@+id/ConstraintLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?colorPrimary">
+    android:background="?colorPrimary"
+    >
 
 
     <LinearLayout
         android:id="@+id/buttons"
         android:layout_width="348dp"
         android:layout_height="304dp"
-        android:layout_marginStart="411dp"
-        android:layout_marginTop="53dp"
-        android:layout_marginEnd="64dp"
-        android:layout_marginBottom="54dp"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.9"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/username_in"
+            android:id="@+id/username_input_layout"
+            style="@style/input_constraint"
             android:layout_width="match_parent"
-            android:layout_height="64dp"
-            android:layout_marginBottom="16dp"
-            android:background="?colorPrimaryVariant">
+            android:layout_marginBottom="16dp">
 
-            <TextView
-                android:id="@+id/username_in_text"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
+            <EditText
+                android:id="@+id/username_input_text"
+                style="@style/input_edittext"
                 android:layout_marginStart="16dp"
                 android:layout_marginEnd="16dp"
-                android:gravity="center_vertical"
-                android:text="Username"
-                android:textAppearance="@style/input"
-                app:layout_constraintStart_toStartOf="parent" />
+                android:hint="Username"
+                android:inputType="textShortMessage"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/password_in"
+            android:id="@+id/password_input"
+            style="@style/input_constraint"
             android:layout_width="match_parent"
-            android:layout_height="64dp"
-            android:layout_marginBottom="16dp"
-            android:background="?colorPrimaryVariant">
+            android:layout_marginBottom="16dp">
 
-            <TextView
+            <EditText
                 android:id="@+id/password_in_text"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                style="@style/input_edittext"
                 android:layout_marginStart="16dp"
                 android:layout_marginEnd="16dp"
-                android:gravity="center_vertical"
-                android:text="Password"
-                android:textAppearance="@style/input"
-                app:layout_constraintStart_toStartOf="parent" />
+                android:hint="Password"
+                android:inputType="textPassword"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/login_button"
+            android:id="@+id/login_button_layout"
+            style="@style/button_constraint"
             android:layout_width="match_parent"
-            android:layout_height="64dp"
-            android:layout_marginBottom="16dp"
-            android:background="?colorPrimaryVariant">
+            android:layout_marginBottom="16dp">
 
-            <TextView
-                android:id="@+id/login_button_text"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center_horizontal|center_vertical"
+            <Button
+                android:id="@+id/login_button"
+                style="@style/button"
+                android:layout_marginStart="1dp"
+                android:layout_marginTop="1dp"
+                android:layout_marginEnd="1dp"
+                android:layout_marginBottom="1dp"
                 android:text="Log in"
-                android:textAppearance="@style/input"
-                android:textColor="#BFFFFFFF"
-                tools:layout_editor_absoluteX="60dp"
-                tools:layout_editor_absoluteY="-16dp" />
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/register_button"
-            android:layout_width="match_parent"
-            android:layout_height="64dp"
-            android:layout_marginBottom="16dp"
-            android:background="?colorPrimaryVariant">
+            android:id="@+id/register_button_layout"
+            style="@style/button_constraint"
+            android:layout_width="match_parent">
 
-            <TextView
-                android:id="@+id/register_button_text"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center_horizontal|center_vertical"
+            <Button
+                android:id="@+id/register_button"
+                style="@style/button"
+                android:layout_marginStart="1dp"
+                android:layout_marginTop="1dp"
+                android:layout_marginEnd="1dp"
+                android:layout_marginBottom="1dp"
                 android:text="Register"
-                android:textAppearance="@style/input"
-                android:textColor="#BFFFFFFF" />
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
+
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/app_name_text"
+        android:layout_width="350dp"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/montserrat"
+        android:gravity="center_horizontal"
+        android:text="fancy app name"
+        android:textColor="?colorPrimaryVariant"
+        android:textSize="36sp"
+        app:layout_constraintEnd_toStartOf="@+id/buttons"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageView" />
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:backgroundTint="#0000"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/buttons"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_bank_logo"
+        app:tint="?colorPrimaryVariant" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

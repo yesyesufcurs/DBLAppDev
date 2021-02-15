@@ -16,7 +16,7 @@
         android:layout_marginStart="31dp"
         android:layout_marginTop="299dp"
         android:layout_marginEnd="31dp"
-        android:layout_marginBottom="220dp"
+        android:layout_marginBottom="196dp"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -24,11 +24,10 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            style="@style/input_constraint"
             android:id="@+id/username_input_layout"
-            android:layout_marginBottom="16dp"
+            style="@style/input_constraint"
             android:layout_width="match_parent"
-            >
+            android:layout_marginBottom="16dp">
 
             <EditText
                 android:id="@+id/username_input_text"
@@ -45,8 +44,8 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            style="@style/input_constraint"
             android:id="@+id/password_input"
+            style="@style/input_constraint"
             android:layout_width="match_parent"
             android:layout_marginBottom="16dp">
 
@@ -65,8 +64,8 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            style="@style/button_constraint"
             android:id="@+id/login_button_layout"
+            style="@style/button_constraint"
             android:layout_width="match_parent"
             android:layout_marginBottom="16dp">
 
@@ -86,8 +85,8 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            style="@style/button_constraint"
             android:id="@+id/register_button_layout"
+            style="@style/button_constraint"
             android:layout_width="match_parent">
 
             <Button
@@ -106,5 +105,32 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/app_name_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:fontFamily="@font/montserrat"
+        android:gravity="center_horizontal"
+        android:text="fancy app name"
+        android:textColor="?colorPrimaryVariant"
+        android:textSize="36sp"
+        app:layout_constraintBottom_toTopOf="@+id/buttons"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="133dp"
+        android:layout_marginEnd="134dp"
+        android:backgroundTint="#0000"
+        app:layout_constraintBottom_toTopOf="@+id/app_name_text"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:srcCompat="@drawable/ic_bank_logo"
+        app:tint="?colorPrimaryVariant" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
