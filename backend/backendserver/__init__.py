@@ -14,17 +14,13 @@ db_file = "/home/vincent/Documents/DBLAppDev/backend/backendserver/app.db"
 
 def create_connection(db_file):
     conn = None
-    try:
-        conn = sqlite3.connect(db_file)
-    except Error as e:
-        print(e)
-
+    conn = sqlite3.connect(db_file)
     return conn
 
 # import functionallity of backend
 import backendserver.login
-
-
+import backendserver.expense
+import backendserver.expense_group
 
  
 # Default homepage
@@ -32,29 +28,32 @@ import backendserver.login
 def home():
     return "Backend running normally"
 
-
-
-def select_all_tasks(conn):
-    """
-    Query all rows in the tasks table
-    :param conn: the Connection object
-    :return:
-    """
-    cur = conn.cursor()
-    cur.execute("SELECT * FROM user")
-
-    rows = cur.fetchall()
-
-    return jsonify(rows)
-
-
 @app.route("/showAllUsers")
-def main():
+def showAllUsers():
 
     # create a database connection
-    conn = create_connection(db_file)
-    with conn:
-        
-        print("2. Query all tasks")
-        return select_all_tasks(conn)
+    cursor, connection = None, None
+    
+    try:
+        connection = create_connection(db_file)
+        cursor = connection.cursor()
+    except Exception as e:
+        return jsonify(error=500, text="could not connect to database"), 500
+    
+    query = "SELECT * FROM user"
+    cursor.execute(query)
+    result = cursor.fetchall()
+    return jsonify(result)
 
+def verify_API_key(api_key):
+    cursor, connection = None, None
+
+    connection = create_connection(db_file)
+    cursor = connection.cursor()
+    
+    query = "SELECT id FROM user WHERE api_key = ?"
+    cursor.execute(query, (api_key, ))
+    result = cursor.fetchone()
+    if result == None:
+        raise Exception("API Key not valid")
+    return result

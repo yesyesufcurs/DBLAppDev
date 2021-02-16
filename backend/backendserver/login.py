@@ -6,7 +6,6 @@ import json
 import hashlib
 import os
 
-print(db_file)
 
 @app.route("/register")
 def register():
@@ -25,6 +24,9 @@ def register():
     except Exception as e:
         return jsonify(error=412, text="username/password/email header missing"), 412
     
+    if not len(username) <= 30:
+        return jsonify(error=412, text="username must be shorter than 30 characters"), 412
+
     if not len(password) >= 6:
         return jsonify(error=412, text="password must be longer than 5 characters"), 412 
 
