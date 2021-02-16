@@ -1,0 +1,4 @@
+Make sure requirements.txt are installed, and python 3.8 or newer is used.
+1. export FLASK_APP=backendserver
+2. export FLASK_ENV=development
+3. flask run

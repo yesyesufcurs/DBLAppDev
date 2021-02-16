@@ -16,3 +16,4 @@ local.properties
 backend/backendserver/app.db
 backend/backendserver/migrations
 backend/backendserver/__pycache__
+.vscode
