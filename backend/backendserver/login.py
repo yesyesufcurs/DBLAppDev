@@ -51,7 +51,7 @@ def register():
         cursor.execute(query, (username, obfuscate(username, password), email, api_key))
         connection.commit()
 
-    return jsonify(error=200, text=api_key), 200
+    return jsonify(api_key)
 
 @app.route("/login")
 def login():
@@ -76,7 +76,7 @@ def login():
     except Exception as e:
         return jsonify(error=412, text="username or password incorrect"), 412
     
-    return jsonify(error=200, text=api_key), 200
+    return jsonify(api_key)
     
 
 def valid_username(username, cursor):

@@ -45,15 +45,4 @@ def showAllUsers():
     result = cursor.fetchall()
     return jsonify(result)
 
-def verify_API_key(api_key):
-    cursor, connection = None, None
 
-    connection = create_connection(db_file)
-    cursor = connection.cursor()
-    
-    query = "SELECT id FROM user WHERE api_key = ?"
-    cursor.execute(query, (api_key, ))
-    result = cursor.fetchone()
-    if result == None:
-        raise Exception("API Key not valid")
-    return result
