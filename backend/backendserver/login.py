@@ -28,7 +28,7 @@ def register():
         return jsonify(error=412, text="username must be shorter than 30 characters"), 412
 
     if not len(password) >= 6:
-        return jsonify(error=412, text="password must be longer than 5 characters"), 412 
+        return jsonify(error=412, text="password must be at least 6 characters"), 412 
 
     
     if not valid_email(email):
