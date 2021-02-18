@@ -25,6 +25,21 @@ def getExpenseGroups():
     
     return GetExpenseGroup.template_method(GetExpenseGroup, request.headers["api_key"] if "api_key" in request.headers else None)
 
+@app.route("/getAllExpenseGroups")
+def getAllExpenseGroups():
+    class GetAllExpenseGroups(AbstractAPI):
+        def api_operation(self, user_id, conn):
+            cursor = conn.cursor()
+            query = '''SELECT id, name, moderator_id
+            FROM expense_group'''
+            try:
+                cursor.execute(query)
+            except Exception as e:
+                return jsonify(error=412, text="Cannot retrieve expense groups")
+            result = cursor.fetchall()
+            return jsonify(result)
+    return GetAllExpenseGroups.template_method(GetAllExpenseGroups, request.headers["api_key"] if "api_key" in request.headers else None)
+
 @app.route("/createExpenseGroup")
 def createExpenseGroup():
     class CreateExpenseGroup(AbstractAPI):
