@@ -7,11 +7,12 @@ import json
 
 # Creation of Flaks App
 app = Flask(__name__)
+app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024
 CORS(app)
 
 # Path to db. Change accordingly
-# db_file = "/home/vincent/Documents/DBLAppDev/backend/backendserver/app.db"
-db_file = "/mnt/c/Users/Vincent/AndroidStudioProjects/App/backend/backendserver/app.db"
+db_file = "/home/vincent/Documents/DBLAppDev/backend/backendserver/app.db"
+# db_file = "/mnt/c/Users/Vincent/AndroidStudioProjects/App/backend/backendserver/app.db"
 
 def create_connection(db_file):
     conn = None

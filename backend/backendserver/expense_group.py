@@ -9,10 +9,14 @@ import os
 
 @app.route("/getExpenseGroups")
 def getExpenseGroups():
+    '''
+    Returns JSON containing all expense group a user is part of.
+    Each entry is of the form expense_group_id, expense_group_name, moderator.
+    '''
     class GetExpenseGroup(AbstractAPI):
         def api_operation(self, user_id, conn):
             cursor = conn.cursor()
-            query = '''SELECT expense_group.id, expense_group.name 
+            query = '''SELECT expense_group.id, expense_group.name, moderator_id
             FROM expense_group_members, expense_group 
             WHERE user_id = ? AND 
             expense_group_members.expense_group_id = expense_group.id'''
@@ -27,6 +31,10 @@ def getExpenseGroups():
 
 @app.route("/getAllExpenseGroups")
 def getAllExpenseGroups():
+    '''
+    Returns JSON containing all expense group available.
+    Each entry is of the form expense_group_id, expense_group_name, moderator.
+    '''
     class GetAllExpenseGroups(AbstractAPI):
         def api_operation(self, user_id, conn):
             cursor = conn.cursor()
