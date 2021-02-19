@@ -29,6 +29,34 @@ import os
 
 #             # Determine how to send accured expenses!
 
+@app.router("/createExpenseIOU/<iouJson>")
+def createExpenseIOU(iouJson):
+    '''
+    Add how much each person owes the creator of an expense after creating an expense
+    Expects json string in following form:
+    {userid1:amount1, userid2:amount2, ...}
+    '''
+    class CreateExpenseIOU(AbstractAPI):
+        def api_operation(self, user_id, conn):
+            cursor = conn.cursor()
+            iou = json.loads(iouJson)
+            expense_id = ""
+            query = ''' INSERT INTO accured_expenses VALUES (?, ?, ?, ?) '''
+            try:
+                expense_id = request.headers.get('expense_id')
+            except Exception as e:
+                return jsonify(error=412, text="Cannot get expense id"), 412
+            for key in iou:
+                try:
+                    cursor.execute(query, (expense_id, key, iou[key], False))
+                except Exception as e:
+                    return jsonify(error=412, text="Cannot add transaction"), 412
+            return jsonify("Added successfully")
+    return CreateExpenseIOU.template_method(CreateExpenseIOU, request.headers["api_key"] if "api_key" in request.headers else None)
+
+
+
+
 @app.router("/getUsersExpenses")
 def getUsersExpenses():
     '''
