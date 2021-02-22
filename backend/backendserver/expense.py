@@ -14,7 +14,7 @@ def createExpense():
     '''
     Create expense WITHOUT UPLOADING PICTURE!
     Expects headers:
-    title, amount, content, expense_group_id
+    title, amount, description, expense_group_id
     Returns:
     expense_id
     '''
@@ -26,10 +26,10 @@ def createExpense():
                 expense_title = request.headers.get('title')
                 amount = request.headers.get('amount')
                 # Get picture
-                content = request.headers.get('content')
-                expense_group_id = request.header.get('expense_group_id')
+                content = request.headers.get('description')
+                expense_group_id = request.headers.get('expense_group_id')
             except Exception as e:
-                return jsonify(error=412, text="Expense group name missing")
+                return jsonify(error=412, text="Expense group name missing"), 412
 
             # Determine how to send accured expenses!
             query = '''
@@ -39,21 +39,22 @@ def createExpense():
             try:
                 cursor.execute(query, (user_id, expense_title, amount, content, expense_group_id))
             except Exception as e:
-                return jsonify(error=412, text="Cannot add expense to database")
+                return jsonify(error=412, text="Cannot add expense to database"), 412
             query = '''SELECT last_insert_rowid()'''
             try:
                 cursor.execute(query)
                 expense_id = cursor.fetchone()[0]
             except Exception as e:
                 return jsonify(error=412, text="Cannot get expense_id"),412
+            conn.commit()
             return jsonify(expense_id)
-
+    return CreateExpense.template_method(CreateExpense, request.headers["api_key"] if "api_key" in request.headers else None)
 @app.route("/createExpenseIOU/<iouJson>")
 def createExpenseIOU(iouJson):
     '''
     Add how much each person owes the creator of an expense after creating an expense
     Expects json string in following form:
-    {userid1:amount1, userid2:amount2, ...}
+    {userid1:amount1, userid2:amount2, ...} id's should be in quotes!
     Expects headers:
     expense_id: id of expense where IOU has to be added to
     returns: Added succesfully if succesful.
@@ -73,6 +74,7 @@ def createExpenseIOU(iouJson):
                     cursor.execute(query, (expense_id, key, iou[key], False))
                 except Exception as e:
                     return jsonify(error=412, text="Cannot add transaction"), 412
+            conn.commit()
             return jsonify("Added successfully")
     return CreateExpenseIOU.template_method(CreateExpenseIOU, request.headers["api_key"] if "api_key" in request.headers else None)
 

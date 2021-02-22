@@ -7,6 +7,7 @@ import json
 import hashlib
 import os
 
+
 @app.route("/getExpenseGroups")
 def getExpenseGroups():
     '''
@@ -23,11 +24,12 @@ def getExpenseGroups():
             try:
                 cursor.execute(query, (user_id,))
             except Exception as e:
-                return jsonify(error=412, text="Cannot retrieve expense groups of this user"),412
+                return jsonify(error=412, text="Cannot retrieve expense groups of this user"), 412
             result = cursor.fetchall()
             return jsonify(result)
-    
+
     return GetExpenseGroup.template_method(GetExpenseGroup, request.headers["api_key"] if "api_key" in request.headers else None)
+
 
 @app.route("/getAllExpenseGroups")
 def getAllExpenseGroups():
@@ -43,10 +45,11 @@ def getAllExpenseGroups():
             try:
                 cursor.execute(query)
             except Exception as e:
-                return jsonify(error=412, text="Cannot retrieve expense groups"),412
+                return jsonify(error=412, text="Cannot retrieve expense groups"), 412
             result = cursor.fetchall()
             return jsonify(result)
     return GetAllExpenseGroups.template_method(GetAllExpenseGroups, request.headers["api_key"] if "api_key" in request.headers else None)
+
 
 @app.route("/createExpenseGroup")
 def createExpenseGroup():
@@ -65,27 +68,28 @@ def createExpenseGroup():
             try:
                 expense_group_name = request.headers.get('expense_group_name')
             except Exception as e:
-                return jsonify(error=412, text="Expense group name missing"),412
+                return jsonify(error=412, text="Expense group name missing"), 412
             query = '''INSERT INTO expense_group(name, moderator_id) VALUES (?, ?)'''
             try:
                 cursor.execute(query, (expense_group_name, user_id))
             except Exception as e:
-                return jsonify(error=412, text="Cannot complete operation"),412
+                return jsonify(error=412, text="Cannot complete operation"), 412
             query = '''SELECT last_insert_rowid()'''
             try:
                 cursor.execute(query)
                 expense_group_id = cursor.fetchone()[0]
             except Exception as e:
-                return jsonify(error=412, text="Cannot get expense_group_id"),412
+                return jsonify(error=412, text="Cannot get expense_group_id"), 412
             query = '''INSERT INTO expense_group_members VALUES (?, ?)'''
             try:
                 cursor.execute(query, (expense_group_id, user_id))
             except Exception as e:
-                return jsonify(error=412, text="Cannot add moderator to expense group"),412
+                return jsonify(error=412, text="Cannot add moderator to expense group"), 412
             conn.commit()
             return jsonify(expense_group_id)
 
     return CreateExpenseGroup.template_method(CreateExpenseGroup, request.headers["api_key"] if "api_key" in request.headers else None)
+
 
 @app.route("/getExpenseGroupMembers")
 def getExpenseGroupMembers():
@@ -103,13 +107,41 @@ def getExpenseGroupMembers():
             try:
                 expense_group_id = request.headers.get('expense_group_id')
             except Exception as e:
-                return jsonify(error=412)
+                return jsonify(error=412, text="Cannot get expense group id"),412
             query = '''SELECT * FROM expense_group_members WHERE expense_group_id = ?'''
             try:
                 cursor.execute(query, (expense_group_id,))
             except Exception as e:
-                return jsonify(error=412, text="Cannot retrieve expense group members"),412
+                return jsonify(error=412, text="Cannot retrieve expense group members"), 412
             result = cursor.fetchall()
             return jsonify(result)
     return GetExpenseGroupMembers.template_method(GetExpenseGroupMembers, request.headers["api_key"] if "api_key" in request.headers else None)
 
+
+@app.route("/addToExpenseGroup")
+def addToExpenseGroup():
+    '''
+    Adds user to expense group'
+    Expects headers:
+    user_id: user_id of person to be added
+    expense_group_id: id of expense_group
+    Returns "Added successfully" if added succefully.
+    '''
+    class AddToExpenseGroup(AbstractAPI):
+        def api_operation(self, user_id, conn):
+            cursor = conn.cursor()
+            expense_group_id, user = "", ""
+            try:
+                user = request.headers.get('user_id')
+                expense_group_id = request.headers.get('expense_group_id')
+            except Exception as e:
+                return jsonify(error=412, text="Cannot get expense group id or user id"),412
+            query = '''
+            INSERT INTO expense_group_members(expense_group_id, user_id) VALUES (?, ?)'''
+            try:
+                cursor.execute(query, (expense_group_id, user))
+            except Exception as e:
+                return jsonify(error=412, text="Cannot add user to expense group"), 412
+            conn.commit()
+            return jsonify("Added successfully")
+    return AddToExpenseGroup.template_method(AddToExpenseGroup, request.headers["api_key"] if "api_key" in request.headers else None)
