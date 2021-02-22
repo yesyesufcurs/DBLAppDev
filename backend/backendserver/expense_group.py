@@ -50,6 +50,13 @@ def getAllExpenseGroups():
 
 @app.route("/createExpenseGroup")
 def createExpenseGroup():
+    '''
+    Creates new expense group.
+    Expects headers:
+    expense_group_name: name of expense group
+    Returns:
+    expense_group_id.
+    '''
     class CreateExpenseGroup(AbstractAPI):
         def api_operation(self, user_id, conn):
             cursor = conn.cursor()
@@ -76,12 +83,19 @@ def createExpenseGroup():
             except Exception as e:
                 return jsonify(error=412, text="Cannot add moderator to expense group"),412
             conn.commit()
-            return jsonify("Expense group has been created successfully")
+            return jsonify(expense_group_id)
 
     return CreateExpenseGroup.template_method(CreateExpenseGroup, request.headers["api_key"] if "api_key" in request.headers else None)
 
 @app.route("/getExpenseGroupMembers")
 def getExpenseGroupMembers():
+    '''
+    Returns members of expense group by id.
+    Expects headers:
+    expense_group_id: id of expense group
+    Returns:
+    json containing usernames of users in group.
+    '''
     class GetExpenseGroupMembers(AbstractAPI):
         def api_operation(self, user_id, conn):
             cursor = conn.cursor()

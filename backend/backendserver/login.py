@@ -11,6 +11,10 @@ import os
 def register():
     """
     Registers a user to the application
+    Expected headers:
+    username: username
+    password: password
+    email: valid email address
     @pre username != None && password != None && email != None &&
          valid_username(username) && valid_email(email)
     @modifies database
@@ -55,7 +59,14 @@ def register():
 
 @app.route("/login")
 def login():
-
+    '''
+    Login user given username and password
+    Expected headers:
+    username: username of the user
+    password: password of the user
+    returns:
+    api_key
+    '''
     username, password, api_key = "", "", ""
     try:
         username = request.headers["username"]
