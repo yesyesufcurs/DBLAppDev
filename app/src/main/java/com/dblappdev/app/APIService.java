@@ -20,7 +20,7 @@ public class APIService {
      * @returns apiKey
      * @post {@code \result == apiKey}
      */
-    public String register(String username, String password, String email) {
+    public static void register(String username, String password, String email) {
         if (username == null || password == null || email == null) {
             throw new IllegalArgumentException("APIService.register.pre: username, password or " +
                     "email is null.");
@@ -33,6 +33,7 @@ public class APIService {
             throw new IllegalArgumentException("APIService.register.pre: password should be at " +
                     "least 6 characters.");
         }
+        // Source: https://emailregex.com/
         if (!email.matches("(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}" +
                 "~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\" +
                 "[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?" +
@@ -42,7 +43,6 @@ public class APIService {
                 "\\x0c\\x0e-\\x7f])+)\\])")) {
             throw new IllegalArgumentException("APIService.register.pre: email is not valid.");
         }
-        return null;
     }
 
     /**
@@ -56,13 +56,12 @@ public class APIService {
      * @pre {@code username != null && password != null}
      * @post {@code \result == apiKey}
      */
-    public String login(String username, String password) {
+    public static void login(String username, String password) {
         if (username == null || password == null) {
             throw new IllegalArgumentException("APIService.login.pre: username or password" +
                     "is null");
         }
 
-        return null;
     }
 
     /**
@@ -76,11 +75,10 @@ public class APIService {
      * @pre {@code apiKey != null}
      * @post {@code \result == expenseGroups}
      */
-    public JSONArray getExpenseGroups(String apiKey) {
+    public static void getExpenseGroups(String apiKey) {
         if (apiKey == null) {
             throw new IllegalArgumentException("APIService.getExpenseGroups.pre: apiKey is null");
         }
-        return null;
     }
 
     /**
@@ -94,12 +92,11 @@ public class APIService {
      * @pre {@code apiKey != null}
      * @post {@code \result == expenseGroups}
      */
-    public JSONArray getAllExpenseGroups(String apiKey) {
+    public static void getAllExpenseGroups(String apiKey) {
         if (apiKey == null) {
             throw new IllegalArgumentException("APIService.getAllExpenseGroups.pre: apiKey is" +
                     " null");
         }
-        return null;
     }
 
     /**
@@ -113,13 +110,12 @@ public class APIService {
      * @pre {@code apiKey != null && expenseGroupName != null}
      * @post {@code \result == expenseGroups}
      */
-    public String createExpenseGroup(String apiKey, String expenseGroupName) {
+    public static void createExpenseGroup(String apiKey, String expenseGroupName) {
         if (apiKey == null || expenseGroupName == null) {
             throw new IllegalArgumentException("APIService.createExpenseGroup.pre: apiKey or " +
                     "expenseGroupName is null");
         }
 
-        return null;
     }
 
     /**
@@ -133,13 +129,12 @@ public class APIService {
      * @pre {@code apiKey != null && expenseGroupId != null}
      * @post {@code \result == userIds}
      */
-    public JSONArray getExpenseGroupMembers(String apiKey, String expenseGroupId) {
+    public void getExpenseGroupMembers(String apiKey, String expenseGroupId) {
         if (apiKey == null || expenseGroupId == null) {
             throw new IllegalArgumentException("APIService.getExpenseGroupMembers.pre: apiKey or" +
                     "expenseGroupId is null");
         }
 
-        return null;
     }
 
     /**
@@ -154,7 +149,7 @@ public class APIService {
      * @pre {@code apiKey != null && userId != null && expenseGroupId != null}
      * @post {@code \result in getExpenseGroupMembers(apiKey, expenseGroupId)}
      */
-    public void addToExpenseGroup(String apiKey, String userId, String expenseGroupId) {
+    public static void addToExpenseGroup(String apiKey, String userId, String expenseGroupId) {
         if (apiKey == null || userId == null || expenseGroupId == null) {
             throw new IllegalArgumentException("APIService.addToExpenseGroup.pre:" +
                     "apiKey or userId or expenseGroupId is null");
@@ -179,7 +174,7 @@ public class APIService {
      * picture != null && description != null && expenseGroupId != null}
      * @post {@code \result in getExpenseGroupExpenses(apiKey, expenseGroupId)}
      */
-    public String createExpense(String apiKey, String title, String amount, String picture,
+    public static void createExpense(String apiKey, String title, String amount, String picture,
                                 String description, String expenseGroupId) {
         if (apiKey == null || title == null || amount == null || picture == null ||
                 description == null || expenseGroupId == null) {
@@ -187,7 +182,6 @@ public class APIService {
                     "title or amount or picture or description or expenseGroupId is null");
         }
 
-        return null;
     }
 
     /**
@@ -203,7 +197,7 @@ public class APIService {
      * @pre {@code apiKey != null && expenseId != null && iouJson != null}
      * @post {@code iouJson == getOwedExpenses(apiKey, expenseId)}
      */
-    public void createExpenseIOU(String apiKey, String expenseId, JSONObject iouJson) {
+    public static void createExpenseIOU(String apiKey, String expenseId, JSONObject iouJson) {
         if (apiKey == null || expenseId == null || iouJson == null) {
             throw new IllegalArgumentException("APIService.createExpenseIOU.pre: apiKey or " +
                     "expenseId or iouJson is null");
@@ -223,13 +217,12 @@ public class APIService {
      * @post {@code \result == expenseGroupExpenses : expenseGroupExpenses.expenseGroupId ==
      * expenseGroupId}
      */
-    public JSONArray getExpenseGroupExpenses(String apiKey, String expenseGroupId) {
+    public static void getExpenseGroupExpenses(String apiKey, String expenseGroupId) {
         if (apiKey == null || expenseGroupId == null) {
             throw new IllegalArgumentException("APIService.getExpenseGroupExpenses.pre: " +
                     "apiKey or expenseGroupId is null");
         }
 
-        return null;
     }
 
     /**
@@ -242,11 +235,11 @@ public class APIService {
      * @pre {@code apiKey != null}
      * @post {@code \result == userExpenses : userExpenses.expenseGroupId == apiKey.user}
      */
-    public JSONArray getUsersExpenses(String apiKey) {
+    public static void getUsersExpenses(String apiKey) {
         if (apiKey == null) {
             throw new IllegalArgumentException("APIService.getUserExpenses.pre: apiKey is null");
         }
-        return null;
+
 
     }
 
@@ -261,11 +254,10 @@ public class APIService {
      * @post {@code \result == userOwedExpenses : \forall i; userOwedExpenses.ids().has(i);
      * getOwedExpenses(userOwedExpenses[i]).ower() == apiKey.user}
      */
-    public JSONArray getUserOwedExpenses(String apiKey) {
+    public static void getUserOwedExpenses(String apiKey) {
         if (apiKey == null) {
             throw new IllegalArgumentException("APIService.getUserExpenses.pre: apiKey is null");
         }
-        return null;
     }
 
 
@@ -280,12 +272,12 @@ public class APIService {
      * @pre {@code apiKey != null && expenseId != null}
      * @post {@code \result == expenseDetails : expenseDetails.id() == expenseId}
      */
-    public JSONArray getExpenseDetails(String apiKey, String expenseId) {
+    public static void getExpenseDetails(String apiKey, String expenseId) {
         if (apiKey == null || expenseId == null) {
             throw new IllegalArgumentException("APIService.getExpenseDetails.pre: " +
                     "apiKey or expenseId is null.");
         }
-        throw null;
+
 
     }
 
@@ -300,12 +292,12 @@ public class APIService {
      * @pre {@code apiKey != null && expenseId != null}
      * @post {@code \result == owedExpenses: owedExpenses.expenseId() == expenseId}
      */
-    public JSONArray getOwedExpenses(String apiKey, String expenseId) {
+    public static void getOwedExpenses(String apiKey, String expenseId) {
         if (apiKey == null || expenseId == null) {
             throw new IllegalArgumentException("APIService.getOwedExpenses.pre: " +
                     "apiKey or expenseId is null.");
         }
-        return null;
+
     }
 
 
