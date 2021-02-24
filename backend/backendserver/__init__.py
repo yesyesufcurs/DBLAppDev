@@ -15,8 +15,8 @@ CORS(app)
 db_file = "/mnt/c/Users/Vincent/AndroidStudioProjects/App/backend/backendserver/app.db"
 
 def create_connection(db_file):
-    conn = None
     conn = sqlite3.connect(db_file)
+    conn.row_factory = sqlite3.Row
     return conn
 
 # import functionallity of backend
@@ -39,14 +39,20 @@ def showAllUsers():
     
     try:
         connection = create_connection(db_file)
+        connection.row_factory = sqlite3.Row
         cursor = connection.cursor()
+        
     except Exception as e:
         return jsonify(error=500, text="could not connect to database"), 500
     
     query = "SELECT * FROM user"
     cursor.execute(query)
-    result = cursor.fetchall()
-    return jsonify(result)
+    rows = cursor.fetchall()
+    json_result = []
+    for row in rows:
+        drow = dict(zip(row.keys(), row))
+        json_result.append(drow)
+    return jsonify(json_result)
 
 @app.route("/showAllExpenseGroups")
 def showAllExpenseGroups():
@@ -56,14 +62,19 @@ def showAllExpenseGroups():
     
     try:
         connection = create_connection(db_file)
+        connection.row_factory = sqlite3.Row
         cursor = connection.cursor()
     except Exception as e:
         return jsonify(error=500, text="could not connect to database"), 500
     
     query = "SELECT * FROM expense_group"
     cursor.execute(query)
-    result = cursor.fetchall()
-    return jsonify(result)
+    rows = cursor.fetchall()
+    json_result = []
+    for row in rows:
+        drow = dict(zip(row.keys(), row))
+        json_result.append(drow)
+    return jsonify(json_result)
 
 @app.route("/showAllExpenses")
 def showAllExpenses():
@@ -73,14 +84,19 @@ def showAllExpenses():
     
     try:
         connection = create_connection(db_file)
+        connection.row_factory = sqlite3.Row
         cursor = connection.cursor()
     except Exception as e:
         return jsonify(error=500, text="could not connect to database"), 500
     
     query = "SELECT * FROM expense"
     cursor.execute(query)
-    result = cursor.fetchall()
-    return jsonify(result)
+    rows = cursor.fetchall()
+    json_result = []
+    for row in rows:
+        drow = dict(zip(row.keys(), row))
+        json_result.append(drow)
+    return jsonify(json_result)
 
 @app.route("/showAllAccuredExpenses")
 def showAllAccuredExpenses():
@@ -90,14 +106,19 @@ def showAllAccuredExpenses():
     
     try:
         connection = create_connection(db_file)
+        connection.row_factory = sqlite3.Row
         cursor = connection.cursor()
     except Exception as e:
         return jsonify(error=500, text="could not connect to database"), 500
     
     query = "SELECT * FROM accured_expenses"
     cursor.execute(query)
-    result = cursor.fetchall()
-    return jsonify(result)
+    rows = cursor.fetchall()
+    json_result = []
+    for row in rows:
+        drow = dict(zip(row.keys(), row))
+        json_result.append(drow)
+    return jsonify(json_result)
 
 @app.route("/showAllExpenseGroupMembers")
 def showAllExpenseGroupMembers():
@@ -107,11 +128,16 @@ def showAllExpenseGroupMembers():
     
     try:
         connection = create_connection(db_file)
+        connection.row_factory = sqlite3.Row
         cursor = connection.cursor()
     except Exception as e:
         return jsonify(error=500, text="could not connect to database"), 500
     
     query = "SELECT * FROM expense_group_members"
     cursor.execute(query)
-    result = cursor.fetchall()
-    return jsonify(result)
+    rows = cursor.fetchall()
+    json_result = []
+    for row in rows:
+        drow = dict(zip(row.keys(), row))
+        json_result.append(drow)
+    return jsonify(json_result)

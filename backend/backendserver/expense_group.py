@@ -26,7 +26,7 @@ def getExpenseGroups():
             except Exception as e:
                 return jsonify(error=412, text="Cannot retrieve expense groups of this user"), 412
             result = cursor.fetchall()
-            return jsonify(result)
+            return self.generateJson(self, result)
 
     return GetExpenseGroup.template_method(GetExpenseGroup, request.headers["api_key"] if "api_key" in request.headers else None)
 
@@ -47,7 +47,7 @@ def getAllExpenseGroups():
             except Exception as e:
                 return jsonify(error=412, text="Cannot retrieve expense groups"), 412
             result = cursor.fetchall()
-            return jsonify(result)
+            return self.generateJson(self, result)
     return GetAllExpenseGroups.template_method(GetAllExpenseGroups, request.headers["api_key"] if "api_key" in request.headers else None)
 
 
@@ -114,7 +114,7 @@ def getExpenseGroupMembers():
             except Exception as e:
                 return jsonify(error=412, text="Cannot retrieve expense group members"), 412
             result = cursor.fetchall()
-            return jsonify(result)
+            return self.generateJson(self, result)
     return GetExpenseGroupMembers.template_method(GetExpenseGroupMembers, request.headers["api_key"] if "api_key" in request.headers else None)
 
 

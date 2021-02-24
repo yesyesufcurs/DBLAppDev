@@ -14,7 +14,7 @@ class AbstractAPI():
 
     To use this class, create new class inheriting AbstractAPI and override the api_operation method.
     '''
-    user_id, api_key = "", ""
+    user_id = ""
     cursor, conn = None, None
 
 
@@ -56,6 +56,12 @@ class AbstractAPI():
             raise Exception("API Key not valid")
         return result[0]
     
+    def generateJson(self, rows):
+        json_result = []
+        for row in rows:
+            drow = dict(zip(row.keys(), row))
+            json_result.append(drow)
+        return jsonify(json_result)
 
     @abstractmethod
     def api_operation(self, user_id, cursor):
