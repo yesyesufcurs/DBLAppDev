@@ -57,7 +57,7 @@ def createExpenseIOU(iouJson):
     {userid1:amount1, userid2:amount2, ...} id's should be in quotes!
     Expects headers:
     expense_id: id of expense where IOU has to be added to
-    returns: Added succesfully if succesful.
+    returns: "Added succesfully" if succesful.
     '''
     class CreateExpenseIOU(AbstractAPI):
         def api_operation(self, user_id, conn):
@@ -78,7 +78,31 @@ def createExpenseIOU(iouJson):
             return jsonify("Added successfully")
     return CreateExpenseIOU.template_method(CreateExpenseIOU, request.headers["api_key"] if "api_key" in request.headers else None)
 
-
+@app.route("/getExpenseGroupExpenses")
+def getExpenseGroupExpenses():
+    ''' 
+    Returns all expenses that are in an expense group.
+    Expects: expense_group_id
+    Returns: expense_id, user_id, title, amount, content, expense_group_id of expense
+    '''
+    class ExpenseGroupExpenses(AbstractAPI):
+        def api_operation(self, user_id, conn):
+            cursor = conn.cursor()
+            expense_group_id = ""
+            try:
+                expense_group_id = request.headers.get('expense_group_id')
+            except Exception as e:
+                return jsonify(error=412, text="Cannot get expense_group_id")
+            query = ''' SELECT id, user_id, title, amount, content, expense_group_id
+            FROM expense
+            WHERE expense_group_id = ?'''
+            try:
+                cursor.execute(query, (expense_group_id,))
+            except Exception as e:
+                return jsonify(error=412, text="Cannot get expense_group_expenses")
+            result = cursor.fetchall()
+            return jsonify(result)
+    return ExpenseGroupExpenses.template_method(ExpenseGroupExpenses, request.headers["api_key"] if "api_key" in request.headers else None)
 
 
 @app.route("/getUsersExpenses")
