@@ -1,6 +1,7 @@
 package com.dblappdev.app;
 
 import org.json.JSONArray;
+import org.json.JSONObject;
 
 public class APIService {
     /**
@@ -149,8 +150,9 @@ public class APIService {
      * @param expenseGroupId
      * @throws IllegalArgumentException if {@code apiKey == null || userId == null
      *                                  expenseGroupId}
+     * @throws IllegalStateException    if backend returns an error
      * @pre {@code apiKey != null && userId != null && expenseGroupId != null}
-     * @post {@code userId is member of expenseGroupId}
+     * @post {@code \result in getExpenseGroupMembers(apiKey, expenseGroupId)}
      */
     public void addToExpenseGroup(String apiKey, String userId, String expenseGroupId) {
         if (apiKey == null || userId == null || expenseGroupId == null) {
@@ -159,6 +161,152 @@ public class APIService {
         }
     }
 
-    //TODO Add expense.py methods
+    /**
+     * Creates expense and returns expense id of created expense.
+     *
+     * @param apiKey
+     * @param title
+     * @param amount
+     * @param picture
+     * @param description
+     * @param expenseGroupId
+     * @return expenseId
+     * @throws IllegalArgumentException if {@code apiKey == null || title == null ||
+     *                                  amount == null || picture == null ||
+     *                                  description == null || expenseGroupId == null}
+     * @throws IllegalStateException    if backend returns an error
+     * @pre {@code apiKey != null && title != null && amount != null &&
+     * picture != null && description != null && expenseGroupId != null}
+     * @post {@code \result in getExpenseGroupExpenses(apiKey, expenseGroupId)}
+     */
+    public String createExpense(String apiKey, String title, String amount, String picture,
+                                String description, String expenseGroupId) {
+        if (apiKey == null || title == null || amount == null || picture == null ||
+                description == null || expenseGroupId == null) {
+            throw new IllegalArgumentException("APIService.createExpense.pre: apiKey or " +
+                    "title or amount or picture or description or expenseGroupId is null");
+        }
+
+        return null;
+    }
+
+    /**
+     * Creates expenseIOU i.e. the amount of money each person in a expense group
+     * owes the creator of an expense.
+     *
+     * @param apiKey
+     * @param expenseId
+     * @param iouJson
+     * @throws IllegalArgumentException if {@code apiKey == null || expenseId == null ||
+     *                                  iouJson == null}
+     * @throws IllegalStateException    if backend returns an error
+     * @pre {@code apiKey != null && expenseId != null && iouJson != null}
+     * @post {@code iouJson == getOwedExpenses(apiKey, expenseId)}
+     */
+    public void createExpenseIOU(String apiKey, String expenseId, JSONObject iouJson) {
+        if (apiKey == null || expenseId == null || iouJson == null) {
+            throw new IllegalArgumentException("APIService.createExpenseIOU.pre: apiKey or " +
+                    "expenseId or iouJson is null");
+        }
+
+    }
+
+    /**
+     * Gets expense details of all expenses in an expense group.
+     *
+     * @param apiKey
+     * @param expenseGroupId
+     * @return expenseGroupExpenses
+     * @throws IllegalArgumentException if {@code apiKey == null || expenseGroupId == null}
+     * @throws IllegalStateException    if backend returns an error
+     * @pre {@code apiKey != null && expenseGroupId != null}
+     * @post {@code \result == expenseGroupExpenses : expenseGroupExpenses.expenseGroupId ==
+     * expenseGroupId}
+     */
+    public JSONArray getExpenseGroupExpenses(String apiKey, String expenseGroupId) {
+        if (apiKey == null || expenseGroupId == null) {
+            throw new IllegalArgumentException("APIService.getExpenseGroupExpenses.pre: " +
+                    "apiKey or expenseGroupId is null");
+        }
+
+        return null;
+    }
+
+    /**
+     * Returns expense details of all expenses created by the user that makes the request
+     *
+     * @param apiKey
+     * @throws IllegalArgumentException if {@code apiKey == null}
+     * @throws IllegalStateException    if backend returns an error
+     * @returns userExpenses
+     * @pre {@code apiKey != null}
+     * @post {@code \result == userExpenses : userExpenses.expenseGroupId == apiKey.user}
+     */
+    public JSONArray getUsersExpenses(String apiKey) {
+        if (apiKey == null) {
+            throw new IllegalArgumentException("APIService.getUserExpenses.pre: apiKey is null");
+        }
+        return null;
+
+    }
+
+    /**
+     * Returns all expenses where the user owes someone else money
+     *
+     * @param apiKey
+     * @throws IllegalArgumentException if {@code apiKey == null}
+     * @throws IllegalStateException    if backend returns an error
+     * @return userOwedExpenses
+     * @pre {@code apiKey != null}
+     * @post {@code \result == userOwedExpenses : \forall i; userOwedExpenses.ids().has(i);
+     * getOwedExpenses(userOwedExpenses[i]).ower() == apiKey.user}
+     */
+    public JSONArray getUserOwedExpenses(String apiKey) {
+        if (apiKey == null) {
+            throw new IllegalArgumentException("APIService.getUserExpenses.pre: apiKey is null");
+        }
+        return null;
+    }
+
+
+    /**
+     * Returns the details of an expense given an expenseId
+     *
+     * @param apiKey
+     * @param expenseId
+     * @throws IllegalArgumentException if {@code apiKey == null || expenseId == null}
+     * @throws IllegalStateException    if backend returns an error
+     * @return expenseDetails
+     * @pre {@code apiKey != null && expenseId != null}
+     * @post {@code \result == expenseDetails : expenseDetails.id() == expenseId}
+     */
+    public JSONArray getExpenseDetails(String apiKey, String expenseId) {
+        if (apiKey == null || expenseId == null) {
+            throw new IllegalArgumentException("APIService.getExpenseDetails.pre: " +
+                    "apiKey or expenseId is null.");
+        }
+        throw null;
+
+    }
+
+    /**
+     * Returns how much each person owes the expense creator given expenseId
+     *
+     * @param apiKey
+     * @param expenseId
+     * @throws IllegalArgumentException if {@code apiKey == null || expenseId == null}
+     * @throws IllegalStateException    if backend returns an error
+     * @return owedExpenses
+     * @pre {@code apiKey != null && expenseId != null}
+     * @post {@code \result == owedExpenses: owedExpenses.expenseId() == expenseId}
+     */
+    public JSONArray getOwedExpenses(String apiKey, String expenseId) {
+        if (apiKey == null || expenseId == null) {
+            throw new IllegalArgumentException("APIService.getOwedExpenses.pre: " +
+                    "apiKey or expenseId is null.");
+        }
+        return null;
+    }
+
 
 }
