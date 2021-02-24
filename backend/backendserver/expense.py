@@ -92,14 +92,14 @@ def getExpenseGroupExpenses():
             try:
                 expense_group_id = request.headers.get('expense_group_id')
             except Exception as e:
-                return jsonify(error=412, text="Cannot get expense_group_id")
+                return jsonify(error=412, text="Cannot get expense_group_id"), 412
             query = ''' SELECT id, user_id, title, amount, content, expense_group_id
             FROM expense
             WHERE expense_group_id = ?'''
             try:
                 cursor.execute(query, (expense_group_id,))
             except Exception as e:
-                return jsonify(error=412, text="Cannot get expense_group_expenses")
+                return jsonify(error=412, text="Cannot get expense_group_expenses"), 412
             result = cursor.fetchall()
             return jsonify(result)
     return ExpenseGroupExpenses.template_method(ExpenseGroupExpenses, request.headers["api_key"] if "api_key" in request.headers else None)
@@ -161,7 +161,7 @@ def getExpenseDetails():
             try:
                 expense_id = request.headers.get('expense_id')
             except Exception as e:
-                return jsonify(error=412, text="Missing expense_id")
+                return jsonify(error=412, text="Missing expense_id"), 412
             cursor = conn.cursor()
             query = ''' SELECT * FROM expense WHERE expense_id = ?'''
             try:
@@ -170,6 +170,7 @@ def getExpenseDetails():
                 return jsonify(error=412, text="Cannot get expense details"), 412
             result = cursor.fetchone()
             return jsonify(result)
+    return GetExpenseDetails.template_method(GetExpenseDetails, request.headers["api_key"] if "api_key" in request.headers else None)
 
 @app.route("/getOwedExpenses")
 def getOwedExpenses():
@@ -183,11 +184,10 @@ def getOwedExpenses():
     class GetOwedExpenses(AbstractAPI):
         def api_operation(self, user_id, conn):
             expense_id = ""
-            user_id = ""
             try:
                 expense_id = request.headers.get('expense_id')
             except Exception as e:
-                return jsonify(error=412, text="Missing expense_id")
+                return jsonify(error=412, text="Missing expense_id"), 412
             cursor = conn.cursor()
             query = ''' SELECT e.user_id, a.expense_id, a.user_id, a.amount, a.paid
             FROM expense AS e, accured_expenses AS a
@@ -198,3 +198,34 @@ def getOwedExpenses():
                 return jsonify(error=412, text="Cannot get expense details"), 412
             result = cursor.fetchone()
             return jsonify(result)
+    return GetOwedExpenses.template_method(GetOwedExpenses, request.headers["api_key"] if "api_key" in request.headers else None)
+
+@app.route("/setUserPaidExpense")
+def setUserPaidExpense():
+    '''
+    Sets paid value in owedExpenses to true given expense_id and user_id
+    Expects headers:
+    expense_id
+    user_id
+    Returns:
+    "Set successfully" if successful.
+    '''
+    class SetUserPaidExpense(AbstractAPI):
+        def api_operation(self, user_id, conn):
+            cursor= conn.cursor()
+            expense_id = ""
+            user = ""
+            try:
+                expense_id = request.headers.get('expense_id')
+                user = request.headers.get('user_id')
+            except Exception as e:
+                return jsonify(error=412, text="Missing expense_id"), 412
+            query = '''
+            UPDATE accured_expenses
+            SET paid = ?
+            WHERE user_id = ? AND expense_id = ? '''
+            try:
+                cursor.execute(query, (True, user, expense_id))
+            except Exception as e:
+                return jsonify(error=412, text="Cannot set paid value to true"), 412
+            return jsonify("Set successfully")
