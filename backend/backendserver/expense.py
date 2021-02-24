@@ -229,3 +229,4 @@ def setUserPaidExpense():
             except Exception as e:
                 return jsonify(error=412, text="Cannot set paid value to true"), 412
             return jsonify("Set successfully")
+    return SetUserPaidExpense.template_method(SetUserPaidExpense, request.headers["api_key"] if "api_key" in request.headers else None)
