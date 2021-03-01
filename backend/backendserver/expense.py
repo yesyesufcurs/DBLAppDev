@@ -29,9 +29,12 @@ def createExpense():
                 content = request.headers.get('description')
                 expense_group_id = request.headers.get('expense_group_id')
             except Exception as e:
-                return jsonify(error=412, text="Expense group name missing"), 412
+                return jsonify(error=412, text="Expense group details missing."), 412
+            if not(1 <= len(expense_title) < 100):
+                return jsonify(error=412, text="Title should be non-empty and shorter than 100 characters."), 412
+            if not(float(amount) < 100000):
+                return jsonify(error=412, text="Expense amount should be lower than 100000"), 412
 
-            # Determine how to send accured expenses!
             query = '''
             INSERT INTO expense(user_id, title, amount, content, expense_group_id)
             VALUES (?, ?, ?, ?, ?)

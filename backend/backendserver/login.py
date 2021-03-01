@@ -85,7 +85,8 @@ def login():
     try:
         api_key = verify_login(username, password, cursor)
     except Exception as e:
-        return jsonify(error=412, text="username or password incorrect"), 412
+        return jsonify(error=412, text=str(e)), 412
+
     
     return jsonify(api_key)
     
@@ -127,8 +128,8 @@ def verify_login(username, password, cursor):
     cursor.execute(query, (username, ))
     result = cursor.fetchone()
     if result == None:
-        raise Exception("Username not found")
+        raise Exception("Username does not exist.")
     if result[0] != obfuscate(username, password):
-        raise Exception("Password not found")
+        raise Exception("Password is incorrect.")
     return result[1]
 
