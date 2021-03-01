@@ -1,12 +1,12 @@
 from flask import Flask, request, jsonify, Response
 from backendserver import app, db_file, create_connection
 from backendserver.abstractAPI import AbstractAPI
-import re
 import sqlite3
 import json
 import hashlib
 import os
-
+import random
+import time
 
 @app.route("/getExpenseGroups")
 def getExpenseGroups():
@@ -69,9 +69,9 @@ def createExpenseGroup():
                 expense_group_name = request.headers.get('expense_group_name')
             except Exception as e:
                 return jsonify(error=412, text="Expense group name missing"), 412
-            query = '''INSERT INTO expense_group(name, moderator_id) VALUES (?, ?)'''
+            query = '''INSERT INTO expense_group(id, name, moderator_id) VALUES (? ,?, ?)'''
             try:
-                cursor.execute(query, (expense_group_name, user_id))
+                cursor.execute(query, (generate_expense_group_id(cursor) ,expense_group_name, user_id))
             except Exception as e:
                 return jsonify(error=412, text="Cannot complete operation"), 412
             query = '''SELECT last_insert_rowid()'''
@@ -145,3 +145,17 @@ def addToExpenseGroup():
             conn.commit()
             return jsonify("Added successfully")
     return AddToExpenseGroup.template_method(AddToExpenseGroup, request.headers["api_key"] if "api_key" in request.headers else None)
+
+def generate_expense_group_id(cursor):
+    unique_id_found = False
+    timestamp = int(time.time())
+    random.seed(timestamp) 
+    id = 0
+    while not(unique_id_found):
+        id = random.randint(0,1000000)
+        cursor.execute("SELECT * FROM expense_group WHERE id = ?", (id,))
+        unique_id_found = len(cursor.fetchall())==0
+    return id
+
+
+    

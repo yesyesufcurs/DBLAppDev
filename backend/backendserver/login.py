@@ -51,7 +51,7 @@ def register():
     else:
         query = '''INSERT INTO user(id, password, email, api_key)
         VALUES(?,?,?,?)'''
-        api_key = key_gen(username)
+        api_key = key_gen(username, cursor)
         cursor.execute(query, (username, obfuscate(username, password), email, api_key))
         connection.commit()
 
@@ -112,9 +112,15 @@ def obfuscate(username, password):
 
 # General way to generate api_key
 # = SHA256(username + os.uranom(64).hex())
-def key_gen(username):
-    stringToHash = username + os.urandom(64).hex()
-    return hashlib.sha256(stringToHash.encode('utf-8')).hexdigest()
+def key_gen(username, cursor):
+    apikey = None
+    unique_id_found = False
+    while not(unique_id_found):
+        stringToHash = username + os.urandom(64).hex()
+        apikey = hashlib.sha256(stringToHash.encode('utf-8')).hexdigest()
+        cursor.execute("SELECT * FROM user WHERE api_key = ?", (apikey,))
+        unique_id_found = len(cursor.fetchall())==0
+    return apikey
 
 def verify_login(username, password, cursor):
     query = "SELECT password, api_key FROM user WHERE id = ?"
