@@ -8,7 +8,9 @@ import com.android.volley.VolleyError;
 
 import org.json.JSONObject;
 
+import java.util.HashMap;
 import java.util.Map;
+
 
 /**
  * Abstract API Request using template design pattern.
@@ -48,7 +50,7 @@ public abstract class AbstractAPIRequest<T> {
      * @param context
      * @param apiResponse
      */
-    public void templateAPIRequest(Context context, APIResponse<T> apiResponse) {
+    public void run(Context context, APIResponse<T> apiResponse) {
         responseListener = new Response.Listener<T>() {
             @Override
             public void onResponse(T response) {
@@ -60,9 +62,11 @@ public abstract class AbstractAPIRequest<T> {
             @Override
             public void onErrorResponse(VolleyError error) {
                 try {
-                    String responseNetworkData = new String(error.networkResponse.data, "utf-8");
+                    String responseNetworkData = new String(error.networkResponse.data,
+                            "utf-8");
                     errorMessage = new JSONObject(responseNetworkData).optString("text");
                 } catch (Exception e) {
+                    errorMessage = error.getMessage();
                 }
                 apiResponse.onErrorResponse(error, errorMessage);
             }

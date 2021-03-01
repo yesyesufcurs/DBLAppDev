@@ -22,11 +22,15 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         TextView textView = (TextView) findViewById(R.id.helloWorld);
-        APIService.register("appTest", "test123", "apptest@test.nl",
-                this, new APIResponse<String>() {
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("test2", 5);
+        }
+        catch (Exception e) {}
+        APIService.createExpenseIOU("10593bc886776acc3934716ebde2ea534510968a3574f622242e624d93014964", "3",jsonObject, this, new APIResponse<String>() {
                     @Override
                     public void onResponse(String data) {
-                        textView.setText(data);
+                        textView.setText(data.toString());
                     }
 
                     @Override
