@@ -171,7 +171,7 @@ def getExpenseDetails():
                 cursor.execute(query, (expense_id,))
             except Exception as e:
                 return jsonify(error=412, text="Cannot get expense details"), 412
-            result = cursor.fetchone()
+            result = cursor.fetchall()
             return self.generateJson(self, result)
     return GetExpenseDetails.template_method(GetExpenseDetails, request.headers["api_key"] if "api_key" in request.headers else None)
 
@@ -199,14 +199,14 @@ def getOwedExpenses():
                 cursor.execute(query, (expense_id,))
             except Exception as e:
                 return jsonify(error=412, text="Cannot get expense details"), 412
-            result = cursor.fetchone()
+            result = cursor.fetchall()
             return self.generateJson(self, result)
     return GetOwedExpenses.template_method(GetOwedExpenses, request.headers["api_key"] if "api_key" in request.headers else None)
 
 @app.route("/setUserPaidExpense")
 def setUserPaidExpense():
     '''
-    Sets paid value in owedExpenses to true given expense_id and user_id
+    Toggles paid value in owedExpenses given expense_id and user_id
     Expects headers:
     expense_id
     user_id
@@ -218,14 +218,27 @@ def setUserPaidExpense():
             cursor= conn.cursor()
             expense_id = ""
             user = ""
+            currentValue, newValue = -1, -1
             try:
                 expense_id = request.headers.get('expense_id')
                 user = request.headers.get('user_id')
             except Exception as e:
                 return jsonify(error=412, text="Missing expense_id"), 412
-            query = '''
+            query = """
+            SELECT paid FROM accured_expenses
+            WHERE user_id = ? AND expense_id = ?
+            """
+            
+            try:
+                cursor.execute(query, (user, expense_id))
+                currentValue = cursor.fetchone()[0]
+                newValue = not(currentValue)
+            except Exception as e:
+                return jsonify(error=412, text="Cannot get current status of accured expense."), 412
+            
+            query = f'''
             UPDATE accured_expenses
-            SET paid = 1
+            SET paid = {str(newValue)}
             WHERE user_id = ? AND expense_id = ? '''
             try:
                 cursor.execute(query, (user, expense_id))

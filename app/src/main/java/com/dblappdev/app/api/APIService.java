@@ -24,7 +24,7 @@ public class APIService {
      * @param password
      * @param email
      * @param context  context of request, often AppActivity (instance of calling object)
-     * @param response subclass of APIResponse
+     * @param response  contains a callback method that is called on (un)successful request.
      * @throws IllegalArgumentException if {@code username == null || password == null
      *                                  || email == null}
      * @throws IllegalArgumentException if {@code username.length() > 30 || password.length() < 6
@@ -93,7 +93,7 @@ public class APIService {
      * @param username
      * @param password
      * @param context  context of request, often AppActivity (instance of calling object)
-     * @param response subclass of APIResponse
+     * @param response  contains a callback method that is called on (un)successful request.
      * @throws IllegalArgumentException if {@code username == null || password == null}
      * @pre {@code username != null && password != null}
      * @post {@code APIResponse.data == apiKey}
@@ -133,7 +133,7 @@ public class APIService {
      *
      * @param apiKey
      * @param context  context of request, often AppActivity (instance of calling object)
-     * @param response subclass of APIResponse
+     * @param response  contains a callback method that is called on (un)successful request.
      * @throws IllegalArgumentException if {@code apiKey == null}
      * @pre {@code apiKey != null}
      * @post {@code APIResponse.data == expenseGroups}
@@ -170,7 +170,7 @@ public class APIService {
      *
      * @param apiKey
      * @param context  context of request, often AppActivity (instance of calling object)
-     * @param response subclass of APIResponse
+     * @param response  contains a callback method that is called on (un)successful request.
      * @throws IllegalArgumentException if {@code apiKey == null}
      * @pre {@code apiKey != null}
      * @post {@code APIResponse.data == expenseGroups}
@@ -207,7 +207,7 @@ public class APIService {
      * @param apiKey
      * @param expenseGroupName
      * @param context          context of request, often AppActivity (instance of calling object)
-     * @param response         subclass of APIResponse
+     * @param response  contains a callback method that is called on (un)successful request.
      * @throws IllegalArgumentException if {@code apiKey == null || expenseGroupName == null}
      * @pre {@code apiKey != null && expenseGroupName != null}
      * @post {@code APIResponse.data == expenseGroups}
@@ -246,7 +246,7 @@ public class APIService {
      * @param apiKey
      * @param expenseGroupId
      * @param context        context of request, often AppActivity (instance of calling object)
-     * @param response       subclass of APIResponse
+     * @param response  contains a callback method that is called on (un)successful request.
      * @throws IllegalArgumentException if {@code apiKey == null || expenseGroupId == null}
      * @pre {@code apiKey != null && expenseGroupId != null}
      * @post {@code APIResponse.data == userIds}
@@ -286,7 +286,7 @@ public class APIService {
      * @param userId
      * @param expenseGroupId
      * @param context        context of request, often AppActivity (instance of calling object)
-     * @param response       subclass of APIResponse
+     * @param response  contains a callback method that is called on (un)successful request.
      * @throws IllegalArgumentException if {@code apiKey == null || userId == null
      *                                  expenseGroupId}
      * @pre {@code apiKey != null && userId != null && expenseGroupId != null}
@@ -330,7 +330,7 @@ public class APIService {
      * @param description
      * @param expenseGroupId
      * @param context        context of request, often AppActivity (instance of calling object)
-     * @param response       subclass of APIResponse
+     * @param response  contains a callback method that is called on (un)successful request.
      * @throws IllegalArgumentException if {@code apiKey == null || title == null ||
      *                                  amount == null || picture == null ||
      *                                  description == null || expenseGroupId == null}
@@ -381,7 +381,7 @@ public class APIService {
      * @param expenseId
      * @param iouJson   JSONObject with userIds as keys, and amount owed as value
      * @param context   context of request, often AppActivity (instance of calling object)
-     * @param response  subclass of APIResponse
+     * @param response  contains a callback method that is called on (un)successful request.
      * @throws IllegalArgumentException if {@code apiKey == null || expenseId == null ||
      *                                  iouJson == null}
      * @pre {@code apiKey != null && expenseId != null && iouJson != null}
@@ -400,7 +400,7 @@ public class APIService {
             protected Request<String> doAPIRequest(Response.Listener<String> responseListener,
                                                    Response.ErrorListener errorListener) {
                 return new StringRequest(Request.Method.GET,
-                        AbstractAPIRequest.getAPIUrl() + "createExpenseIOU/"+iouJson.toString(),
+                        AbstractAPIRequest.getAPIUrl() + "createExpenseIOU/" + iouJson.toString(),
                         responseListener, errorListener) {
                     @Override
                     public Map<String, String> getHeaders() throws AuthFailureError {
@@ -417,80 +417,160 @@ public class APIService {
     }
 
     /**
-     * Gets expense details of all expenses in an expense group.
+     * Returns JSONArray containing all expense details of all expenses in an expense group.
      *
      * @param apiKey
      * @param expenseGroupId
      * @param context        context of request, often AppActivity (instance of calling object)
-     * @param response       subclass of APIResponse
+     * @param response  contains a callback method that is called on (un)successful request.
      * @throws IllegalArgumentException if {@code apiKey == null || expenseGroupId == null}
      * @pre {@code apiKey != null && expenseGroupId != null}
      * @post {@code APIResponse.data == expenseGroupExpenses : expenseGroupExpenses.expenseGroupId
      * == expenseGroupId}
      */
     public static void getExpenseGroupExpenses(String apiKey, String expenseGroupId,
-                                               Context context, APIResponse response) {
+                                               Context context, APIResponse<JSONArray> response) {
         if (apiKey == null || expenseGroupId == null || context == null || response == null) {
             throw new IllegalArgumentException("APIService.getExpenseGroupExpenses.pre: " +
                     "apiKey or expenseGroupId is null");
         }
 
+        AbstractAPIRequest<JSONArray> apiRequest = new AbstractAPIRequest<JSONArray>() {
+
+            @Override
+            protected Request<JSONArray> doAPIRequest(Response.Listener<JSONArray>
+                                                              responseListener,
+                                                      Response.ErrorListener errorListener) {
+                return new JsonArrayRequest(Request.Method.GET,
+                        AbstractAPIRequest.getAPIUrl() + "getExpenseGroupExpenses",
+                        null, responseListener, errorListener) {
+                    @Override
+                    public Map<String, String> getHeaders() throws AuthFailureError {
+                        Map<String, String> params = new HashMap<String, String>();
+                        params.put("api_key", apiKey);
+                        params.put("expense_group_id", expenseGroupId);
+                        return params;
+                    }
+                };
+            }
+        };
+        apiRequest.run(context, response);
+
     }
 
     /**
-     * Returns expense details of all expenses created by the user that makes the request
+     * Returns JSONArray containing expense details of all expenses created by the user that makes the request
      *
      * @param apiKey
      * @param context  context of request, often AppActivity (instance of calling object)
-     * @param response subclass of APIResponse
+     * @param response  contains a callback method that is called on (un)successful request.
      * @throws IllegalArgumentException if {@code apiKey == null}
      * @pre {@code apiKey != null}
      * @post {@code APIResponse.data == userExpenses : userExpenses.expenseGroupId == apiKey.user}
      */
-    public static void getUsersExpenses(String apiKey, Context context, APIResponse response) {
+    public static void getUsersExpenses(String apiKey, Context context,
+                                        APIResponse<JSONArray> response) {
         if (apiKey == null || context == null || response == null) {
             throw new IllegalArgumentException("APIService.getUserExpenses.pre: apiKey is null");
         }
 
+        AbstractAPIRequest<JSONArray> apiRequest = new AbstractAPIRequest<JSONArray>() {
+
+            @Override
+            protected Request<JSONArray> doAPIRequest(Response.Listener<JSONArray>
+                                                              responseListener,
+                                                      Response.ErrorListener errorListener) {
+                return new JsonArrayRequest(Request.Method.GET,
+                        AbstractAPIRequest.getAPIUrl() + "getUsersExpenses",
+                        null, responseListener, errorListener) {
+                    @Override
+                    public Map<String, String> getHeaders() throws AuthFailureError {
+                        Map<String, String> params = new HashMap<String, String>();
+                        params.put("api_key", apiKey);
+                        return params;
+                    }
+                };
+            }
+        };
+        apiRequest.run(context, response);
 
     }
 
     /**
-     * Returns all expenses where the user owes someone else money
+     * Returns JSONArray containing all expenses where the user owes someone else money
      *
      * @param apiKey
      * @param context  context of request, often AppActivity (instance of calling object)
-     * @param response subclass of APIResponse
+     * @param response  contains a callback method that is called on (un)successful request.
      * @throws IllegalArgumentException if {@code apiKey == null}
      * @pre {@code apiKey != null}
      * @post {@code APIResponse.data == userOwedExpenses : \forall i; userOwedExpenses.ids().has(i);
      * getOwedExpenses(userOwedExpenses[i]).ower() == apiKey.user}
      */
-    public static void getUserOwedExpenses(String apiKey, Context context, APIResponse response) {
+    public static void getUserOwedExpenses(String apiKey, Context context,
+                                           APIResponse<JSONArray> response) {
         if (apiKey == null || context == null || response == null) {
             throw new IllegalArgumentException("APIService.getUserExpenses.pre: apiKey is null");
         }
+        AbstractAPIRequest<JSONArray> apiRequest = new AbstractAPIRequest<JSONArray>() {
+
+            @Override
+            protected Request<JSONArray> doAPIRequest(Response.Listener<JSONArray>
+                                                              responseListener,
+                                                      Response.ErrorListener errorListener) {
+                return new JsonArrayRequest(Request.Method.GET,
+                        AbstractAPIRequest.getAPIUrl() + "getUserOwedExpenses",
+                        null, responseListener, errorListener) {
+                    @Override
+                    public Map<String, String> getHeaders() throws AuthFailureError {
+                        Map<String, String> params = new HashMap<String, String>();
+                        params.put("api_key", apiKey);
+                        return params;
+                    }
+                };
+            }
+        };
+        apiRequest.run(context, response);
     }
 
 
     /**
-     * Returns the details of an expense given an expenseId
+     * Returns JSONArray containing the details of an expense given an expenseId
      *
      * @param apiKey
      * @param expenseId
      * @param context   context of request, often AppActivity (instance of calling object)
-     * @param response  subclass of APIResponse
+     * @param response  contains a callback method that is called on (un)successful request.
      * @throws IllegalArgumentException if {@code apiKey == null || expenseId == null}
      * @pre {@code apiKey != null && expenseId != null}
      * @post {@code APIResponse.data == expenseDetails : expenseDetails.id() == expenseId}
      */
     public static void getExpenseDetails(String apiKey, String expenseId, Context context,
-                                         APIResponse response) {
+                                         APIResponse<JSONArray> response) {
         if (apiKey == null || expenseId == null || context == null || response == null) {
             throw new IllegalArgumentException("APIService.getExpenseDetails.pre: " +
                     "apiKey or expenseId is null.");
         }
+        AbstractAPIRequest<JSONArray> apiRequest = new AbstractAPIRequest<JSONArray>() {
 
+            @Override
+            protected Request<JSONArray> doAPIRequest(Response.Listener<JSONArray>
+                                                              responseListener,
+                                                      Response.ErrorListener errorListener) {
+                return new JsonArrayRequest(Request.Method.GET,
+                        AbstractAPIRequest.getAPIUrl() + "getExpenseDetails",
+                        null, responseListener, errorListener) {
+                    @Override
+                    public Map<String, String> getHeaders() throws AuthFailureError {
+                        Map<String, String> params = new HashMap<String, String>();
+                        params.put("api_key", apiKey);
+                        params.put("expense_id", expenseId);
+                        return params;
+                    }
+                };
+            }
+        };
+        apiRequest.run(context, response);
 
     }
 
@@ -500,17 +580,76 @@ public class APIService {
      * @param apiKey
      * @param expenseId
      * @param context   context of request, often AppActivity (instance of calling object)
-     * @param response  subclass of APIResponse
+     * @param response  contains a callback method that is called on (un)successful request.
      * @throws IllegalArgumentException if {@code apiKey == null || expenseId == null}
      * @pre {@code apiKey != null && expenseId != null}
      * @post {@code APIResponse.data == owedExpenses: owedExpenses.expenseId() == expenseId}
      */
     public static void getOwedExpenses(String apiKey, String expenseId, Context context,
-                                       APIResponse response) {
+                                       APIResponse<JSONArray> response) {
         if (apiKey == null || expenseId == null || context == null || response == null) {
             throw new IllegalArgumentException("APIService.getOwedExpenses.pre: " +
                     "apiKey or expenseId is null.");
         }
+
+        AbstractAPIRequest<JSONArray> apiRequest = new AbstractAPIRequest<JSONArray>() {
+
+            @Override
+            protected Request<JSONArray> doAPIRequest(Response.Listener<JSONArray>
+                                                              responseListener,
+                                                      Response.ErrorListener errorListener) {
+                return new JsonArrayRequest(Request.Method.GET,
+                        AbstractAPIRequest.getAPIUrl() + "getOwedExpenses",
+                        null, responseListener, errorListener) {
+                    @Override
+                    public Map<String, String> getHeaders() throws AuthFailureError {
+                        Map<String, String> params = new HashMap<String, String>();
+                        params.put("api_key", apiKey);
+                        params.put("expense_id", expenseId);
+                        return params;
+                    }
+                };
+            }
+        };
+        apiRequest.run(context, response);
+
+    }
+
+    /**
+     * Toggles the Paid value in the given accured for the given userId expense.
+     * @param apiKey
+     * @param expenseId
+     * @param userId
+     * @param context   context of request, often AppActivity (instance of calling object)
+     * @param response  contains a callback method that is called on (un)successful request.
+     */
+    public static void setUserPaidExpense(String apiKey, String expenseId, String userId,
+                                          Context context, APIResponse<String> response) {
+        if (apiKey == null || expenseId == null || userId == null || context == null ||
+                response == null) {
+            throw new IllegalArgumentException("APIService.setUserPaidExpense.pre: " +
+                    "apiKey, expenseId or userId is null.");
+        }
+
+        AbstractAPIRequest<String> apiRequest = new AbstractAPIRequest<String>() {
+            @Override
+            protected Request<String> doAPIRequest(Response.Listener<String> responseListener,
+                                                   Response.ErrorListener errorListener) {
+                return new StringRequest(Request.Method.GET,
+                        AbstractAPIRequest.getAPIUrl() + "setUserPaidExpense",
+                        responseListener, errorListener) {
+                    @Override
+                    public Map<String, String> getHeaders() throws AuthFailureError {
+                        Map<String, String> params = new HashMap<String, String>();
+                        params.put("expense_id", expenseId);
+                        params.put("api_key", apiKey);
+                        params.put("user_id", userId);
+                        return params;
+                    }
+                };
+            }
+        };
+        apiRequest.run(context, response);
 
     }
 
