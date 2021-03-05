@@ -35,6 +35,7 @@ public class APIService {
      */
     public static void register(String username, String password, String email, Context context,
                                 APIResponse<String> response) {
+        // Check preconditions
         if (username == null || password == null || email == null || context == null ||
                 response == null) {
             throw new IllegalArgumentException("APIService.register.pre: username, password or " +
@@ -59,7 +60,7 @@ public class APIService {
             String errorMessage = "Enter a valid email address.";
             response.onErrorResponse(new VolleyError(errorMessage), errorMessage);
         }
-
+        // Send request
         AbstractAPIRequest<String> apiRequest = new AbstractAPIRequest<String>() {
             @Override
             protected Request<String> doAPIRequest(Response.Listener<String> responseListener,
@@ -100,11 +101,12 @@ public class APIService {
      */
     public static void login(String username, String password, Context context,
                              APIResponse<String> response) {
+        //Check preconditions
         if (username == null || password == null || context == null || response == null) {
             throw new IllegalArgumentException("APIService.login.pre: username or password" +
                     "is null");
         }
-
+        // Send request
         AbstractAPIRequest<String> apiRequest = new AbstractAPIRequest<String>() {
 
             @Override
@@ -139,10 +141,12 @@ public class APIService {
      * @post {@code APIResponse.data == expenseGroups}
      */
     public static void getExpenseGroups(String apiKey, Context context, APIResponse<JSONArray> response) {
+        // Check preconditions
         if (apiKey == null || context == null || response == null) {
             throw new IllegalArgumentException("APIService.getExpenseGroups.pre: apiKey is null");
         }
 
+        // Send request
         AbstractAPIRequest<JSONArray> apiRequest = new AbstractAPIRequest<JSONArray>() {
 
             @Override
@@ -176,10 +180,12 @@ public class APIService {
      * @post {@code APIResponse.data == expenseGroups}
      */
     public static void getAllExpenseGroups(String apiKey, Context context, APIResponse<JSONArray> response) {
+        // Check preconditions
         if (apiKey == null || context == null || response == null) {
             throw new IllegalArgumentException("APIService.getAllExpenseGroups.pre: apiKey is" +
                     " null");
         }
+        // Send request
         AbstractAPIRequest<JSONArray> apiRequest = new AbstractAPIRequest<JSONArray>() {
 
             @Override
@@ -215,10 +221,12 @@ public class APIService {
     public static void createExpenseGroup(String apiKey, String expenseGroupName, Context
             context,
                                           APIResponse<String> response) {
+        // Check preconditions
         if (apiKey == null || expenseGroupName == null || context == null || response == null) {
             throw new IllegalArgumentException("APIService.createExpenseGroup.pre: apiKey or " +
                     "expenseGroupName is null");
         }
+        // Send request
         AbstractAPIRequest<String> apiRequest = new AbstractAPIRequest<String>() {
             @Override
             protected Request<String> doAPIRequest(Response.Listener<String> responseListener,
@@ -253,10 +261,12 @@ public class APIService {
      */
     public static void getExpenseGroupMembers(String apiKey, String expenseGroupId, Context context,
                                               APIResponse<JSONArray> response) {
+        // Check preconditions
         if (apiKey == null || expenseGroupId == null || context == null || response == null) {
             throw new IllegalArgumentException("APIService.getExpenseGroupMembers.pre: apiKey or" +
                     "expenseGroupId is null");
         }
+        // Send request
         AbstractAPIRequest<JSONArray> apiRequest = new AbstractAPIRequest<JSONArray>() {
 
             @Override
@@ -294,11 +304,13 @@ public class APIService {
      */
     public static void addToExpenseGroup(String apiKey, String userId, String expenseGroupId,
                                          Context context, APIResponse<String> response) {
+        // Check preconditions
         if (apiKey == null || userId == null || expenseGroupId == null || context == null ||
                 response == null) {
             throw new IllegalArgumentException("APIService.addToExpenseGroup.pre:" +
                     "apiKey or userId or expenseGroupId is null");
         }
+        // Send request
         AbstractAPIRequest<String> apiRequest = new AbstractAPIRequest<String>() {
             @Override
             protected Request<String> doAPIRequest(Response.Listener<String> responseListener,
@@ -341,13 +353,14 @@ public class APIService {
     public static void createExpense(String apiKey, String title, String amount, String
             picture, String description, String expenseGroupId, Context context,
                                      APIResponse<String> response) {
+        // Check preconditions
         if (apiKey == null || title == null || amount == null || picture == null ||
                 description == null || expenseGroupId == null || context == null ||
                 response == null) {
             throw new IllegalArgumentException("APIService.createExpense.pre: apiKey or " +
                     "title or amount or picture or description or expenseGroupId is null");
         }
-
+        // Send request
         AbstractAPIRequest<String> apiRequest = new AbstractAPIRequest<String>() {
             @Override
             protected Request<String> doAPIRequest(Response.Listener<String> responseListener,
@@ -389,12 +402,13 @@ public class APIService {
      */
     public static void createExpenseIOU(String apiKey, String expenseId, JSONObject iouJson,
                                         Context context, APIResponse<String> response) {
+        // Check preconditions
         if (apiKey == null || expenseId == null || iouJson == null || context == null ||
                 response == null) {
             throw new IllegalArgumentException("APIService.createExpenseIOU.pre: apiKey or " +
                     "expenseId or iouJson is null");
         }
-
+        // Send request
         AbstractAPIRequest<String> apiRequest = new AbstractAPIRequest<String>() {
             @Override
             protected Request<String> doAPIRequest(Response.Listener<String> responseListener,
@@ -430,11 +444,12 @@ public class APIService {
      */
     public static void getExpenseGroupExpenses(String apiKey, String expenseGroupId,
                                                Context context, APIResponse<JSONArray> response) {
+        // Check preconditions
         if (apiKey == null || expenseGroupId == null || context == null || response == null) {
             throw new IllegalArgumentException("APIService.getExpenseGroupExpenses.pre: " +
                     "apiKey or expenseGroupId is null");
         }
-
+        // Send request
         AbstractAPIRequest<JSONArray> apiRequest = new AbstractAPIRequest<JSONArray>() {
 
             @Override
@@ -470,10 +485,11 @@ public class APIService {
      */
     public static void getUsersExpenses(String apiKey, Context context,
                                         APIResponse<JSONArray> response) {
+        // Check preconditions
         if (apiKey == null || context == null || response == null) {
             throw new IllegalArgumentException("APIService.getUserExpenses.pre: apiKey is null");
         }
-
+        // Send request
         AbstractAPIRequest<JSONArray> apiRequest = new AbstractAPIRequest<JSONArray>() {
 
             @Override
@@ -509,9 +525,11 @@ public class APIService {
      */
     public static void getUserOwedExpenses(String apiKey, Context context,
                                            APIResponse<JSONArray> response) {
+        // Check preconditions
         if (apiKey == null || context == null || response == null) {
             throw new IllegalArgumentException("APIService.getUserExpenses.pre: apiKey is null");
         }
+        // Send request
         AbstractAPIRequest<JSONArray> apiRequest = new AbstractAPIRequest<JSONArray>() {
 
             @Override
@@ -547,10 +565,12 @@ public class APIService {
      */
     public static void getExpenseDetails(String apiKey, String expenseId, Context context,
                                          APIResponse<JSONArray> response) {
+        // Check preconditions
         if (apiKey == null || expenseId == null || context == null || response == null) {
             throw new IllegalArgumentException("APIService.getExpenseDetails.pre: " +
                     "apiKey or expenseId is null.");
         }
+        // Send request
         AbstractAPIRequest<JSONArray> apiRequest = new AbstractAPIRequest<JSONArray>() {
 
             @Override
@@ -587,11 +607,12 @@ public class APIService {
      */
     public static void getOwedExpenses(String apiKey, String expenseId, Context context,
                                        APIResponse<JSONArray> response) {
+        // Check preconditions
         if (apiKey == null || expenseId == null || context == null || response == null) {
             throw new IllegalArgumentException("APIService.getOwedExpenses.pre: " +
                     "apiKey or expenseId is null.");
         }
-
+        // Send request
         AbstractAPIRequest<JSONArray> apiRequest = new AbstractAPIRequest<JSONArray>() {
 
             @Override
@@ -625,12 +646,13 @@ public class APIService {
      */
     public static void setUserPaidExpense(String apiKey, String expenseId, String userId,
                                           Context context, APIResponse<String> response) {
+        // Check preconditions
         if (apiKey == null || expenseId == null || userId == null || context == null ||
                 response == null) {
             throw new IllegalArgumentException("APIService.setUserPaidExpense.pre: " +
                     "apiKey, expenseId or userId is null.");
         }
-
+        // Send request
         AbstractAPIRequest<String> apiRequest = new AbstractAPIRequest<String>() {
             @Override
             protected Request<String> doAPIRequest(Response.Listener<String> responseListener,
