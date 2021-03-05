@@ -61,12 +61,17 @@ public abstract class AbstractAPIRequest<T> {
         errorListener = new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
+                // Try to retrieve server error response.
                 try {
                     String responseNetworkData = new String(error.networkResponse.data,
                             "utf-8");
                     errorMessage = new JSONObject(responseNetworkData).optString("text");
                 } catch (Exception e) {
                     errorMessage = error.getMessage();
+                }
+                // Check if error was a TimeoutError
+                if (error.getClass().getSimpleName().equals("TimeoutError")) {
+                    errorMessage = "Cannot establish connection to server.";
                 }
                 apiResponse.onErrorResponse(error, errorMessage);
             }
