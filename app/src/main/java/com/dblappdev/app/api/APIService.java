@@ -1,22 +1,24 @@
 package com.dblappdev.app.api;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.util.Base64;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-public class APIService {
+public abstract class APIService {
     /**
      * Registers user in backend and returns apiKey
      *
@@ -43,10 +45,12 @@ public class APIService {
         if (username.length() >= 30) {
             String errorMessage = "Username must be longer than 30 characters.";
             response.onErrorResponse(new VolleyError(errorMessage), errorMessage);
+            return;
         }
         if (password.length() < 6) {
             String errorMessage = "Password must be shorter than 6 characters.";
             response.onErrorResponse(new VolleyError(errorMessage), errorMessage);
+            return;
         }
         // Source: https://emailregex.com/
         if (!email.matches("(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}" +
@@ -58,6 +62,7 @@ public class APIService {
                 "\\x0c\\x0e-\\x7f])+)\\])")) {
             String errorMessage = "Enter a valid email address.";
             response.onErrorResponse(new VolleyError(errorMessage), errorMessage);
+            return;
         }
 
         AbstractAPIRequest<String> apiRequest = new AbstractAPIRequest<String>() {
@@ -338,7 +343,7 @@ public class APIService {
      * picture != null && description != null && expenseGroupId != null}
      * @post {@code APIResponse.data in getExpenseGroupExpenses(apiKey, expenseGroupId)}
      */
-    public static void createExpense(String apiKey, String title, String amount, String
+    public static void createExpense(String apiKey, String title, String amount, Bitmap
             picture, String description, String expenseGroupId, Context context,
                                      APIResponse<String> response) {
         if (apiKey == null || title == null || amount == null || picture == null ||
@@ -348,13 +353,23 @@ public class APIService {
                     "title or amount or picture or description or expenseGroupId is null");
         }
 
+        String pictureBase64;
+        try {
+            pictureBase64 = bitmapToBase64(picture);
+        } catch(IllegalArgumentException e) {
+            String errorMessage = "Picture too large, should be smaller than 10MB.";
+            response.onErrorResponse(new VolleyError(errorMessage), errorMessage);
+            return;
+        }
+
         AbstractAPIRequest<String> apiRequest = new AbstractAPIRequest<String>() {
             @Override
             protected Request<String> doAPIRequest(Response.Listener<String> responseListener,
                                                    Response.ErrorListener errorListener) {
-                return new StringRequest(Request.Method.GET,
+                return new StringRequest(Request.Method.POST,
                         AbstractAPIRequest.getAPIUrl() + "createExpense",
                         responseListener, errorListener) {
+                    // Add correct headers
                     @Override
                     public Map<String, String> getHeaders() throws AuthFailureError {
                         Map<String, String> params = new HashMap<String, String>();
@@ -365,12 +380,39 @@ public class APIService {
                         params.put("api_key", apiKey);
                         return params;
                     }
+
+                    // Add picture as a string
+                    @Override
+                    protected Map<String, String> getParams() throws AuthFailureError {
+                        Map<String,String> params = new HashMap<>();
+                        params.put("picture", pictureBase64);
+
+                        return params;
+                    }
+
                 };
             }
         };
         apiRequest.run(context, response);
 
 
+    }
+
+    /**
+     * Returns a Base64 string of Bitmap at 70% quality and checks size limit of 10MB
+     * @param picture picture to be converted
+     * @throws IllegalArgumentException if size of picture greater than 10MB
+     * @return Base64 string of the picture
+     */
+    private static String bitmapToBase64(Bitmap picture) throws IllegalArgumentException {
+        // Convert Bitmap to byte array
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        picture.compress(Bitmap.CompressFormat.JPEG, 70, output);
+        byte[] pictureByteArray = output.toByteArray();
+        if (pictureByteArray.length > 10 * 1024 * 1024) {
+            throw new IllegalArgumentException("Size of picture greater than 10MB");
+        }
+        return Base64.encodeToString(pictureByteArray, Base64.DEFAULT);
     }
 
     /**

@@ -8,8 +8,9 @@ import sqlite3
 import json
 import hashlib
 import os
+import base64
 
-@app.route("/createExpense")
+@app.route("/createExpense", methods=["POST"])
 def createExpense():
     '''
     Create expense WITHOUT UPLOADING PICTURE!
@@ -20,12 +21,14 @@ def createExpense():
     '''
     class CreateExpense(AbstractAPI):
         def api_operation(self, user_id, conn):
+            return "Image received"
             cursor = conn.cursor()
             expense_title, amount, picture, content, expense_group_id, expense_id = None, None, None, None, None, None
+            # Get data from request
             try:
                 expense_title = request.headers.get('title')
                 amount = request.headers.get('amount')
-                # Get picture
+                picture = request.get_json()['picture']
                 content = request.headers.get('description')
                 expense_group_id = request.headers.get('expense_group_id')
             except Exception as e:
@@ -34,13 +37,16 @@ def createExpense():
                 return jsonify(error=412, text="Title should be non-empty and shorter than 100 characters."), 412
             if not(float(amount) < 100000):
                 return jsonify(error=412, text="Expense amount should be lower than 100000"), 412
+            # Convert base64 string to bytes
+            bytePicture = base64.b64decode(picture)
+
 
             query = '''
-            INSERT INTO expense(user_id, title, amount, content, expense_group_id)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO expense(user_id, title, amount, picture, content, expense_group_id)
+            VALUES (?, ?, ?, ?, ?, ?)
             '''
             try:
-                cursor.execute(query, (user_id, expense_title, amount, content, expense_group_id))
+                cursor.execute(query, (user_id, expense_title, amount, bytePicture, content, expense_group_id))
             except Exception as e:
                 return jsonify(error=412, text="Cannot add expense to database"), 412
             query = '''SELECT last_insert_rowid()'''

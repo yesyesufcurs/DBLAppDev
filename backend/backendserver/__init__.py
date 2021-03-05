@@ -4,6 +4,7 @@ from flask import Flask, request, jsonify, Response
 import sqlite3
 from flask_cors import CORS
 import json
+import base64
 
 # Creation of Flaks App
 app = Flask(__name__)
@@ -89,7 +90,7 @@ def showAllExpenses():
     except Exception as e:
         return jsonify(error=500, text="could not connect to database"), 500
     
-    query = "SELECT * FROM expense"
+    query = "SELECT id, user_id, title, amount, content, expense_group_id FROM expense"
     cursor.execute(query)
     rows = cursor.fetchall()
     json_result = []
@@ -97,6 +98,24 @@ def showAllExpenses():
         drow = dict(zip(row.keys(), row))
         json_result.append(drow)
     return jsonify(json_result)
+
+@app.route("/showExpensePicture/<int:id>")
+def showExpensePicture(id):
+    # create a database connection
+    cursor, connection = None, None
+    
+    try:
+        connection = create_connection(db_file)
+        connection.row_factory = sqlite3.Row
+        cursor = connection.cursor()
+    except Exception as e:
+        return jsonify(error=500, text="could not connect to database"), 500
+    
+    query = f"SELECT picture FROM expense WHERE id = {id}"
+    cursor.execute(query)
+    binPic = cursor.fetchone()[0]
+    picture = base64.b64encode(binPic).decode("utf-8")
+    return render_template("picture.html", obj=binPic, image=picture)
 
 @app.route("/showAllAccuredExpenses")
 def showAllAccuredExpenses():
