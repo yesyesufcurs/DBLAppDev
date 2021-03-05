@@ -8,6 +8,7 @@ import os
 import random
 import time
 
+
 @app.route("/getExpenseGroups")
 def getExpenseGroups():
     '''
@@ -74,7 +75,8 @@ def createExpenseGroup():
             query = '''INSERT INTO expense_group(id, name, moderator_id) VALUES (? ,?, ?)'''
             expense_group_id = generate_expense_group_id(cursor)
             try:
-                cursor.execute(query, (expense_group_id ,expense_group_name, user_id))
+                cursor.execute(
+                    query, (expense_group_id, expense_group_name, user_id))
             except Exception as e:
                 return jsonify(error=412, text="Cannot add expense group"), 412
             # Add moderator to db
@@ -106,7 +108,7 @@ def getExpenseGroupMembers():
             try:
                 expense_group_id = request.headers.get('expense_group_id')
             except Exception as e:
-                return jsonify(error=412, text="Cannot get expense group id"),412
+                return jsonify(error=412, text="Cannot get expense group id"), 412
             # Get expense group members
             query = '''SELECT * FROM expense_group_members WHERE expense_group_id = ?'''
             try:
@@ -138,23 +140,25 @@ def addToExpenseGroup():
                 user = request.headers.get('user_id')
                 expense_group_id = request.headers.get('expense_group_id')
             except Exception as e:
-                return jsonify(error=412, text="Cannot get expense group id or user id."),412
+                return jsonify(error=412, text="Cannot get expense group id or user id."), 412
             # Check permission to add person to expense group.
             try:
                 # User may add themselves, or must be moderator.
-                hasPermission = isModerator(user_id, expense_group_id, cursor) or user == user_id 
+                hasPermission = isModerator(
+                    user_id, expense_group_id, cursor) or user == user_id
             except Exception as e:
                 return jsonify(error=412, text="Cannot determine if caller has permissions."), 412
             if not(hasPermission):
                 return jsonify(error=412, text="Insufficient permissions to perform this action"), 412
             # Add person to expense group.
             try:
-                number_of_members = number_expense_group_members(expense_group_id, cursor)
+                number_of_members = number_expense_group_members(
+                    expense_group_id, cursor)
             except Exception as e:
-                return jsonify(error=412, text="Cannot get number of expense group members."),412
+                return jsonify(error=412, text="Cannot get number of expense group members."), 412
             # Check requirement of at most 50 members.
             if number_of_members >= 50:
-                return jsonify(error=412, text="Expense group full, can only have at most 50 members."),412
+                return jsonify(error=412, text="Expense group full, can only have at most 50 members."), 412
             query = '''
             INSERT INTO expense_group_members(expense_group_id, user_id) VALUES (?, ?)'''
             try:
@@ -165,27 +169,31 @@ def addToExpenseGroup():
             return jsonify("Added successfully")
     return AddToExpenseGroup.template_method(AddToExpenseGroup, request.headers["api_key"] if "api_key" in request.headers else None)
 
+
 def generate_expense_group_id(cursor):
     '''
     Generates random expense_group_id, while guaranteeing uniqueness.
     '''
     unique_id_found = False
     timestamp = int(time.time())
-    random.seed(timestamp) 
+    random.seed(timestamp)
     id = 0
     while not(unique_id_found):
-        id = random.randint(0,1000000)
+        id = random.randint(0, 1000000)
         cursor.execute("SELECT * FROM expense_group WHERE id = ?", (id,))
-        unique_id_found = len(cursor.fetchall())==0
+        unique_id_found = len(cursor.fetchall()) == 0
     return id
+
 
 def number_expense_group_members(expense_group_id, cursor):
     '''
     Returns number of expense group members in a expense group
     '''
-    cursor.execute("SELECT * FROM expense_group_members WHERE expense_group_id = ?", (expense_group_id,))
+    cursor.execute(
+        "SELECT * FROM expense_group_members WHERE expense_group_id = ?", (expense_group_id,))
     return len(cursor.fetchall())
-    
+
+
 def isModerator(user_id, expense_group_id, cursor):
     '''
     Returns if user is moderator of expense group

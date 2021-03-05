@@ -28,18 +28,17 @@ def register():
         email = request.headers["email"]
     except Exception as e:
         return jsonify(error=412, text="username/password/email header missing"), 412
-    
+
     # Verify requirements
     if not len(username) <= 30:
         return jsonify(error=412, text="username must be shorter than 30 characters"), 412
 
     if not len(password) >= 6:
-        return jsonify(error=412, text="password must be at least 6 characters"), 412 
+        return jsonify(error=412, text="password must be at least 6 characters"), 412
 
-    
     if not valid_email(email):
         return jsonify(error=412, text="email is not valid"), 412
-    
+
     # Establish connection to db
     cursor, connection = None, None
     try:
@@ -47,7 +46,7 @@ def register():
         cursor = connection.cursor()
     except Exception as e:
         return jsonify(error=500, text="could not connect to database"), 500
-    
+
     # Check uniqueness of username, and add user.
     if not valid_username(username, cursor):
         return jsonify(error=412, text="username already exists"), 412
@@ -55,11 +54,13 @@ def register():
         query = '''INSERT INTO user(id, password, email, api_key)
         VALUES(?,?,?,?)'''
         api_key = key_gen(username, cursor)
-        cursor.execute(query, (username, obfuscate(username, password), email, api_key))
+        cursor.execute(query, (username, obfuscate(
+            username, password), email, api_key))
         connection.commit()
-    
+
     # Return api_key on success.
     return jsonify(api_key)
+
 
 @app.route("/login")
 def login():
@@ -78,7 +79,7 @@ def login():
         password = request.headers["password"]
     except Exception as e:
         return jsonify(error=412, text="username/password header missing"), 412
-    
+
     # Establish connection to db
     cursor, connection = None, None
     try:
@@ -95,7 +96,7 @@ def login():
 
     # Return API Key
     return jsonify(api_key)
-    
+
 
 def valid_username(username, cursor):
     query = "SELECT id FROM user WHERE id = ?"
@@ -126,7 +127,7 @@ def key_gen(username, cursor):
         stringToHash = username + os.urandom(64).hex()
         apikey = hashlib.sha256(stringToHash.encode('utf-8')).hexdigest()
         cursor.execute("SELECT * FROM user WHERE api_key = ?", (apikey,))
-        unique_id_found = len(cursor.fetchall())==0
+        unique_id_found = len(cursor.fetchall()) == 0
     return apikey
 
 # Verifies login credentials of user and returns api_key if correct.
@@ -139,4 +140,3 @@ def verify_login(username, password, cursor):
     if result[0] != obfuscate(username, password):
         raise Exception("Password is incorrect.")
     return result[1]
-

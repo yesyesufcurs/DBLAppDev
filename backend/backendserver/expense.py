@@ -9,6 +9,7 @@ import json
 import hashlib
 import os
 
+
 @app.route("/createExpense")
 def createExpense():
     '''
@@ -41,7 +42,8 @@ def createExpense():
             VALUES (?, ?, ?, ?, ?)
             '''
             try:
-                cursor.execute(query, (user_id, expense_title, amount, content, expense_group_id))
+                cursor.execute(query, (user_id, expense_title,
+                                       amount, content, expense_group_id))
             except Exception as e:
                 return jsonify(error=412, text="Cannot add expense to database"), 412
             # Retrieve expense id
@@ -50,11 +52,13 @@ def createExpense():
                 cursor.execute(query)
                 expense_id = cursor.fetchone()[0]
             except Exception as e:
-                return jsonify(error=412, text="Cannot get expense_id"),412
+                return jsonify(error=412, text="Cannot get expense_id"), 412
             conn.commit()
             # Return expense id
             return jsonify(expense_id)
     return CreateExpense.template_method(CreateExpense, request.headers["api_key"] if "api_key" in request.headers else None)
+
+
 @app.route("/createExpenseIOU/<iouJson>")
 def createExpenseIOU(iouJson):
     '''
@@ -85,6 +89,7 @@ def createExpenseIOU(iouJson):
             conn.commit()
             return jsonify("Added successfully")
     return CreateExpenseIOU.template_method(CreateExpenseIOU, request.headers["api_key"] if "api_key" in request.headers else None)
+
 
 @app.route("/getExpenseGroupExpenses")
 def getExpenseGroupExpenses():
@@ -137,6 +142,7 @@ def getUsersExpenses():
             return self.generateJson(self, result)
     return GetUsersExpenses.template_method(GetUsersExpenses, request.headers["api_key"] if "api_key" in request.headers else None)
 
+
 @app.route("/getUserOwedExpenses")
 def getUserOwedExpenses():
     '''
@@ -158,6 +164,7 @@ def getUserOwedExpenses():
             result = cursor.fetchall()
             return self.generateJson(self, result)
     return GetUserOwedExpenses.template_method(GetUserOwedExpenses, request.headers["api_key"] if "api_key" in request.headers else None)
+
 
 @app.route("/getExpenseDetails")
 def getExpenseDetails():
@@ -185,6 +192,7 @@ def getExpenseDetails():
             result = cursor.fetchall()
             return self.generateJson(self, result)
     return GetExpenseDetails.template_method(GetExpenseDetails, request.headers["api_key"] if "api_key" in request.headers else None)
+
 
 @app.route("/getOwedExpenses")
 def getOwedExpenses():
@@ -216,6 +224,7 @@ def getOwedExpenses():
             return self.generateJson(self, result)
     return GetOwedExpenses.template_method(GetOwedExpenses, request.headers["api_key"] if "api_key" in request.headers else None)
 
+
 @app.route("/setUserPaidExpense")
 def setUserPaidExpense():
     '''
@@ -228,7 +237,7 @@ def setUserPaidExpense():
     '''
     class SetUserPaidExpense(AbstractAPI):
         def api_operation(self, user_id, conn):
-            cursor= conn.cursor()
+            cursor = conn.cursor()
             expense_id = ""
             user = ""
             currentValue, newValue = -1, -1
@@ -243,14 +252,14 @@ def setUserPaidExpense():
             SELECT paid FROM accured_expenses
             WHERE user_id = ? AND expense_id = ?
             """
-            
+
             try:
                 cursor.execute(query, (user, expense_id))
                 currentValue = cursor.fetchone()[0]
                 newValue = not(currentValue)
             except Exception as e:
                 return jsonify(error=412, text="Cannot get current status of accured expense."), 412
-            
+
             query = f'''
             UPDATE accured_expenses
             SET paid = {str(newValue)}
