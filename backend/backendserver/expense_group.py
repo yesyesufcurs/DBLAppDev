@@ -65,21 +65,19 @@ def createExpenseGroup():
             cursor = conn.cursor()
             expense_group_name = ""
             expense_group_id = 0
+            # Get headers
             try:
                 expense_group_name = request.headers.get('expense_group_name')
             except Exception as e:
                 return jsonify(error=412, text="Expense group name missing"), 412
+            # Add expense group to db
             query = '''INSERT INTO expense_group(id, name, moderator_id) VALUES (? ,?, ?)'''
+            expense_group_id = generate_expense_group_id(cursor)
             try:
-                cursor.execute(query, (generate_expense_group_id(cursor) ,expense_group_name, user_id))
+                cursor.execute(query, (expense_group_id ,expense_group_name, user_id))
             except Exception as e:
-                return jsonify(error=412, text="Cannot complete operation"), 412
-            query = '''SELECT last_insert_rowid()'''
-            try:
-                cursor.execute(query)
-                expense_group_id = cursor.fetchone()[0]
-            except Exception as e:
-                return jsonify(error=412, text="Cannot get expense_group_id"), 412
+                return jsonify(error=412, text="Cannot add expense group"), 412
+            # Add moderator to db
             query = '''INSERT INTO expense_group_members VALUES (?, ?)'''
             try:
                 cursor.execute(query, (expense_group_id, user_id))
@@ -104,10 +102,12 @@ def getExpenseGroupMembers():
         def api_operation(self, user_id, conn):
             cursor = conn.cursor()
             expense_group_id = 0
+            # Get headers
             try:
                 expense_group_id = request.headers.get('expense_group_id')
             except Exception as e:
                 return jsonify(error=412, text="Cannot get expense group id"),412
+            # Get expense group members
             query = '''SELECT * FROM expense_group_members WHERE expense_group_id = ?'''
             try:
                 cursor.execute(query, (expense_group_id,))
@@ -133,11 +133,13 @@ def addToExpenseGroup():
             expense_group_id, user = "", ""
             number_of_members = 0
             hasPermission = False
+            # Get headers
             try:
                 user = request.headers.get('user_id')
                 expense_group_id = request.headers.get('expense_group_id')
             except Exception as e:
                 return jsonify(error=412, text="Cannot get expense group id or user id."),412
+            # Check permission to add person to expense group.
             try:
                 # User may add themselves, or must be moderator.
                 hasPermission = isModerator(user_id, expense_group_id, cursor) or user == user_id 
@@ -145,10 +147,12 @@ def addToExpenseGroup():
                 return jsonify(error=412, text="Cannot determine if caller has permissions."), 412
             if not(hasPermission):
                 return jsonify(error=412, text="Insufficient permissions to perform this action"), 412
+            # Add person to expense group.
             try:
                 number_of_members = number_expense_group_members(expense_group_id, cursor)
             except Exception as e:
                 return jsonify(error=412, text="Cannot get number of expense group members."),412
+            # Check requirement of at most 50 members.
             if number_of_members >= 50:
                 return jsonify(error=412, text="Expense group full, can only have at most 50 members."),412
             query = '''
