@@ -24,6 +24,10 @@ public class RegisterActivity extends AppCompatActivity {
         Intent createProfileIntent = new Intent(this, CreateProfileActivity.class);
         startActivity(createProfileIntent);
         finish();
-        // TODO: Somehow prevent the user from going back to the register screen (possibly)
+    }
+
+    @Override
+    public void onBackPressed() {
+        // leave this method empty, to prevent the user from leaving the screen
     }
 }

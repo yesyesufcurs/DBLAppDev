@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?colorPrimary"
-    tools:context=".HomeScreenActivity">
+    tools:context=".GroupScreenActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -16,16 +16,16 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageButton
-            android:id="@+id/accountButton"
+            android:id="@+id/settingsButton"
             style="@style/image_button"
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:layout_marginEnd="16dp"
-            android:onClick="onAccount"
+            android:onClick="onSettings"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_account" />
+            app:srcCompat="@drawable/ic_settings" />
 
         <ImageButton
             android:id="@+id/addButton"
@@ -35,50 +35,49 @@
             android:layout_marginEnd="16dp"
             android:onClick="onAdd"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/accountButton"
+            app:layout_constraintEnd_toStartOf="@+id/settingsButton"
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/ic_add" />
 
         <ImageButton
-            android:id="@+id/logoutButton"
+            android:id="@+id/searchButton"
+            style="@style/image_button"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginEnd="16dp"
+            android:onClick="onSearch"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/addButton"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_search" />
+
+        <ImageButton
+            android:id="@+id/backButton"
             style="@style/image_button"
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:layout_marginStart="16dp"
-            android:onClick="onLogout"
-            android:rotation="180"
+            android:onClick="onBack"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_logout" />
+            app:srcCompat="@drawable/ic_back" />
 
         <!--
-            TODO: Programatically set the username text
+            TODO: Programatically set the group name text
         -->
         <TextView
             android:id="@+id/usernameText"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:gravity="center_vertical"
-            android:text="Username"
+            android:text="Group name"
             android:textAppearance="@style/text_topbar"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintHorizontal_bias="0.25"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <Button
-        android:id="@+id/tempButton"
-        style="@style/button"
-        android:layout_width="match_parent"
-        android:layout_height="64dp"
-        android:onClick="onTempClick"
-        android:text="temp button"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 
     <!--
         TODO: The rest of this page should go here

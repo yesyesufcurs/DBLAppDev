@@ -24,6 +24,10 @@ public class CreateProfileActivity extends AppCompatActivity {
         Intent homeScreenIntent = new Intent(this, HomeScreenActivity.class);
         startActivity(homeScreenIntent);
         finish();
-        // TODO: Make sure that the back button doesn't take the user back to this screen. Might have to be done in the HomeScreen activity
+    }
+
+    @Override
+    public void onBackPressed() {
+        // leave this method empty, to prevent the user from leaving the screen
     }
 }
