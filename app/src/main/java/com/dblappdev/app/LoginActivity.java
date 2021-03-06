@@ -20,6 +20,10 @@ public class LoginActivity extends AppCompatActivity {
      */
     public void onLoginClick(View view) {
 
+        // Redirect to the home screen
+        Intent homeScreenIntent = new Intent(this, HomeScreenActivity.class);
+        startActivity(homeScreenIntent);
+        finish();
     }
 
     /**
@@ -32,5 +36,6 @@ public class LoginActivity extends AppCompatActivity {
         // Start this as a new activity to make sure pressing the back button takes you back to this screen again
         Intent registerIntent = new Intent(this, RegisterActivity.class);
         startActivity(registerIntent);
+        finish();
     }
 }

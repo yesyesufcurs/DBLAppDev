@@ -20,5 +20,10 @@ public class CreateProfileActivity extends AppCompatActivity {
      */
     public void onCompleteProfile(View view) {
 
+        // Redirect to the home screen
+        Intent homeScreenIntent = new Intent(this, HomeScreenActivity.class);
+        startActivity(homeScreenIntent);
+        finish();
+        // TODO: Make sure that the back button doesn't take the user back to this screen. Might have to be done in the HomeScreen activity
     }
 }

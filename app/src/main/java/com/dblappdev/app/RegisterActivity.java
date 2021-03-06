@@ -23,6 +23,7 @@ public class RegisterActivity extends AppCompatActivity {
         // Redirect to the Create profile screen
         Intent createProfileIntent = new Intent(this, CreateProfileActivity.class);
         startActivity(createProfileIntent);
+        finish();
         // TODO: Somehow prevent the user from going back to the register screen (possibly)
     }
 }
