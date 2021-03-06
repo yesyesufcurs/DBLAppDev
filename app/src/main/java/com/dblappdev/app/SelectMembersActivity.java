@@ -2,6 +2,7 @@ package com.dblappdev.app;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
@@ -20,6 +21,8 @@ public class SelectMembersActivity extends AppCompatActivity {
     public void onBack(View view) {
 
         // Redirect to the add/edit expense screen
+        Intent expenseDetailsIntent = new Intent(this, ExpenseDetailsActivity.class);
+        startActivity(expenseDetailsIntent);
         finish();
     }
 
