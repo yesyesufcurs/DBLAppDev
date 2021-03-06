@@ -11,7 +11,6 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getSupportActionBar().hide(); // hide the title bar
         setContentView(R.layout.activity_login);
     }
 
@@ -29,5 +28,9 @@ public class LoginActivity extends AppCompatActivity {
      */
     public void onRegisterClick(View view) {
 
+        // Redirect to the Register screen
+        // Start this as a new activity to make sure pressing the back button takes you back to this screen again
+        Intent registerIntent = new Intent(this, RegisterActivity.class);
+        startActivity(registerIntent);
     }
 }
