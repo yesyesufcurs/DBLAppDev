@@ -9,6 +9,8 @@ import json
 import hashlib
 import os
 import base64
+import time
+from io import BytesIO
 
 @app.route("/createExpense", methods=["POST"])
 def createExpense():
@@ -20,15 +22,14 @@ def createExpense():
     expense_id
     '''
     class CreateExpense(AbstractAPI):
-        def api_operation(self, user_id, conn):
-            return "Image received"
+        def api_operation(self, user_id, conn):            
             cursor = conn.cursor()
             expense_title, amount, picture, content, expense_group_id, expense_id = None, None, None, None, None, None
             # Get data from request
             try:
                 expense_title = request.headers.get('title')
                 amount = request.headers.get('amount')
-                picture = request.get_json()['picture']
+                picture = request.form['picture']
                 content = request.headers.get('description')
                 expense_group_id = request.headers.get('expense_group_id')
             except Exception as e:
@@ -58,6 +59,37 @@ def createExpense():
             conn.commit()
             return jsonify(expense_id)
     return CreateExpense.template_method(CreateExpense, request.headers["api_key"] if "api_key" in request.headers else None)
+
+@app.route("/getExpensePicture", methods=["GET", "POST"])
+def getExpensePicture():
+    """
+    Returns HTML Website with the picture of the expense
+    Expects headers:
+    expense_id: id of expense.
+    Returns: 
+    HTML website containing picture
+    """
+    class GetExpensePicture(AbstractAPI):
+        def api_operation(self, user_id, conn):
+            cursor = conn.cursor()
+            expense_id,pictureBytes = None, None
+            
+            #Get headers
+            try:
+                expense_id = request.headers.get('expense_id')
+            except Exception as e:
+                return jsonify(error=412, text="Expense id missing"), 412
+            query = "SELECT picture from expense where id = ?"
+            
+            try:
+                cursor.execute(query,(expense_id,))
+                pictureBytes = cursor.fetchone()[0]
+            except Exception as e:
+                return jsonify(error=412, text="Cannot get picture"), 412
+            return base64.b64encode(pictureBytes)
+    return GetExpensePicture.template_method(GetExpensePicture, request.headers["api_key"] if "api_key" in request.headers else None)
+
+
 @app.route("/createExpenseIOU/<iouJson>")
 def createExpenseIOU(iouJson):
     '''

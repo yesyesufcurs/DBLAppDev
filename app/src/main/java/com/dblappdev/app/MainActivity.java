@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.StrictMode;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.volley.Response;
@@ -31,24 +32,20 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         TextView textView = (TextView) findViewById(R.id.helloWorld);
+        ImageView im1 = (ImageView) findViewById(R.id.imageView);
         JSONObject jsonObject = new JSONObject();
-        Bitmap testImage = null;
-        try{
-            URL url = new URL("https://miro.medium.com/max/2400/1*1BUIofZgqVuR6nj8LbrRtQ.jpeg");
-            testImage = BitmapFactory.decodeStream(url.openConnection().getInputStream());
-        } catch (IOException e){
-            System.out.println(e);
-        }
-        APIService.createExpense("10593bc886776acc3934716ebde2ea534510968a3574f622242e624d93014964","testWithPic","10", testImage, "Description", "1", this, new APIResponse<String>() {
+        APIService.getExpensePicture("aea35fd516cb721c5a32451d9cf78764533f64fc3ab2c92305be461fbe4c183b","4",this, new APIResponse<Bitmap>() {
                     @Override
-                    public void onResponse(String data) {
-                        textView.setText(data.toString());
+                    public void onResponse(Bitmap data) {
+//                        textView.setText(data.toString());
+                        im1.setImageBitmap(data);
                     }
 
                     @Override
                     public void onErrorResponse(VolleyError error, String errorMessage) {
-//                        textView.setText(error.toString());
-                        textView.setText(errorMessage);
+                        textView.setText(error.toString());
+//                        throw error;
+//                        textView.setText(errorMessage);
                     }
                 });
     }

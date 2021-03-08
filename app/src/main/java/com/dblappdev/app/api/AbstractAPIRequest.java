@@ -2,6 +2,7 @@ package com.dblappdev.app.api;
 
 import android.content.Context;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -17,8 +18,9 @@ import java.util.Map;
  * Overwrite doAPIRequest that returns the VolleyRequest to be executed.
  *
  * @param <T> Object type that is returned by VolleyRequest
+ * @param <K> Object type that is expected by APIResponse
  */
-public abstract class AbstractAPIRequest<T> {
+public abstract class AbstractAPIRequest<T, K> {
     private final static String api_url = "http://10.0.2.2:5000/";
     protected Response.Listener<T> responseListener;
     protected Response.ErrorListener errorListener;
@@ -28,9 +30,9 @@ public abstract class AbstractAPIRequest<T> {
      * Primitive method to be overwritten by implementer.
      * Returns the VolleyRequest to be executed.
      *
-     * @param responseListener
-     * @param errorListener
-     * @return
+     * @param responseListener Volley responseListener
+     * @param errorListener Volley errorListener
+     * @return Volley Request that must be executed
      */
     protected abstract Request<T> doAPIRequest(Response.Listener<T> responseListener,
                                                Response.ErrorListener errorListener);
@@ -45,16 +47,31 @@ public abstract class AbstractAPIRequest<T> {
     }
 
     /**
+     * Converts data from VolleyRequest to data expected by APIResponse
+     *
+     * @param data data returned by VolleyRequest
+     * @return converted data object in type K
+     *
+     * Default implementation:
+     * Cast data of type T to K.
+     *
+     * If K != T this method MUST BE overwritten!
+     */
+    protected K convertData(T data) {
+        return (K) data;
+    }
+
+    /**
      * Template method to be executed to run the API request.
      *
      * @param context
      * @param apiResponse
      */
-    public void run(Context context, APIResponse<T> apiResponse) {
+    public void run(Context context, APIResponse<K> apiResponse) {
         responseListener = new Response.Listener<T>() {
             @Override
             public void onResponse(T response) {
-                apiResponse.onResponse(response);
+                apiResponse.onResponse(convertData(response));
             }
         };
 
@@ -78,10 +95,13 @@ public abstract class AbstractAPIRequest<T> {
         };
 
         Request<T> request = doAPIRequest(responseListener, errorListener);
+        request.setRetryPolicy(new DefaultRetryPolicy(
+                12000,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         RequestHandler.getInstance(context).addToRequestQueue(request);
 
     }
 
-    ;
 
 }
