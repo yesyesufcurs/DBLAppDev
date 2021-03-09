@@ -1,10 +1,9 @@
-
 # Necessary imports to run Flask normally
 from flask import Flask, request, jsonify, Response
 import sqlite3
 from flask_cors import CORS
 import json
-import base64
+import os
 
 # Creation of Flaks App
 app = Flask(__name__)
@@ -12,8 +11,7 @@ app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024
 CORS(app)
 
 # Path to db. Change accordingly
-# db_file = "/home/vincent/Documents/DBLAppDev/backend/backendserver/app.db"
-db_file = "/mnt/c/Users/Vincent/AndroidStudioProjects/App/backend/backendserver/app.db"
+db_file = os.getcwd() + "/backendserver/app.db"
 
 def create_connection(db_file):
     conn = sqlite3.connect(db_file)
