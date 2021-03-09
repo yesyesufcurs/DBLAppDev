@@ -16,6 +16,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,9 +24,9 @@ public abstract class APIService {
     /**
      * Registers user in backend and returns apiKey
      *
-     * @param username
-     * @param password
-     * @param email
+     * @param username desired username of the new user (max length: 30)
+     * @param password desired password of the new user (min length: 6)
+     * @param email    desired email of the new user    (must be valid)
      * @param context  context of request, often AppActivity (instance of calling object)
      * @param response contains a callback method that is called on (un)successful request.
      * @throws IllegalArgumentException if {@code username == null || password == null
@@ -96,8 +97,8 @@ public abstract class APIService {
     /**
      * Logs user in and returns apiKey.
      *
-     * @param username
-     * @param password
+     * @param username username of the user logging in
+     * @param password password of the user logging in
      * @param context  context of request, often AppActivity (instance of calling object)
      * @param response contains a callback method that is called on (un)successful request.
      * @throws IllegalArgumentException if {@code username == null || password == null}
@@ -137,7 +138,7 @@ public abstract class APIService {
      * Returns JSONArray containing expense groups a user is part of.
      * Each entry is of the form expense_group_id, expense_group_name, user_id of moderator.
      *
-     * @param apiKey
+     * @param apiKey   apiKey of the user calling this method
      * @param context  context of request, often AppActivity (instance of calling object)
      * @param response contains a callback method that is called on (un)successful request.
      * @throws IllegalArgumentException if {@code apiKey == null}
@@ -174,7 +175,7 @@ public abstract class APIService {
      * Returns JSONArray containing all available expense groups.
      * Each entry is of the form expense_group_id, expense_group_name, user_id of moderator.
      *
-     * @param apiKey
+     * @param apiKey   apiKey of the user calling this method
      * @param context  context of request, often AppActivity (instance of calling object)
      * @param response contains a callback method that is called on (un)successful request.
      * @throws IllegalArgumentException if {@code apiKey == null}
@@ -210,8 +211,8 @@ public abstract class APIService {
     /**
      * Creates new expenseGroup and returns the assigned expense_group_id.
      *
-     * @param apiKey
-     * @param expenseGroupName
+     * @param apiKey           apiKey of the user calling this method
+     * @param expenseGroupName name of the expense group
      * @param context          context of request, often AppActivity (instance of calling object)
      * @param response         contains a callback method that is called on (un)successful request.
      * @throws IllegalArgumentException if {@code apiKey == null || expenseGroupName == null}
@@ -249,8 +250,8 @@ public abstract class APIService {
     /**
      * Returns JSONArray containing userIds of expense group members
      *
-     * @param apiKey
-     * @param expenseGroupId
+     * @param apiKey         apiKey of the user calling this method
+     * @param expenseGroupId id of the expense group
      * @param context        context of request, often AppActivity (instance of calling object)
      * @param response       contains a callback method that is called on (un)successful request.
      * @throws IllegalArgumentException if {@code apiKey == null || expenseGroupId == null}
@@ -288,9 +289,9 @@ public abstract class APIService {
     /**
      * Adds user to expense group.
      *
-     * @param apiKey
-     * @param userId
-     * @param expenseGroupId
+     * @param apiKey         apiKey of the user calling this method
+     * @param userId         id of the user to be added
+     * @param expenseGroupId id of the expense group
      * @param context        context of request, often AppActivity (instance of calling object)
      * @param response       contains a callback method that is called on (un)successful request.
      * @throws IllegalArgumentException if {@code apiKey == null || userId == null
@@ -329,12 +330,12 @@ public abstract class APIService {
     /**
      * Creates expense and returns expense id of created expense.
      *
-     * @param apiKey
-     * @param title
-     * @param amount
-     * @param picture
-     * @param description
-     * @param expenseGroupId
+     * @param apiKey         apiKey of the user calling this method
+     * @param title          title of the expense to be added
+     * @param amount         amount of the expense to be added
+     * @param picture        picture to be added
+     * @param description    description of the expense to be added
+     * @param expenseGroupId expense group id the transaction has to be added to
      * @param context        context of request, often AppActivity (instance of calling object)
      * @param response       contains a callback method that is called on (un)successful request.
      * @throws IllegalArgumentException if {@code apiKey == null || title == null ||
@@ -418,17 +419,32 @@ public abstract class APIService {
     }
 
     /**
-     * Returns a Bitmap object of the given Base64 String
+     * Returns a Bitmap object of the given weblink
      *
-     * @param picture picture to be converted
+     * @param weblink link to picture to be converted
      * @return Bitmap object of the picture
      */
-    private static Bitmap base64ToBitmap(String picture) {
-        // Convert base64 string to byte array
-        byte[] pictureArray = Base64.decode(picture, Base64.DEFAULT);
-        return BitmapFactory.decodeByteArray(pictureArray, 0, pictureArray.length);
+    private static Bitmap weblinkToBitmap(String weblink) throws IllegalStateException {
+        // Convert link with website to bitmap object
+        URL url = null;
+        Bitmap bmp = null;
+        try {
+            url = new URL(weblink);
+            bmp = BitmapFactory.decodeStream(url.openConnection().getInputStream());
+        } catch (Exception e) {
+            throw new IllegalStateException(e.getMessage());
+        }
+        return bmp;
     }
 
+    /**
+     * Returns a bitmap object of the picture of the expense.
+     *
+     * @param apiKey    apiKey of the user calling this method
+     * @param expenseId expense id of the expense
+     * @param context   context of request, often AppActivity (instance of calling object)
+     * @param response  contains a callback method that is called on (un)successful request.
+     */
     public static void getExpensePicture(String apiKey, String expenseId, Context context,
                                          APIResponse<Bitmap> response) {
         if (apiKey == null || expenseId == null || context == null ||
@@ -436,34 +452,17 @@ public abstract class APIService {
             throw new IllegalArgumentException("APIService.getExpensePicture.pre: apiKey or " +
                     "expenseId or iouJson is null");
         }
-
-        // Create request
-        AbstractAPIRequest<String, Bitmap> apiRequest = new AbstractAPIRequest<String, Bitmap>() {
-            @Override
-            protected Request<String> doAPIRequest(Response.Listener<String> responseListener,
-                                                   Response.ErrorListener errorListener) {
-                return new StringRequest(Request.Method.GET,
-                        AbstractAPIRequest.getAPIUrl() + "getExpensePicture",
-                        responseListener, errorListener) {
-                    // Add correct headers
-                    @Override
-                    public Map<String, String> getHeaders() throws AuthFailureError {
-                        Map<String, String> params = new HashMap<String, String>();
-                        params.put("expense_id", expenseId);
-                        params.put("api_key", apiKey);
-                        return params;
-                    }
-                };
-            }
-
-            @Override
-            protected Bitmap convertData(String data) {
-                return base64ToBitmap(data);
-            }
-        };
-
-
-        apiRequest.run(context, response);
+        String url = AbstractAPIRequest.getAPIUrl() + "getExpensePicture/" + expenseId + "/" +
+                apiKey;
+        // Get image from URL.
+        Bitmap picture = null;
+        try {
+            picture = weblinkToBitmap(url);
+        } catch (IllegalStateException e) {
+            String error = "Cannot retrieve picture";
+            response.onErrorResponse(new VolleyError(error), error);
+        }
+        response.onResponse(picture);
 
     }
 
@@ -471,8 +470,8 @@ public abstract class APIService {
      * Creates expenseIOU i.e. the amount of money each person in a expense group
      * owes the creator of an expense.
      *
-     * @param apiKey
-     * @param expenseId
+     * @param apiKey    apiKey of the user calling this method
+     * @param expenseId id of the expense
      * @param iouJson   JSONObject with userIds as keys, and amount owed as value
      * @param context   context of request, often AppActivity (instance of calling object)
      * @param response  contains a callback method that is called on (un)successful request.
@@ -513,8 +512,8 @@ public abstract class APIService {
     /**
      * Returns JSONArray containing all expense details of all expenses in an expense group.
      *
-     * @param apiKey
-     * @param expenseGroupId
+     * @param apiKey         apiKey of the user calling this method
+     * @param expenseGroupId id of the expense group
      * @param context        context of request, often AppActivity (instance of calling object)
      * @param response       contains a callback method that is called on (un)successful request.
      * @throws IllegalArgumentException if {@code apiKey == null || expenseGroupId == null}
@@ -555,7 +554,7 @@ public abstract class APIService {
     /**
      * Returns JSONArray containing expense details of all expenses created by the user that makes the request
      *
-     * @param apiKey
+     * @param apiKey   apiKey of the user calling this method
      * @param context  context of request, often AppActivity (instance of calling object)
      * @param response contains a callback method that is called on (un)successful request.
      * @throws IllegalArgumentException if {@code apiKey == null}
@@ -593,7 +592,7 @@ public abstract class APIService {
     /**
      * Returns JSONArray containing all expenses where the user owes someone else money
      *
-     * @param apiKey
+     * @param apiKey   apiKey of the user calling this method
      * @param context  context of request, often AppActivity (instance of calling object)
      * @param response contains a callback method that is called on (un)successful request.
      * @throws IllegalArgumentException if {@code apiKey == null}
@@ -631,8 +630,8 @@ public abstract class APIService {
     /**
      * Returns JSONArray containing the details of an expense given an expenseId
      *
-     * @param apiKey
-     * @param expenseId
+     * @param apiKey    apiKey of the user calling this method
+     * @param expenseId id of the expense
      * @param context   context of request, often AppActivity (instance of calling object)
      * @param response  contains a callback method that is called on (un)successful request.
      * @throws IllegalArgumentException if {@code apiKey == null || expenseId == null}
@@ -671,8 +670,8 @@ public abstract class APIService {
     /**
      * Returns how much each person owes the expense creator given expenseId
      *
-     * @param apiKey
-     * @param expenseId
+     * @param apiKey    apiKey of the user calling this method
+     * @param expenseId id of the expense
      * @param context   context of request, often AppActivity (instance of calling object)
      * @param response  contains a callback method that is called on (un)successful request.
      * @throws IllegalArgumentException if {@code apiKey == null || expenseId == null}
@@ -712,9 +711,9 @@ public abstract class APIService {
     /**
      * Toggles the Paid value in the given accured for the given userId expense.
      *
-     * @param apiKey
-     * @param expenseId
-     * @param userId
+     * @param apiKey    apiKey of the user calling this method
+     * @param expenseId id of the expense where paid has to be toggled
+     * @param userId    id of the user that has to be toggled
      * @param context   context of request, often AppActivity (instance of calling object)
      * @param response  contains a callback method that is called on (un)successful request.
      */

@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, Response
+from flask import Flask, request, jsonify, Response, send_file
 from backendserver import app, db_file, create_connection
 from backendserver.abstractAPI import AbstractAPI
 import backendserver.expense_group
@@ -60,8 +60,8 @@ def createExpense():
             return jsonify(expense_id)
     return CreateExpense.template_method(CreateExpense, request.headers["api_key"] if "api_key" in request.headers else None)
 
-@app.route("/getExpensePicture", methods=["GET", "POST"])
-def getExpensePicture():
+@app.route("/getExpensePicture/<expenseid>/<apikey>", methods=["GET", "POST"])
+def getExpensePicture(expenseid, apikey):
     """
     Returns HTML Website with the picture of the expense
     Expects headers:
@@ -76,7 +76,7 @@ def getExpensePicture():
             
             #Get headers
             try:
-                expense_id = request.headers.get('expense_id')
+                expense_id = expenseid
             except Exception as e:
                 return jsonify(error=412, text="Expense id missing"), 412
             query = "SELECT picture from expense where id = ?"
@@ -86,8 +86,10 @@ def getExpensePicture():
                 pictureBytes = cursor.fetchone()[0]
             except Exception as e:
                 return jsonify(error=412, text="Cannot get picture"), 412
-            return base64.b64encode(pictureBytes)
-    return GetExpensePicture.template_method(GetExpensePicture, request.headers["api_key"] if "api_key" in request.headers else None)
+            return send_file(BytesIO(pictureBytes),
+                            attachment_filename=f"expense_id_{expense_id}",
+                            mimetype='image/jpg')
+    return GetExpensePicture.template_method(GetExpensePicture, apikey)
 
 
 @app.route("/createExpenseIOU/<iouJson>")
