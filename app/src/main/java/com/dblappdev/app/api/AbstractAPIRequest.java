@@ -22,9 +22,9 @@ import java.util.Map;
  */
 public abstract class AbstractAPIRequest<T, K> {
     // For local testing
-    private final static String api_url = "http://10.0.2.2:5000/";
+//    private final static String api_url = "http://10.0.2.2:5000/";
     // For deployment
-    // private final static String api_url = "http://94.130.144.25:5000/";
+    private final static String api_url = "http://94.130.144.25:5000/";
     protected Response.Listener<T> responseListener;
     protected Response.ErrorListener errorListener;
     protected String errorMessage = "Generic error message.";
@@ -67,10 +67,20 @@ public abstract class AbstractAPIRequest<T, K> {
     /**
      * Template method to be executed to run the API request.
      *
-     * @param context
-     * @param apiResponse
+     * @param context       Context of caller
+     * @param apiResponse   APIResponse of caller
+     * @throws IllegalArgumentException if {@code context == null || apiResponse == null}
+     * @pre {@code context != null && apiResponse != null}
+     *
      */
     public void run(Context context, APIResponse<K> apiResponse) {
+        if (context == null) {
+            throw new IllegalArgumentException("AbstractAPIRequest.run.pre: context is null.");
+        }
+        if (apiResponse == null) {
+            throw new IllegalArgumentException("AbstractAPIRequest.run.pre: apiResponse is null.");
+        }
+
         responseListener = new Response.Listener<T>() {
             @Override
             public void onResponse(T response) {
