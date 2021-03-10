@@ -30,31 +30,46 @@ public abstract class APIService {
      * @param context  context of request, often AppActivity (instance of calling object)
      * @param response contains a callback method that is called on (un)successful request.
      * @throws IllegalArgumentException if {@code username == null || password == null
-     *                                  || email == null}
-     * @throws IllegalArgumentException if {@code username.length() > 30 || password.length() < 6
-     *                                  || email is valid}
-     * @pre {@code username != null && password != null && email != null && username.length() <= 30
-     * && password.length() >= 6 && email is valid}
+     *                                  || email == null || context == null || response == null}
+     * @throws IllegalArgumentException if {@code username.length() >= 30 || password.length() < 6
+     *                                  || password.length() >= 30 || !isASCII(username)
+     *                                  || !isASCII(password) || email is invalid}
+     * @pre {@code username != null && password != null && email != null && username.length() < 30
+     * && isASCII(username) && isAscii(password) && 6 <= password.length() < 30 && email is valid
+     * && context != null && response != null}
      * @post {@code APIResponse.data == apiKey}
      */
     public static void register(String username, String password, String email, Context context,
                                 APIResponse<String> response) {
         // Check preconditions
-        if (username == null || password == null || email == null || context == null ||
-                response == null) {
+        if (username == null || password == null || email == null) {
             throw new IllegalArgumentException("APIService.register.pre: username, password or " +
                     "email is null.");
         }
         if (username.length() >= 30) {
-            String errorMessage = "Username must be longer than 30 characters.";
+            String errorMessage = "Username must be shorter than 30 characters.";
             response.onErrorResponse(new VolleyError(errorMessage), errorMessage);
             return;
         }
-        if (password.length() < 6) {
-            String errorMessage = "Password must be shorter than 6 characters.";
+
+        if (!isASCII(username)) {
+            String errorMessage = "Username must only contain ASCII characters";
             response.onErrorResponse(new VolleyError(errorMessage), errorMessage);
             return;
         }
+
+        if (password.length() < 6 || password.length() >= 30) {
+            String errorMessage = "Password must be at least 6 and less than 30 characters.";
+            response.onErrorResponse(new VolleyError(errorMessage), errorMessage);
+            return;
+        }
+
+        if (isASCII(password)) {
+            String errorMessage = "Password may only contain ASCII characters";
+            response.onErrorResponse(new VolleyError(errorMessage), errorMessage);
+            return;
+        }
+
         // Source: https://emailregex.com/
         if (!email.matches("(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}" +
                 "~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\" +
@@ -95,6 +110,22 @@ public abstract class APIService {
         apiRequest.run(context, response);
     }
 
+    /**
+     * Returns if string only contains ASCII characters
+     *
+     * @param string string to be checked
+     * @return true if string only contains ASCII, else false
+     */
+    private static boolean isASCII(String string) {
+        for (char c : string.toCharArray()) {
+            // The characters between 0 - 127 are the ASCII characters
+            if (c >= 128) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 
     /**
      * Logs user in and returns apiKey.
@@ -103,14 +134,15 @@ public abstract class APIService {
      * @param password password of the user logging in
      * @param context  context of request, often AppActivity (instance of calling object)
      * @param response contains a callback method that is called on (un)successful request.
-     * @throws IllegalArgumentException if {@code username == null || password == null}
-     * @pre {@code username != null && password != null}
+     * @throws IllegalArgumentException if {@code username == null || password == null ||
+     *                                  context == null || response == null}}
+     * @pre {@code username != null && password != null && context != null && response != null}
      * @post {@code APIResponse.data == apiKey}
      */
     public static void login(String username, String password, Context context,
                              APIResponse<String> response) {
         //Check preconditions
-        if (username == null || password == null || context == null || response == null) {
+        if (username == null || password == null) {
             throw new IllegalArgumentException("APIService.login.pre: username or password" +
                     "is null");
         }
@@ -144,13 +176,14 @@ public abstract class APIService {
      * @param apiKey   apiKey of the user calling this method
      * @param context  context of request, often AppActivity (instance of calling object)
      * @param response contains a callback method that is called on (un)successful request.
-     * @throws IllegalArgumentException if {@code apiKey == null}
-     * @pre {@code apiKey != null}
+     * @throws IllegalArgumentException if {@code apiKey == null || context == null ||
+     *                                  response == null}}
+     * @pre {@code apiKey != null && context != null && response != null}
      * @post {@code APIResponse.data == expenseGroups}
      */
     public static void getExpenseGroups(String apiKey, Context context, APIResponse<JSONArray> response) {
         // Check preconditions
-        if (apiKey == null || context == null || response == null) {
+        if (apiKey == null) {
             throw new IllegalArgumentException("APIService.getExpenseGroups.pre: apiKey is null");
         }
 
@@ -184,17 +217,18 @@ public abstract class APIService {
      * @param apiKey   apiKey of the user calling this method
      * @param context  context of request, often AppActivity (instance of calling object)
      * @param response contains a callback method that is called on (un)successful request.
-     * @throws IllegalArgumentException if {@code apiKey == null}
-     * @pre {@code apiKey != null}
+     * @throws IllegalArgumentException if {@code apiKey == null || context == null ||
+     *                                  response == null}}
+     * @pre {@code apiKey != null && context != null && response != null}
      * @post {@code APIResponse.data == expenseGroups}
      */
     public static void getAllExpenseGroups(String apiKey, Context context, APIResponse<JSONArray> response) {
         // Check preconditions
-        if (apiKey == null || context == null || response == null) {
+        if (apiKey == null) {
             throw new IllegalArgumentException("APIService.getAllExpenseGroups.pre: apiKey is" +
                     " null");
         }
-      
+
         // Send request
         AbstractAPIRequest<JSONArray, JSONArray> apiRequest = new AbstractAPIRequest<JSONArray, JSONArray>() {
 
@@ -224,21 +258,22 @@ public abstract class APIService {
      * @param expenseGroupName name of the expense group
      * @param context          context of request, often AppActivity (instance of calling object)
      * @param response         contains a callback method that is called on (un)successful request.
-     * @throws IllegalArgumentException if {@code apiKey == null || expenseGroupName == null}
-     * @pre {@code apiKey != null && expenseGroupName != null}
+     * @throws IllegalArgumentException if {@code apiKey == null || expenseGroupName == null ||
+     *                                  context == null || response == null}}
+     * @pre {@code apiKey != null && expenseGroupName != null && context != null && response != null}
      * @post {@code APIResponse.data == expenseGroups}
      */
     public static void createExpenseGroup(String apiKey, String expenseGroupName, Context
             context,
                                           APIResponse<String> response) {
         // Check preconditions
-        if (apiKey == null || expenseGroupName == null || context == null || response == null) {
+        if (apiKey == null || expenseGroupName == null) {
             throw new IllegalArgumentException("APIService.createExpenseGroup.pre: apiKey or " +
                     "expenseGroupName is null");
         }
         // Send request
         AbstractAPIRequest<String, String> apiRequest = new AbstractAPIRequest<String, String>() {
-  
+
             @Override
             protected Request<String> doAPIRequest(Response.Listener<String> responseListener,
                                                    Response.ErrorListener errorListener) {
@@ -266,14 +301,15 @@ public abstract class APIService {
      * @param expenseGroupId id of the expense group
      * @param context        context of request, often AppActivity (instance of calling object)
      * @param response       contains a callback method that is called on (un)successful request.
-     * @throws IllegalArgumentException if {@code apiKey == null || expenseGroupId == null}
-     * @pre {@code apiKey != null && expenseGroupId != null}
+     * @throws IllegalArgumentException if {@code apiKey == null || expenseGroupId == null ||
+     *                                  context == null || response == null}}
+     * @pre {@code apiKey != null && expenseGroupId != null && context != null && response != null}
      * @post {@code APIResponse.data == userIds}
      */
     public static void getExpenseGroupMembers(String apiKey, String expenseGroupId, Context context,
                                               APIResponse<JSONArray> response) {
         // Check preconditions
-        if (apiKey == null || expenseGroupId == null || context == null || response == null) {
+        if (apiKey == null || expenseGroupId == null) {
             throw new IllegalArgumentException("APIService.getExpenseGroupMembers.pre: apiKey or" +
                     "expenseGroupId is null");
         }
@@ -308,15 +344,15 @@ public abstract class APIService {
      * @param context        context of request, often AppActivity (instance of calling object)
      * @param response       contains a callback method that is called on (un)successful request.
      * @throws IllegalArgumentException if {@code apiKey == null || userId == null
-     *                                  expenseGroupId}
-     * @pre {@code apiKey != null && userId != null && expenseGroupId != null}
+     *                                  expenseGroupId || context == null || response == null}
+     * @pre {@code apiKey != null && userId != null && expenseGroupId != null
+     * && context != null && response != null}
      * @post {@code APIResponse.data in getExpenseGroupMembers(apiKey, expenseGroupId)}
      */
     public static void addToExpenseGroup(String apiKey, String userId, String expenseGroupId,
                                          Context context, APIResponse<String> response) {
         // Check preconditions
-        if (apiKey == null || userId == null || expenseGroupId == null || context == null ||
-                response == null) {
+        if (apiKey == null || userId == null || expenseGroupId == null) {
             throw new IllegalArgumentException("APIService.addToExpenseGroup.pre:" +
                     "apiKey or userId or expenseGroupId is null");
         }
@@ -355,9 +391,11 @@ public abstract class APIService {
      * @param response       contains a callback method that is called on (un)successful request.
      * @throws IllegalArgumentException if {@code apiKey == null || title == null ||
      *                                  amount == null || picture == null ||
-     *                                  description == null || expenseGroupId == null}
+     *                                  description == null || expenseGroupId == null ||
+     *                                  context == null || response == null}}
      * @pre {@code apiKey != null && title != null && amount != null &&
-     * picture != null && description != null && expenseGroupId != null}
+     * picture != null && description != null && expenseGroupId != null && context != null &&
+     * response != null}
      * @post {@code APIResponse.data in getExpenseGroupExpenses(apiKey, expenseGroupId)}
      */
     public static void createExpense(String apiKey, String title, String amount, Bitmap
@@ -365,8 +403,7 @@ public abstract class APIService {
                                      APIResponse<String> response) {
         // Check preconditions
         if (apiKey == null || title == null || amount == null || picture == null ||
-                description == null || expenseGroupId == null || context == null ||
-                response == null) {
+                description == null || expenseGroupId == null) {
             throw new IllegalArgumentException("APIService.createExpense.pre: apiKey or " +
                     "title or amount or picture or description or expenseGroupId is null");
         }
@@ -460,11 +497,15 @@ public abstract class APIService {
      * @param expenseId expense id of the expense
      * @param context   context of request, often AppActivity (instance of calling object)
      * @param response  contains a callback method that is called on (un)successful request.
+     * @throws IllegalArgumentException if {@code apiKey == null || expenseId == null ||
+     *                                  context == null || response == null}
+     * @pre {@code apiKey != null && expenseId != null && context != null &&
+     * response != null}
+     * @post {\result == Bitmap object of picture}
      */
     public static void getExpensePicture(String apiKey, String expenseId, Context context,
                                          APIResponse<Bitmap> response) {
-        if (apiKey == null || expenseId == null || context == null ||
-                response == null) {
+        if (apiKey == null || expenseId == null) {
             throw new IllegalArgumentException("APIService.getExpensePicture.pre: apiKey or " +
                     "expenseId or iouJson is null");
         }
@@ -492,15 +533,15 @@ public abstract class APIService {
      * @param context   context of request, often AppActivity (instance of calling object)
      * @param response  contains a callback method that is called on (un)successful request.
      * @throws IllegalArgumentException if {@code apiKey == null || expenseId == null ||
-     *                                  iouJson == null}
-     * @pre {@code apiKey != null && expenseId != null && iouJson != null}
+     *                                  iouJson == null || context == null || response == null}}
+     * @pre {@code apiKey != null && expenseId != null && iouJson != null && context != null &&
+     * response != null}
      * @post {@code APIResponse.data == getOwedExpenses(apiKey, expenseId)}
      */
     public static void createExpenseIOU(String apiKey, String expenseId, JSONObject iouJson,
                                         Context context, APIResponse<String> response) {
         // Check preconditions
-        if (apiKey == null || expenseId == null || iouJson == null || context == null ||
-                response == null) {
+        if (apiKey == null || expenseId == null || iouJson == null) {
             throw new IllegalArgumentException("APIService.createExpenseIOU.pre: apiKey or " +
                     "expenseId or iouJson is null");
         }
@@ -534,15 +575,16 @@ public abstract class APIService {
      * @param expenseGroupId id of the expense group
      * @param context        context of request, often AppActivity (instance of calling object)
      * @param response       contains a callback method that is called on (un)successful request.
-     * @throws IllegalArgumentException if {@code apiKey == null || expenseGroupId == null}
-     * @pre {@code apiKey != null && expenseGroupId != null}
+     * @throws IllegalArgumentException if {@code apiKey == null || expenseGroupId == null
+     *                                  || context == null || response == null}}
+     * @pre {@code apiKey != null && expenseGroupId != null && context != null && response != null}
      * @post {@code APIResponse.data == expenseGroupExpenses : expenseGroupExpenses.expenseGroupId
      * == expenseGroupId}
      */
     public static void getExpenseGroupExpenses(String apiKey, String expenseGroupId,
                                                Context context, APIResponse<JSONArray> response) {
         // Check preconditions
-        if (apiKey == null || expenseGroupId == null || context == null || response == null) {
+        if (apiKey == null || expenseGroupId == null) {
             throw new IllegalArgumentException("APIService.getExpenseGroupExpenses.pre: " +
                     "apiKey or expenseGroupId is null");
         }
@@ -576,17 +618,18 @@ public abstract class APIService {
      * @param apiKey   apiKey of the user calling this method
      * @param context  context of request, often AppActivity (instance of calling object)
      * @param response contains a callback method that is called on (un)successful request.
-     * @throws IllegalArgumentException if {@code apiKey == null}
-     * @pre {@code apiKey != null}
+     * @throws IllegalArgumentException if {@code apiKey == null || context == null ||
+     *                                  response == null}}
+     * @pre {@code apiKey != null && context != null && response != null}
      * @post {@code APIResponse.data == userExpenses : userExpenses.expenseGroupId == apiKey.user}
      */
     public static void getUsersExpenses(String apiKey, Context context,
                                         APIResponse<JSONArray> response) {
         // Check preconditions
-        if (apiKey == null || context == null || response == null) {
+        if (apiKey == null) {
             throw new IllegalArgumentException("APIService.getUserExpenses.pre: apiKey is null");
         }
-      
+
         // Send request
         AbstractAPIRequest<JSONArray, JSONArray> apiRequest = new AbstractAPIRequest<JSONArray, JSONArray>() {
             @Override
@@ -615,20 +658,21 @@ public abstract class APIService {
      * @param apiKey   apiKey of the user calling this method
      * @param context  context of request, often AppActivity (instance of calling object)
      * @param response contains a callback method that is called on (un)successful request.
-     * @throws IllegalArgumentException if {@code apiKey == null}
-     * @pre {@code apiKey != null}
+     * @throws IllegalArgumentException if {@code apiKey == null || context == null ||
+     *                                  response == null}}
+     * @pre {@code apiKey != null && context != null && response != null}
      * @post {@code APIResponse.data == userOwedExpenses : \forall i; userOwedExpenses.ids().has(i);
      * getOwedExpenses(userOwedExpenses[i]).ower() == apiKey.user}
      */
     public static void getUserOwedExpenses(String apiKey, Context context,
                                            APIResponse<JSONArray> response) {
         // Check preconditions
-        if (apiKey == null || context == null || response == null) {
+        if (apiKey == null) {
             throw new IllegalArgumentException("APIService.getUserExpenses.pre: apiKey is null");
         }
-      
+
         AbstractAPIRequest<JSONArray, JSONArray> apiRequest = new AbstractAPIRequest<JSONArray, JSONArray>() {
-          
+
             @Override
             protected Request<JSONArray> doAPIRequest(Response.Listener<JSONArray>
                                                               responseListener,
@@ -656,18 +700,19 @@ public abstract class APIService {
      * @param expenseId id of the expense
      * @param context   context of request, often AppActivity (instance of calling object)
      * @param response  contains a callback method that is called on (un)successful request.
-     * @throws IllegalArgumentException if {@code apiKey == null || expenseId == null}
-     * @pre {@code apiKey != null && expenseId != null}
+     * @throws IllegalArgumentException if {@code apiKey == null || expenseId == null
+     *                                  || context == null || response == null}}
+     * @pre {@code apiKey != null && expenseId != null && context != null && response != null}
      * @post {@code APIResponse.data == expenseDetails : expenseDetails.id() == expenseId}
      */
     public static void getExpenseDetails(String apiKey, String expenseId, Context context,
                                          APIResponse<JSONArray> response) {
         // Check preconditions
-        if (apiKey == null || expenseId == null || context == null || response == null) {
+        if (apiKey == null || expenseId == null) {
             throw new IllegalArgumentException("APIService.getExpenseDetails.pre: " +
                     "apiKey or expenseId is null.");
         }
-      
+
         // Send request
         AbstractAPIRequest<JSONArray, JSONArray> apiRequest = new AbstractAPIRequest<JSONArray, JSONArray>() {
 
@@ -699,14 +744,15 @@ public abstract class APIService {
      * @param expenseId id of the expense
      * @param context   context of request, often AppActivity (instance of calling object)
      * @param response  contains a callback method that is called on (un)successful request.
-     * @throws IllegalArgumentException if {@code apiKey == null || expenseId == null}
-     * @pre {@code apiKey != null && expenseId != null}
+     * @throws IllegalArgumentException if {@code apiKey == null || expenseId == null
+     *                                  || context == null || response == null}}
+     * @pre {@code apiKey != null && expenseId != null && context != null && response != null}
      * @post {@code APIResponse.data == owedExpenses: owedExpenses.expenseId() == expenseId}
      */
     public static void getOwedExpenses(String apiKey, String expenseId, Context context,
                                        APIResponse<JSONArray> response) {
         // Check preconditions
-        if (apiKey == null || expenseId == null || context == null || response == null) {
+        if (apiKey == null || expenseId == null) {
             throw new IllegalArgumentException("APIService.getOwedExpenses.pre: " +
                     "apiKey or expenseId is null.");
         }
@@ -743,12 +789,15 @@ public abstract class APIService {
      * @param userId    id of the user that has to be toggled
      * @param context   context of request, often AppActivity (instance of calling object)
      * @param response  contains a callback method that is called on (un)successful request.
+     * @pre {@code apiKey != null && expenseId != null &&
+     * userId != null && context != null && response != null}
+     * @post {@code AccuredExpenses.key(userId, expenseId).paid ==
+     * !\old(AccuredExpenses.key(userId, expenseId).paid) }
      */
     public static void setUserPaidExpense(String apiKey, String expenseId, String userId,
                                           Context context, APIResponse<String> response) {
         // Check preconditions
-        if (apiKey == null || expenseId == null || userId == null || context == null ||
-                response == null) {
+        if (apiKey == null || expenseId == null || userId == null) {
             throw new IllegalArgumentException("APIService.setUserPaidExpense.pre: " +
                     "apiKey, expenseId or userId is null.");
         }
