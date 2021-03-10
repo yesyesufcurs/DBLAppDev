@@ -64,7 +64,7 @@ public abstract class APIService {
             return;
         }
 
-        if (isASCII(password)) {
+        if (!isASCII(password)) {
             String errorMessage = "Password may only contain ASCII characters";
             response.onErrorResponse(new VolleyError(errorMessage), errorMessage);
             return;
