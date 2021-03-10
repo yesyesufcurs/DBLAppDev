@@ -22,9 +22,9 @@ import java.util.Map;
  */
 public abstract class AbstractAPIRequest<T, K> {
     // For local testing
-    private final static String api_url = "http://10.0.2.2:5000/";
+//    private final static String api_url = "http://10.0.2.2:5000/";
     // For deployment
-    // private final static String api_url = "http://94.130.144.25:5000/";
+    private final static String api_url = "http://94.130.144.25:5000/";
     protected Response.Listener<T> responseListener;
     protected Response.ErrorListener errorListener;
     protected String errorMessage = "Generic error message.";
