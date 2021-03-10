@@ -7,6 +7,7 @@ import json
 import hashlib
 import os
 
+
 class AbstractAPI():
     '''
     AbstractAPI class using template method design pattern.
@@ -16,7 +17,6 @@ class AbstractAPI():
     '''
     user_id = ""
     cursor, conn = None, None
-
 
     def template_method(self, api_key):
         # Get API key from headers
@@ -37,25 +37,24 @@ class AbstractAPI():
             cursor = conn.cursor()
         except Exception as e:
             return jsonify(error=500, text="could not connect to database"), 500
-        
+
         # do operation
 
         return self.api_operation(self, user_id, conn)
-
 
     def verify_api_key(self, api_key):
         cursor, connection = None, None
 
         connection = create_connection(db_file)
         cursor = connection.cursor()
-    
+
         query = "SELECT id FROM user WHERE api_key = ?"
         cursor.execute(query, (api_key, ))
         result = cursor.fetchone()
         if result == None:
             raise Exception("API Key not valid")
         return result[0]
-    
+
     def generateJson(self, rows):
         json_result = []
         for row in rows:
