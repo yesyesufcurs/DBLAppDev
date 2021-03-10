@@ -19,6 +19,8 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
+import java.util.Map;
 
 import TestAPICalls.TestAPILogin;
 
@@ -43,10 +45,15 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception e) {
             throw new IllegalStateException(e.getMessage());
         }
-        APIService.getExpensePicture("0949d532d55b0cb6da0ee09753d6900dce0eb3926bb127c2f3d6b9f1c1db7d5b", "1",  this, new APIResponse<Bitmap>(){
+        APIService.getAllExpenseGroups("0949d532d55b0cb6da0ee09753d6900dce0eb3926bb127c2f3d6b9f1c1db7d5b",  this, new APIResponse<List<Map<String, String>>>(){
             @Override
-            public void onResponse(Bitmap data) {
-                im1.setImageBitmap(data);
+            public void onResponse(List<Map<String, String>> data) {
+                String returnString = "";
+                for (Map<String, String> elt : data){
+                    for (String x : elt.keySet())
+                        returnString += x.toString() + " | ";
+                }
+                textView.setText(returnString);
             }
 
             @Override

@@ -11,13 +11,16 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.StringRequest;
+import com.google.gson.Gson;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public abstract class APIService {
@@ -217,7 +220,7 @@ public abstract class APIService {
     }
 
     /**
-     * Returns JSONArray containing all available expense groups.
+     * Returns List<Map<String, String>> containing all available expense groups.
      * Each entry is of the form expense_group_id, expense_group_name, user_id of moderator.
      *
      * @param apiKey   apiKey of the user calling this method
@@ -228,7 +231,7 @@ public abstract class APIService {
      * @pre {@code apiKey != null && context != null && response != null}
      * @post {@code APIResponse.data == expenseGroups}
      */
-    public static void getAllExpenseGroups(String apiKey, Context context, APIResponse<JSONArray> response) {
+    public static void getAllExpenseGroups(String apiKey, Context context, APIResponse<List<Map<String, String>>> response) {
         // Check preconditions
         if (apiKey == null) {
             throw new IllegalArgumentException("APIService.getAllExpenseGroups.pre: apiKey is" +
@@ -236,25 +239,56 @@ public abstract class APIService {
         }
 
         // Send request
-        AbstractAPIRequest<JSONArray, JSONArray> apiRequest = new AbstractAPIRequest<JSONArray, JSONArray>() {
+        AbstractAPIRequest<JSONArray, List<Map<String, String>>> apiRequest =
+                new AbstractAPIRequest<JSONArray, List<Map<String, String>>>() {
 
-            @Override
-            protected Request<JSONArray> doAPIRequest(Response.Listener<JSONArray>
-                                                              responseListener,
-                                                      Response.ErrorListener errorListener) {
-                return new JsonArrayRequest(Request.Method.GET,
-                        AbstractAPIRequest.getAPIUrl() + "getAllExpenseGroups", null,
-                        responseListener, errorListener) {
                     @Override
-                    public Map<String, String> getHeaders() throws AuthFailureError {
-                        Map<String, String> params = new HashMap<String, String>();
-                        params.put("api_key", apiKey);
-                        return params;
+                    protected Request<JSONArray> doAPIRequest(Response.Listener<JSONArray>
+                                                                      responseListener,
+                                                              Response.ErrorListener errorListener) {
+                        return new JsonArrayRequest(Request.Method.GET,
+                                AbstractAPIRequest.getAPIUrl() + "getAllExpenseGroups", null,
+                                responseListener, errorListener) {
+                            @Override
+                            public Map<String, String> getHeaders() throws AuthFailureError {
+                                Map<String, String> params = new HashMap<String, String>();
+                                params.put("api_key", apiKey);
+                                return params;
+                            }
+
+
+                        };
+                    }
+
+                    @Override
+                    protected List<Map<String, String>> convertData(JSONArray data) {
+                        try {
+                            return convertJSONArrayToMap(data);
+                        } catch (Exception e) {
+                            String error = e.getMessage();
+                            response.onErrorResponse(new VolleyError(error), error);
+                        }
+                        return null;
                     }
                 };
-            }
-        };
         apiRequest.run(context, response);
+    }
+
+    /**
+     * Converts JSONArray to Map of strings
+     * @param array JSONArray to be converted
+     * @return List<Map<String, String>>> that contains all JSONArray elements.
+     */
+    private static List<Map<String, String>> convertJSONArrayToMap(JSONArray array) {
+        List<Map<String, String>> convertedData = new ArrayList<Map<String, String>>();
+        for (int i = 0; i < array.length(); i++) {
+            try {
+                convertedData.add(new Gson().fromJson(array.getJSONObject(i).toString(), HashMap.class));
+            } catch (Exception e) {
+                throw new IllegalStateException("Cannot convert data");
+            }
+        }
+        return convertedData;
     }
 
     /**
@@ -693,12 +727,13 @@ public abstract class APIService {
 
     /**
      * Removes owed expense of user with userId in expense with expenseId
+     *
      * @param apiKey    apiKey of the user calling this method
      * @param expenseId id of the expense
      * @param userId    id of the user to be removed from owed expenses
      * @param context   context of request, often AppActivity (instance of calling object)
      * @param response  contains a callback method that is called on (un)successful request.
-     * @throws IllegalArgumentException if {@code apiKey == null || expenseId == null || 
+     * @throws IllegalArgumentException if {@code apiKey == null || expenseId == null ||
      *                                  userId == null || context == null || response == null}
      * @pre {@code apiKey != null && expenseId != null && userId != null && context != null && response != null}
      * @post{AccuredExpenses.key(userId, expenseId) does not exist}
