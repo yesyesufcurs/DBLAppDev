@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, Response
+from flask import Flask, request, jsonify, Response, send_file
 from backendserver import app, db_file, create_connection
 from backendserver.abstractAPI import AbstractAPI
 import backendserver.expense_group
@@ -8,9 +8,12 @@ import sqlite3
 import json
 import hashlib
 import os
+import base64
+import time
+from io import BytesIO
 
 
-@app.route("/createExpense")
+@app.route("/createExpense", methods=["POST"])
 def createExpense():
     '''
     Create expense WITHOUT UPLOADING PICTURE!
@@ -20,14 +23,15 @@ def createExpense():
     expense_id
     '''
     class CreateExpense(AbstractAPI):
-        def api_operation(self, user_id, conn):
+        def api_operation(self, user_id, conn):            
             cursor = conn.cursor()
             expense_title, amount, picture, content, expense_group_id, expense_id = None, None, None, None, None, None
-            # Get headers
+            
+            # Get data from request
             try:
                 expense_title = request.headers.get('title')
                 amount = request.headers.get('amount')
-                # Get picture
+                picture = request.form['picture']
                 content = request.headers.get('description')
                 expense_group_id = request.headers.get('expense_group_id')
             except Exception as e:
@@ -36,14 +40,17 @@ def createExpense():
                 return jsonify(error=412, text="Title should be non-empty and shorter than 100 characters."), 412
             if not(float(amount) < 100000):
                 return jsonify(error=412, text="Expense amount should be lower than 100000"), 412
+
+            # Convert base64 string to bytes
+            bytePicture = base64.b64decode(picture)
+            
             # Execute query to add expense
             query = '''
-            INSERT INTO expense(user_id, title, amount, content, expense_group_id)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO expense(user_id, title, amount, picture, content, expense_group_id)
+            VALUES (?, ?, ?, ?, ?, ?)
             '''
             try:
-                cursor.execute(query, (user_id, expense_title,
-                                       amount, content, expense_group_id))
+                cursor.execute(query, (user_id, expense_title, amount, bytePicture, content, expense_group_id))
             except Exception as e:
                 return jsonify(error=412, text="Cannot add expense to database"), 412
             # Retrieve expense id
@@ -57,6 +64,38 @@ def createExpense():
             # Return expense id
             return jsonify(expense_id)
     return CreateExpense.template_method(CreateExpense, request.headers["api_key"] if "api_key" in request.headers else None)
+
+
+@app.route("/getExpensePicture/<expenseid>/<apikey>", methods=["GET", "POST"])
+def getExpensePicture(expenseid, apikey):
+    """
+    Returns HTML Website with the picture of the expense
+    Expects headers:
+    expense_id: id of expense.
+    Returns: 
+    HTML website containing picture
+    """
+    class GetExpensePicture(AbstractAPI):
+        def api_operation(self, user_id, conn):
+            cursor = conn.cursor()
+            expense_id,pictureBytes = None, None
+            
+            #Get headers
+            try:
+                expense_id = expenseid
+            except Exception as e:
+                return jsonify(error=412, text="Expense id missing"), 412
+            query = "SELECT picture from expense where id = ?"
+            
+            try:
+                cursor.execute(query,(expense_id,))
+                pictureBytes = cursor.fetchone()[0]
+            except Exception as e:
+                return jsonify(error=412, text="Cannot get picture"), 412
+            return send_file(BytesIO(pictureBytes),
+                            attachment_filename=f"expense_id_{expense_id}",
+                            mimetype='image/jpg')
+    return GetExpensePicture.template_method(GetExpensePicture, apikey)
 
 
 @app.route("/createExpenseIOU/<iouJson>")
