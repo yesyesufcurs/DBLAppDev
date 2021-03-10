@@ -37,6 +37,4 @@ def getExpenseGroup(expense_id, cursor):
     '''
     query = "SELECT expense_group_id FROM expense WHERE id = ?"
     cursor.execute(query, (expense_id,))
-    if (len(cursor.fetchall()) == 0):
-        raise Exception("Expense does not exist")
     return cursor.fetchone()[0]

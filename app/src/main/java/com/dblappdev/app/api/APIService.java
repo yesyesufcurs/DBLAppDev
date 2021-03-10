@@ -46,15 +46,21 @@ public abstract class APIService {
                     "email is null.");
         }
         if (username.length() >= 30) {
-            String errorMessage = "Username must be longer than 30 characters.";
+            String errorMessage = "Username must be shorter than 30 characters.";
             response.onErrorResponse(new VolleyError(errorMessage), errorMessage);
             return;
         }
         if (password.length() < 6) {
-            String errorMessage = "Password must be shorter than 6 characters.";
+            String errorMessage = "Password must be longer than 6 characters.";
             response.onErrorResponse(new VolleyError(errorMessage), errorMessage);
             return;
         }
+        if (password.length() >= 30) {
+            String errorMessage = "Password must be shorter than 30 characters.";
+            response.onErrorResponse(new VolleyError(errorMessage), errorMessage);
+            return;
+        }
+
         // Source: https://emailregex.com/
         if (!email.matches("(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}" +
                 "~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\" +
@@ -113,6 +119,12 @@ public abstract class APIService {
         if (username == null || password == null || context == null || response == null) {
             throw new IllegalArgumentException("APIService.login.pre: username or password" +
                     "is null");
+        }
+
+        if (username.length() >= 30 || password.length() >= 30) {
+            String errorMessage = "Username and password must be shorter than 30 characters.";
+            response.onErrorResponse(new VolleyError(errorMessage), errorMessage);
+            return;
         }
 
         // Send request
@@ -194,7 +206,7 @@ public abstract class APIService {
             throw new IllegalArgumentException("APIService.getAllExpenseGroups.pre: apiKey is" +
                     " null");
         }
-      
+
         // Send request
         AbstractAPIRequest<JSONArray, JSONArray> apiRequest = new AbstractAPIRequest<JSONArray, JSONArray>() {
 
@@ -238,7 +250,7 @@ public abstract class APIService {
         }
         // Send request
         AbstractAPIRequest<String, String> apiRequest = new AbstractAPIRequest<String, String>() {
-  
+
             @Override
             protected Request<String> doAPIRequest(Response.Listener<String> responseListener,
                                                    Response.ErrorListener errorListener) {
@@ -357,28 +369,29 @@ public abstract class APIService {
      *                                  amount == null || picture == null ||
      *                                  description == null || expenseGroupId == null}
      * @pre {@code apiKey != null && title != null && amount != null &&
-     * picture != null && description != null && expenseGroupId != null}
+     * description != null && expenseGroupId != null}
      * @post {@code APIResponse.data in getExpenseGroupExpenses(apiKey, expenseGroupId)}
      */
     public static void createExpense(String apiKey, String title, String amount, Bitmap
             picture, String description, String expenseGroupId, Context context,
                                      APIResponse<String> response) {
         // Check preconditions
-        if (apiKey == null || title == null || amount == null || picture == null ||
+        if (apiKey == null || title == null || amount == null ||
                 description == null || expenseGroupId == null || context == null ||
                 response == null) {
             throw new IllegalArgumentException("APIService.createExpense.pre: apiKey or " +
                     "title or amount or picture or description or expenseGroupId is null");
         }
+        // Initialize base64 string of picture
         String pictureBase64;
         try {
-            pictureBase64 = bitmapToBase64(picture);
+            pictureBase64 = picture == null ? null : bitmapToBase64(picture);
         } catch (IllegalArgumentException e) {
             String errorMessage = "Picture too large, should be smaller than 10MB.";
             response.onErrorResponse(new VolleyError(errorMessage), errorMessage);
             return;
         }
-
+        // Create API Request
         AbstractAPIRequest<String, String> apiRequest = new AbstractAPIRequest<String, String>() {
 
             @Override
@@ -403,7 +416,9 @@ public abstract class APIService {
                     @Override
                     protected Map<String, String> getParams() throws AuthFailureError {
                         Map<String, String> params = new HashMap<>();
-                        params.put("picture", pictureBase64);
+                        if (pictureBase64 != null) {
+                            params.put("picture", pictureBase64);
+                        }
 
                         return params;
                     }
@@ -414,6 +429,121 @@ public abstract class APIService {
         apiRequest.run(context, response);
 
 
+    }
+
+    /**
+     * Modifies expense entry
+     *
+     * @param apiKey         apiKey of the user calling this method
+     * @param title          title of the expense to be modified
+     * @param amount         amount of the expense to be modified
+     * @param picture        picture to be modified
+     * @param description    description of the expense to be modified
+     * @param expenseGroupId expense group id the transaction has to be modified to
+     * @param expenseId      expense id of the transaction to be modified
+     * @param context        context of request, often AppActivity (instance of calling object)
+     * @param response       contains a callback method that is called on (un)successful request.
+     * @throws IllegalArgumentException if {@code apiKey == null || title == null ||
+     *                                  amount == null || picture == null ||
+     *                                  description == null || expenseGroupId == null}
+     */
+    public static void modifyExpense(String apiKey, String title, String amount, Bitmap
+            picture, String description, String expenseGroupId, String expenseId, Context context,
+                                     APIResponse<String> response) {
+        // Check preconditions
+        if (apiKey == null || title == null || amount == null ||
+                description == null || expenseGroupId == null || context == null ||
+                response == null) {
+            throw new IllegalArgumentException("APIService.modifyExpense.pre: apiKey or " +
+                    "title or amount or description or expenseGroupId or expenseId is null");
+        }
+
+        // Initialize base64 string of picture
+        String pictureBase64;
+        try {
+            pictureBase64 = picture == null ? null : bitmapToBase64(picture);
+        } catch (IllegalArgumentException e) {
+            String errorMessage = "Picture too large, should be smaller than 10MB.";
+            response.onErrorResponse(new VolleyError(errorMessage), errorMessage);
+            return;
+        }
+
+        // Create API Request
+        AbstractAPIRequest<String, String> apiRequest = new AbstractAPIRequest<String, String>() {
+
+            @Override
+            protected Request<String> doAPIRequest(Response.Listener<String> responseListener,
+                                                   Response.ErrorListener errorListener) {
+                return new StringRequest(Request.Method.POST,
+                        AbstractAPIRequest.getAPIUrl() + "modifyExpense",
+                        responseListener, errorListener) {
+                    // Add correct headers
+                    @Override
+                    public Map<String, String> getHeaders() throws AuthFailureError {
+                        Map<String, String> params = new HashMap<String, String>();
+                        params.put("title", title);
+                        params.put("amount", amount);
+                        params.put("description", description);
+                        params.put("expense_group_id", expenseGroupId);
+                        params.put("expense_id", expenseId);
+                        params.put("api_key", apiKey);
+                        return params;
+                    }
+
+                    // Add picture as a string
+                    @Override
+                    protected Map<String, String> getParams() throws AuthFailureError {
+                        Map<String, String> params = new HashMap<>();
+                        if (pictureBase64 != null) {
+                            params.put("picture", pictureBase64);
+                        }
+                        return params;
+                    }
+                };
+            }
+        };
+        apiRequest.run(context, response);
+
+    }
+
+    /**
+     * Removes expense from expense group
+     *
+     * @param apiKey    apiKey of the user calling this method
+     * @param expenseId expense id of the expense
+     * @param context   context of request, often AppActivity (instance of calling object)
+     * @param response  contains a callback method that is called on (un)successful request.
+     */
+    public static void removeExpense(String apiKey, String expenseId, Context context,
+                                     APIResponse<String> response) {
+        // Check preconditions
+        if (apiKey == null || expenseId == null || context == null ||
+                response == null) {
+            throw new IllegalArgumentException("APIService.removeExpense.pre: apiKey or " +
+                    "expenseId is null");
+        }
+
+        //Perform API Request
+        AbstractAPIRequest<String, String> apiRequest = new AbstractAPIRequest<String, String>() {
+
+            @Override
+            protected Request<String> doAPIRequest(Response.Listener<String> responseListener,
+                                                   Response.ErrorListener errorListener) {
+                return new StringRequest(Request.Method.GET,
+                        AbstractAPIRequest.getAPIUrl() + "removeExpense",
+                        responseListener, errorListener) {
+                    // Add correct headers
+                    @Override
+                    public Map<String, String> getHeaders() throws AuthFailureError {
+                        Map<String, String> params = new HashMap<String, String>();
+                        params.put("expense_id", expenseId);
+                        params.put("api_key", apiKey);
+                        return params;
+                    }
+                };
+            }
+        };
+        apiRequest.run(context, response);
     }
 
     /**
@@ -466,7 +596,7 @@ public abstract class APIService {
         if (apiKey == null || expenseId == null || context == null ||
                 response == null) {
             throw new IllegalArgumentException("APIService.getExpensePicture.pre: apiKey or " +
-                    "expenseId or iouJson is null");
+                    "expenseId is null");
         }
         String url = AbstractAPIRequest.getAPIUrl() + "getExpensePicture/" + expenseId + "/" +
                 apiKey;
@@ -517,6 +647,45 @@ public abstract class APIService {
                     public Map<String, String> getHeaders() throws AuthFailureError {
                         Map<String, String> params = new HashMap<String, String>();
                         params.put("expense_id", expenseId);
+                        params.put("api_key", apiKey);
+                        return params;
+                    }
+                };
+            }
+        };
+        apiRequest.run(context, response);
+    }
+
+    /**
+     * Removes owed expense of user with userId in expense with expenseId
+     * @param apiKey    apiKey of the user calling this method
+     * @param expenseId id of the expense
+     * @param userId    id of the user to be removed from owed expenses
+     * @param context   context of request, often AppActivity (instance of calling object)
+     * @param response  contains a callback method that is called on (un)successful request.
+     */
+    public static void removeOwedExpense(String apiKey, String expenseId, String userId,
+                                         Context context, APIResponse<String> response) {
+        // Check preconditions
+        if (apiKey == null || expenseId == null || userId == null|| context == null ||
+                response == null) {
+            throw new IllegalArgumentException("APIService.removeOwedExpense.pre: apiKey or " +
+                    "expenseId or userId is null");
+        }
+
+        //Send request
+        AbstractAPIRequest<String, String> apiRequest = new AbstractAPIRequest<String, String>() {
+            @Override
+            protected Request<String> doAPIRequest(Response.Listener<String> responseListener,
+                                                   Response.ErrorListener errorListener) {
+                return new StringRequest(Request.Method.GET,
+                        AbstractAPIRequest.getAPIUrl() + "removeOwedExpense",
+                        responseListener, errorListener) {
+                    @Override
+                    public Map<String, String> getHeaders() throws AuthFailureError {
+                        Map<String, String> params = new HashMap<String, String>();
+                        params.put("expense_id", expenseId);
+                        params.put("user_id", userId);
                         params.put("api_key", apiKey);
                         return params;
                     }
@@ -586,7 +755,7 @@ public abstract class APIService {
         if (apiKey == null || context == null || response == null) {
             throw new IllegalArgumentException("APIService.getUserExpenses.pre: apiKey is null");
         }
-      
+
         // Send request
         AbstractAPIRequest<JSONArray, JSONArray> apiRequest = new AbstractAPIRequest<JSONArray, JSONArray>() {
             @Override
@@ -626,9 +795,9 @@ public abstract class APIService {
         if (apiKey == null || context == null || response == null) {
             throw new IllegalArgumentException("APIService.getUserExpenses.pre: apiKey is null");
         }
-      
+
         AbstractAPIRequest<JSONArray, JSONArray> apiRequest = new AbstractAPIRequest<JSONArray, JSONArray>() {
-          
+
             @Override
             protected Request<JSONArray> doAPIRequest(Response.Listener<JSONArray>
                                                               responseListener,
@@ -667,7 +836,7 @@ public abstract class APIService {
             throw new IllegalArgumentException("APIService.getExpenseDetails.pre: " +
                     "apiKey or expenseId is null.");
         }
-      
+
         // Send request
         AbstractAPIRequest<JSONArray, JSONArray> apiRequest = new AbstractAPIRequest<JSONArray, JSONArray>() {
 
