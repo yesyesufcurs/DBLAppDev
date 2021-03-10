@@ -698,12 +698,15 @@ public abstract class APIService {
      * @param userId    id of the user to be removed from owed expenses
      * @param context   context of request, often AppActivity (instance of calling object)
      * @param response  contains a callback method that is called on (un)successful request.
+     * @throws IllegalArgumentException if {@code apiKey == null || expenseId == null || 
+     *                                  userId == null || context == null || response == null}
+     * @pre {@code apiKey != null && expenseId != null && userId != null && context != null && response != null}
+     * @post{AccuredExpenses.key(userId, expenseId) does not exist}
      */
     public static void removeOwedExpense(String apiKey, String expenseId, String userId,
                                          Context context, APIResponse<String> response) {
         // Check preconditions
-        if (apiKey == null || expenseId == null || userId == null|| context == null ||
-                response == null) {
+        if (apiKey == null || expenseId == null || userId == null) {
             throw new IllegalArgumentException("APIService.removeOwedExpense.pre: apiKey or " +
                     "expenseId or userId is null");
         }
