@@ -67,7 +67,7 @@ public abstract class APIService {
             return;
         }
 
-        if (isASCII(password)) {
+        if (!isASCII(password)) {
             String errorMessage = "Password may only contain ASCII characters";
             response.onErrorResponse(new VolleyError(errorMessage), errorMessage);
             return;
@@ -86,31 +86,15 @@ public abstract class APIService {
             return;
         }
 
-        // Send request
-        AbstractAPIRequest<String, String> apiRequest = new AbstractAPIRequest<String, String>() {
-            @Override
-            protected Request<String> doAPIRequest(Response.Listener<String> responseListener,
-                                                   Response.ErrorListener errorListener) {
-                return new StringRequest(Request.Method.GET,
-                        AbstractAPIRequest.getAPIUrl() + "register",
-                        responseListener, errorListener) {
-                    @Override
-                    public Map<String, String> getHeaders() throws AuthFailureError {
-                        Map<String, String> params = new HashMap<String, String>();
-                        params.put("username", username);
-                        params.put("password", password);
-                        params.put("email", email);
+        // Set headers
+        Map<String, String> headers = new HashMap<String, String>();
+        headers.put("username", username);
+        headers.put("password", password);
+        headers.put("email", email);
 
-                        return params;
-                    }
-
-                };
-
-            }
-
-
-        };
-        apiRequest.run(context, response);
+        // Invoke Request
+        new StringAPIRequest(AbstractAPIRequest.getAPIUrl() + "register", Request.Method.GET,
+                headers, null).run(context, response);
     }
 
     /**
@@ -156,26 +140,15 @@ public abstract class APIService {
             return;
         }
 
-        // Send request
-        AbstractAPIRequest<String, String> apiRequest = new AbstractAPIRequest<String, String>() {
-            @Override
-            protected Request<String> doAPIRequest(Response.Listener<String> responseListener,
-                                                   Response.ErrorListener errorListener) {
-                return new StringRequest(Request.Method.GET,
-                        AbstractAPIRequest.getAPIUrl() + "login", responseListener,
-                        errorListener) {
-                    @Override
-                    public Map<String, String> getHeaders() throws AuthFailureError {
-                        Map<String, String> params = new HashMap<String, String>();
-                        params.put("username", username);
-                        params.put("password", password);
+        // Set headers
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("username", username);
+        params.put("password", password);
 
-                        return params;
-                    }
-                };
-            }
-        };
-        apiRequest.run(context, response);
+        // Do request
+        new StringAPIRequest(AbstractAPIRequest.getAPIUrl() + "login", Request.Method.GET,
+                params, null).run(context, response);
+
     }
 
     /**
@@ -276,8 +249,9 @@ public abstract class APIService {
 
     /**
      * Converts JSONArray to Map of strings
+     *
      * @param array JSONArray to be converted
-     * @return List<Map<String, String>>> that contains all JSONArray elements.
+     * @return List<Map < String, String>>> that contains all JSONArray elements.
      */
     private static List<Map<String, String>> convertJSONArrayToMap(JSONArray array) {
         List<Map<String, String>> convertedData = new ArrayList<Map<String, String>>();
@@ -311,27 +285,16 @@ public abstract class APIService {
             throw new IllegalArgumentException("APIService.createExpenseGroup.pre: apiKey or " +
                     "expenseGroupName is null");
         }
-        // Send request
-        AbstractAPIRequest<String, String> apiRequest = new AbstractAPIRequest<String, String>() {
 
-            @Override
-            protected Request<String> doAPIRequest(Response.Listener<String> responseListener,
-                                                   Response.ErrorListener errorListener) {
-                return new StringRequest(Request.Method.GET,
-                        AbstractAPIRequest.getAPIUrl() + "createExpenseGroup",
-                        responseListener, errorListener) {
-                    @Override
-                    public Map<String, String> getHeaders() throws AuthFailureError {
-                        Map<String, String> params = new HashMap<String, String>();
-                        params.put("expense_group_name", expenseGroupName);
-                        params.put("api_key", apiKey);
+        // Set headers
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("expense_group_name", expenseGroupName);
+        params.put("api_key", apiKey);
 
-                        return params;
-                    }
-                };
-            }
-        };
-        apiRequest.run(context, response);
+        // Do request
+        new StringAPIRequest(AbstractAPIRequest.getAPIUrl() + "createExpenseGroup",
+                Request.Method.GET, params, null).run(context, response);
+
     }
 
     /**
@@ -396,26 +359,17 @@ public abstract class APIService {
             throw new IllegalArgumentException("APIService.addToExpenseGroup.pre:" +
                     "apiKey or userId or expenseGroupId is null");
         }
-        // Send request
-        AbstractAPIRequest<String, String> apiRequest = new AbstractAPIRequest<String, String>() {
-            @Override
-            protected Request<String> doAPIRequest(Response.Listener<String> responseListener,
-                                                   Response.ErrorListener errorListener) {
-                return new StringRequest(Request.Method.GET,
-                        AbstractAPIRequest.getAPIUrl() + "addToExpenseGroup",
-                        responseListener, errorListener) {
-                    @Override
-                    public Map<String, String> getHeaders() throws AuthFailureError {
-                        Map<String, String> params = new HashMap<String, String>();
-                        params.put("expense_group_id", expenseGroupId);
-                        params.put("user_id", userId);
-                        params.put("api_key", apiKey);
-                        return params;
-                    }
-                };
-            }
-        };
-        apiRequest.run(context, response);
+
+        // Set headers
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("expense_group_id", expenseGroupId);
+        params.put("user_id", userId);
+        params.put("api_key", apiKey);
+
+        // Do request
+        new StringAPIRequest(AbstractAPIRequest.getAPIUrl() + "addToExpenseGroup",
+                Request.Method.GET, params, null).run(context, response);
+
     }
 
     /**
@@ -442,10 +396,10 @@ public abstract class APIService {
             picture, String description, String expenseGroupId, Context context,
                                      APIResponse<String> response) {
         // Check preconditions
-        if (apiKey == null || title == null || amount == null || picture == null ||
+        if (apiKey == null || title == null || amount == null ||
                 description == null || expenseGroupId == null) {
             throw new IllegalArgumentException("APIService.createExpense.pre: apiKey or " +
-                    "title or amount or picture or description or expenseGroupId is null");
+                    "title or amount or description or expenseGroupId is null");
         }
         // Initialize base64 string of picture
         String pictureBase64;
@@ -456,43 +410,24 @@ public abstract class APIService {
             response.onErrorResponse(new VolleyError(errorMessage), errorMessage);
             return;
         }
-        // Create API Request
-        AbstractAPIRequest<String, String> apiRequest = new AbstractAPIRequest<String, String>() {
 
-            @Override
-            protected Request<String> doAPIRequest(Response.Listener<String> responseListener,
-                                                   Response.ErrorListener errorListener) {
-                return new StringRequest(Request.Method.POST,
-                        AbstractAPIRequest.getAPIUrl() + "createExpense",
-                        responseListener, errorListener) {
-                    // Add correct headers
-                    @Override
-                    public Map<String, String> getHeaders() throws AuthFailureError {
-                        Map<String, String> params = new HashMap<String, String>();
-                        params.put("title", title);
-                        params.put("amount", amount);
-                        params.put("description", description);
-                        params.put("expense_group_id", expenseGroupId);
-                        params.put("api_key", apiKey);
-                        return params;
-                    }
+        // Set headers
+        Map<String, String> headers = new HashMap<String, String>();
+        headers.put("title", title);
+        headers.put("amount", amount);
+        headers.put("description", description);
+        headers.put("expense_group_id", expenseGroupId);
+        headers.put("api_key", apiKey);
 
-                    // Add picture as a string
-                    @Override
-                    protected Map<String, String> getParams() throws AuthFailureError {
-                        Map<String, String> params = new HashMap<>();
-                        if (pictureBase64 != null) {
-                            params.put("picture", pictureBase64);
-                        }
+        // Set parameters
+        Map<String, String> params = new HashMap<>();
+        if (pictureBase64 != null) {
+            params.put("picture", pictureBase64);
+        }
 
-                        return params;
-                    }
-
-                };
-            }
-        };
-        apiRequest.run(context, response);
-
+        // Do request
+        new StringAPIRequest(AbstractAPIRequest.getAPIUrl() + "createExpense",
+                Request.Method.POST, headers, params).run(context, response);
 
     }
 
@@ -533,41 +468,24 @@ public abstract class APIService {
             return;
         }
 
-        // Create API Request
-        AbstractAPIRequest<String, String> apiRequest = new AbstractAPIRequest<String, String>() {
+        // Set headers
+        Map<String, String> headers = new HashMap<String, String>();
+        headers.put("title", title);
+        headers.put("amount", amount);
+        headers.put("description", description);
+        headers.put("expense_group_id", expenseGroupId);
+        headers.put("expense_id", expenseId);
+        headers.put("api_key", apiKey);
 
-            @Override
-            protected Request<String> doAPIRequest(Response.Listener<String> responseListener,
-                                                   Response.ErrorListener errorListener) {
-                return new StringRequest(Request.Method.POST,
-                        AbstractAPIRequest.getAPIUrl() + "modifyExpense",
-                        responseListener, errorListener) {
-                    // Add correct headers
-                    @Override
-                    public Map<String, String> getHeaders() throws AuthFailureError {
-                        Map<String, String> params = new HashMap<String, String>();
-                        params.put("title", title);
-                        params.put("amount", amount);
-                        params.put("description", description);
-                        params.put("expense_group_id", expenseGroupId);
-                        params.put("expense_id", expenseId);
-                        params.put("api_key", apiKey);
-                        return params;
-                    }
+        // Set parameters
+        Map<String, String> params = new HashMap<>();
+        if (pictureBase64 != null) {
+            params.put("picture", pictureBase64);
+        }
 
-                    // Add picture as a string
-                    @Override
-                    protected Map<String, String> getParams() throws AuthFailureError {
-                        Map<String, String> params = new HashMap<>();
-                        if (pictureBase64 != null) {
-                            params.put("picture", pictureBase64);
-                        }
-                        return params;
-                    }
-                };
-            }
-        };
-        apiRequest.run(context, response);
+        // Do request
+        new StringAPIRequest(AbstractAPIRequest.getAPIUrl() + "modifyExpense",
+                Request.Method.POST, headers, params).run(context, response);
 
     }
 
@@ -588,27 +506,14 @@ public abstract class APIService {
                     "expenseId is null");
         }
 
-        //Perform API Request
-        AbstractAPIRequest<String, String> apiRequest = new AbstractAPIRequest<String, String>() {
+        // Set headers
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("expense_id", expenseId);
+        params.put("api_key", apiKey);
 
-            @Override
-            protected Request<String> doAPIRequest(Response.Listener<String> responseListener,
-                                                   Response.ErrorListener errorListener) {
-                return new StringRequest(Request.Method.GET,
-                        AbstractAPIRequest.getAPIUrl() + "removeExpense",
-                        responseListener, errorListener) {
-                    // Add correct headers
-                    @Override
-                    public Map<String, String> getHeaders() throws AuthFailureError {
-                        Map<String, String> params = new HashMap<String, String>();
-                        params.put("expense_id", expenseId);
-                        params.put("api_key", apiKey);
-                        return params;
-                    }
-                };
-            }
-        };
-        apiRequest.run(context, response);
+        // Do request
+        new StringAPIRequest(AbstractAPIRequest.getAPIUrl() + "removeExpense",
+                Request.Method.GET, params, null).run(context, response);
     }
 
     /**
@@ -704,25 +609,14 @@ public abstract class APIService {
                     "expenseId or iouJson is null");
         }
 
-        // Send request
-        AbstractAPIRequest<String, String> apiRequest = new AbstractAPIRequest<String, String>() {
-            @Override
-            protected Request<String> doAPIRequest(Response.Listener<String> responseListener,
-                                                   Response.ErrorListener errorListener) {
-                return new StringRequest(Request.Method.GET,
-                        AbstractAPIRequest.getAPIUrl() + "createExpenseIOU/" + iouJson.toString(),
-                        responseListener, errorListener) {
-                    @Override
-                    public Map<String, String> getHeaders() throws AuthFailureError {
-                        Map<String, String> params = new HashMap<String, String>();
-                        params.put("expense_id", expenseId);
-                        params.put("api_key", apiKey);
-                        return params;
-                    }
-                };
-            }
-        };
-        apiRequest.run(context, response);
+        // Set headers
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("expense_id", expenseId);
+        params.put("api_key", apiKey);
+
+        // Do request
+        new StringAPIRequest(AbstractAPIRequest.getAPIUrl() + "createExpenseIOU/" + iouJson.toString(),
+                Request.Method.GET, params, null).run(context, response);
     }
 
     /**
@@ -746,26 +640,15 @@ public abstract class APIService {
                     "expenseId or userId is null");
         }
 
-        //Send request
-        AbstractAPIRequest<String, String> apiRequest = new AbstractAPIRequest<String, String>() {
-            @Override
-            protected Request<String> doAPIRequest(Response.Listener<String> responseListener,
-                                                   Response.ErrorListener errorListener) {
-                return new StringRequest(Request.Method.GET,
-                        AbstractAPIRequest.getAPIUrl() + "removeOwedExpense",
-                        responseListener, errorListener) {
-                    @Override
-                    public Map<String, String> getHeaders() throws AuthFailureError {
-                        Map<String, String> params = new HashMap<String, String>();
-                        params.put("expense_id", expenseId);
-                        params.put("user_id", userId);
-                        params.put("api_key", apiKey);
-                        return params;
-                    }
-                };
-            }
-        };
-        apiRequest.run(context, response);
+        // Set headers
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("expense_id", expenseId);
+        params.put("user_id", userId);
+        params.put("api_key", apiKey);
+
+        // Do request
+        new StringAPIRequest(AbstractAPIRequest.getAPIUrl() + "removeOwedExpense",
+                Request.Method.GET, params, null).run(context, response);
 
     }
 
@@ -1003,27 +886,15 @@ public abstract class APIService {
                     "apiKey, expenseId or userId is null.");
         }
 
-        // Send request
-        AbstractAPIRequest<String, String> apiRequest = new AbstractAPIRequest<String, String>() {
-            @Override
-            protected Request<String> doAPIRequest(Response.Listener<String> responseListener,
-                                                   Response.ErrorListener errorListener) {
-                return new StringRequest(Request.Method.GET,
-                        AbstractAPIRequest.getAPIUrl() + "setUserPaidExpense",
-                        responseListener, errorListener) {
-                    @Override
-                    public Map<String, String> getHeaders() throws AuthFailureError {
-                        Map<String, String> params = new HashMap<String, String>();
-                        params.put("expense_id", expenseId);
-                        params.put("api_key", apiKey);
-                        params.put("user_id", userId);
-                        return params;
-                    }
-                };
-            }
-        };
-        apiRequest.run(context, response);
+        // Set headers
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("expense_id", expenseId);
+        params.put("api_key", apiKey);
+        params.put("user_id", userId);
 
+        // Do request
+        new StringAPIRequest(AbstractAPIRequest.getAPIUrl() + "setUserPaidExpense",
+                Request.Method.GET, params, null).run(context, response);
     }
 
 

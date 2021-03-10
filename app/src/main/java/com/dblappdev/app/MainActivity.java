@@ -45,20 +45,15 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception e) {
             throw new IllegalStateException(e.getMessage());
         }
-        APIService.getAllExpenseGroups("0949d532d55b0cb6da0ee09753d6900dce0eb3926bb127c2f3d6b9f1c1db7d5b",  this, new APIResponse<List<Map<String, String>>>(){
+        APIService.createExpenseGroup("832062e78d25084853dd00edd1e9bc430b810a163482431da7446941fe893fd3","newTestGroup", this, new APIResponse<String>(){
             @Override
-            public void onResponse(List<Map<String, String>> data) {
-                String returnString = "";
-                for (Map<String, String> elt : data){
-                    for (String x : elt.keySet())
-                        returnString += x.toString() + " | ";
-                }
-                textView.setText(returnString);
+            public void onResponse(String data) {
+                textView.setText(data);
             }
 
             @Override
             public void onErrorResponse(VolleyError error, String errorMessage) {
-
+                textView.setText(errorMessage);
             }
 
 

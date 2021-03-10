@@ -64,6 +64,7 @@ public abstract class AbstractAPIRequest<T, K> {
         return (K) data;
     }
 
+
     /**
      * Template method to be executed to run the API request.
      *
