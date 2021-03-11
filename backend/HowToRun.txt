@@ -1,0 +1,7 @@
+Make sure requirements.txt are installed, and python 3.8 or newer is used and the database is initialized.
+It is recommended to user Linux or WSL.
+1. In command prompt, navigate to this folder (backend)
+2. export FLASK_APP=backendserver
+3. export FLASK_ENV=development
+4a. For local access run: flask run
+4b. For non-local access run: flask run --host=0.0.0.0
