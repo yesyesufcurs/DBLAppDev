@@ -10,7 +10,6 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.App"
-        android:theme="@style/Theme.App"
         android:usesCleartextTraffic="true">
         <activity android:name=".SelectMembersActivity"></activity>
         <activity android:name=".ExpenseDetailsActivity" />
