@@ -588,15 +588,16 @@ def detect_text(content):
     response = client.text_detection(image=image)
     texts = response.text_annotations
     print('Texts:')
-
+    foundText = "";
     for text in texts:
-        print('\n"{}"'.format(text.description))
+        foundText += text + " "
+        # print('\n"{}"'.format(text.description))
 
         # vertices = (['({},{})'.format(vertex.x, vertex.y)
         #             for vertex in text.bounding_poly.vertices])
 
         # print('bounds: {}'.format(','.join(vertices)))
-
+    print(foundText)
     if response.error.message:
         raise Exception(
             '{}\nFor more info on error messages, check: '
