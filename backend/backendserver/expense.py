@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify, Response, send_file
 from backendserver import app, db_file, create_connection
 from backendserver.abstractAPI import AbstractAPI
 import backendserver.expense_group
+from backendserver.permissionChecks import isModerator, isMember, isExpenseCreator, getExpenseGroup
 import werkzeug
 import re
 import sqlite3
@@ -23,34 +24,48 @@ def createExpense():
     expense_id
     '''
     class CreateExpense(AbstractAPI):
-        def api_operation(self, user_id, conn):            
+        def api_operation(self, user_id, conn):
             cursor = conn.cursor()
             expense_title, amount, picture, content, expense_group_id, expense_id = None, None, None, None, None, None
-            
+
             # Get data from request
             try:
                 expense_title = request.headers.get('title')
                 amount = request.headers.get('amount')
-                picture = request.form['picture']
+                # Picture is optional
+                picture = request.form['picture'] if "picture" in request.form else None
                 content = request.headers.get('description')
                 expense_group_id = request.headers.get('expense_group_id')
             except Exception as e:
                 return jsonify(error=412, text="Expense group details missing."), 412
+
+            # Check requirements for new expense.
             if not(1 <= len(expense_title) < 100):
                 return jsonify(error=412, text="Title should be non-empty and shorter than 100 characters."), 412
             if not(float(amount) < 100000):
                 return jsonify(error=412, text="Expense amount should be lower than 100000"), 412
 
+            # Check if user has permissions to add the expense to the expense group
+            try:
+                if not(isMember(user_id, expense_group_id, cursor)):
+                    return jsonify(error=412, text="User must be member of the expense group to add an expense."), 412
+            except Exception as e:
+                return jsonify(error=412, text="Cannot determine if caller has permissions"), 412
+
             # Convert base64 string to bytes
-            bytePicture = base64.b64decode(picture)
-            
+            if picture != None:
+                bytePicture = base64.b64decode(picture)
+            else:
+                bytePicture = None
+
             # Execute query to add expense
             query = '''
             INSERT INTO expense(user_id, title, amount, picture, content, expense_group_id)
             VALUES (?, ?, ?, ?, ?, ?)
             '''
             try:
-                cursor.execute(query, (user_id, expense_title, amount, bytePicture, content, expense_group_id))
+                cursor.execute(query, (user_id, expense_title,
+                                       amount, bytePicture, content, expense_group_id))
             except Exception as e:
                 return jsonify(error=412, text="Cannot add expense to database"), 412
             # Retrieve expense id
@@ -78,23 +93,32 @@ def getExpensePicture(expenseid, apikey):
     class GetExpensePicture(AbstractAPI):
         def api_operation(self, user_id, conn):
             cursor = conn.cursor()
-            expense_id,pictureBytes = None, None
-            
-            #Get headers
+            expense_id, pictureBytes = None, None
+
+            # Get headers
             try:
                 expense_id = expenseid
             except Exception as e:
                 return jsonify(error=412, text="Expense id missing"), 412
-            query = "SELECT picture from expense where id = ?"
-            
+
+            # Check if user has permissions to get the expense picture
             try:
-                cursor.execute(query,(expense_id,))
+                if not(isMember(user_id, expense_group_id, cursor)):
+                    return jsonify(error=412, text="User must be member of the expense group to see an expense picture."), 412
+            except Exception as e:
+                return jsonify(error=412, text="Cannot determine if caller has permissions"), 412
+
+            # Get picture
+            query = "SELECT picture from expense where id = ?"
+
+            try:
+                cursor.execute(query, (expense_id,))
                 pictureBytes = cursor.fetchone()[0]
             except Exception as e:
                 return jsonify(error=412, text="Cannot get picture"), 412
             return send_file(BytesIO(pictureBytes),
-                            attachment_filename=f"expense_id_{expense_id}",
-                            mimetype='image/jpg')
+                             attachment_filename=f"expense_id_{expense_id}",
+                             mimetype='image/jpg')
     return GetExpensePicture.template_method(GetExpensePicture, apikey)
 
 
@@ -119,6 +143,14 @@ def createExpenseIOU(iouJson):
                 expense_id = request.headers.get('expense_id')
             except Exception as e:
                 return jsonify(error=412, text="Cannot get expense id"), 412
+
+            # Check permissions of caller
+            try:
+                if not(isExpenseCreator(user_id, expense_id, cursor)):
+                    return jsonify(error=412, text="User must be the creator of the expense to add this."), 412
+            except Exception as e:
+                return jsonify(error=412, text="Cannot determine if caller has permissions"), 412
+
             # Iterate through iouJson and add each Accured Expense to db.
             for key in iou:
                 try:
@@ -146,6 +178,14 @@ def getExpenseGroupExpenses():
                 expense_group_id = request.headers.get('expense_group_id')
             except Exception as e:
                 return jsonify(error=412, text="Cannot get expense_group_id"), 412
+
+            # Check if user has permissions to get the expense picture
+            try:
+                if not(isMember(user_id, expense_group_id, cursor)):
+                    return jsonify(error=412, text="User must be member of the expense group to see group expenses."), 412
+            except Exception as e:
+                return jsonify(error=412, text="Cannot determine if caller has permissions"), 412
+
             # Get expense groups from db.
             query = ''' SELECT id, user_id, title, amount, content, expense_group_id
             FROM expense
@@ -222,6 +262,13 @@ def getExpenseDetails():
             except Exception as e:
                 return jsonify(error=412, text="Missing expense_id"), 412
             cursor = conn.cursor()
+            # Check if user has permissions to get the expense details
+            try:
+                expense_group_id = getExpenseGroup(expense_id, cursor)
+                if not(isMember(user_id, expense_group_id, cursor)):
+                    return jsonify(error=412, text="User must be member of the expense group to see expense details."), 412
+            except Exception as e:
+                return jsonify(error=412, text="Cannot determine if caller has permissions"), 412
             # Get expense details
             query = ''' SELECT * FROM expense WHERE id = ?'''
             try:
@@ -251,6 +298,13 @@ def getOwedExpenses():
             except Exception as e:
                 return jsonify(error=412, text="Missing expense_id"), 412
             cursor = conn.cursor()
+            # Check if user has permissions to get the owed expenses
+            try:
+                expense_group_id = getExpenseGroup(expense_id, cursor)
+                if not(isMember(user_id, expense_group_id, cursor)):
+                    return jsonify(error=412, text="User must be member of the expense group to see an expense picture."), 412
+            except Exception as e:
+                return jsonify(error=412, text="Cannot determine if caller has permissions"), 412
             # Get expenses where user owes someone money
             query = ''' SELECT e.user_id, a.expense_id, a.user_id, a.amount, a.paid
             FROM expense AS e, accured_expenses AS a
@@ -286,6 +340,13 @@ def setUserPaidExpense():
                 user = request.headers.get('user_id')
             except Exception as e:
                 return jsonify(error=412, text="Missing expense_id"), 412
+            # Check if user has permissions to toggle the expense
+            try:
+                expense_group_id = getExpenseGroup(expense_id, cursor)
+                if not(isExpenseCreator(user_id, expense_group_id, cursor) or isModerator(user_id, expense_group_id, cursor)):
+                    return jsonify(error=412, text="User must be expense creator or moderator of the expense group to do this."), 412
+            except Exception as e:
+                return jsonify(error=412, text="Cannot determine if caller has permissions"), 412
             # Toggle paid value in accured expenses.
             query = """
             SELECT paid FROM accured_expenses
