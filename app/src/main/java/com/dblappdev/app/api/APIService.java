@@ -666,7 +666,7 @@ public abstract class APIService {
     }
 
     /**
-     * Returns JSONArray containing expense details of all expenses created by the user that makes the request
+     * Returns List<Map<String, String>> containing expense details of all expenses created by the user that makes the request
      *
      * @param apiKey   apiKey of the user calling this method
      * @param context  context of request, often AppActivity (instance of calling object)
@@ -694,7 +694,7 @@ public abstract class APIService {
     }
 
     /**
-     * Returns JSONArray containing all expenses where the user owes someone else money
+     * Returns List<Map<String, String>> containing all expenses where the user owes someone else money
      *
      * @param apiKey   apiKey of the user calling this method
      * @param context  context of request, often AppActivity (instance of calling object)
@@ -724,7 +724,7 @@ public abstract class APIService {
 
 
     /**
-     * Returns JSONArray containing the details of an expense given an expenseId
+     * Returns List<Map<String, String>> containing the details of an expense given an expenseId
      *
      * @param apiKey    apiKey of the user calling this method
      * @param expenseId id of the expense
