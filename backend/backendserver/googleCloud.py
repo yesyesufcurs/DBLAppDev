@@ -1,6 +1,7 @@
 # Source: https://cloud.google.com/vision/docs/ocr
 def detect_text(content):
     """Detects text in the file."""
+    return "Text recognition is currently disabled to safe on API Requests"
     from google.cloud import vision
     client = vision.ImageAnnotatorClient()
 
