@@ -78,8 +78,12 @@ def createExpense():
             VALUES (?, ?, ?, ?, ?, ?)
             '''
             try:
-                cursor.execute(query, (user_id, expense_title,
-                                       amount, bytePicture, content, expense_group_id))
+                if user == None:
+                    cursor.execute(query, (user_id, expense_title,
+                     amount, bytePicture, content, expense_group_id))
+                else:
+                    cursor.execute(query, (user, expense_title,
+                     amount, bytePicture, content, expense_group_id))
             except Exception as e:
                 return jsonify(error=412, text="Cannot add expense to database"), 412
             # Retrieve expense id
