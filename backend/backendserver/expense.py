@@ -20,13 +20,15 @@ def createExpense():
     Creates new expense and adds it do expense group
     Expects headers:
     title, amount, picture, description, expense_group_id
+    Optional headers:
+    user_id (only needed if caller is not the expense creator)
     Returns:
     expense_id
     '''
     class CreateExpense(AbstractAPI):
         def api_operation(self, user_id, conn):
             cursor = conn.cursor()
-            expense_title, amount, picture, content, expense_group_id, expense_id = None, None, None, None, None, None
+            expense_title, amount, picture, content, expense_group_id, expense_id, user = None, None, None, None, None, None, None
 
             # Get data from request
             try:
@@ -36,6 +38,8 @@ def createExpense():
                 picture = request.form['picture'] if "picture" in request.form else None
                 content = request.headers.get('description')
                 expense_group_id = request.headers.get('expense_group_id')
+                # User is optional
+                user = request.headers['user_id'] if 'user_id' in request.headers else None
             except Exception as e:
                 return jsonify(error=412, text="Expense group details missing."), 412
 
@@ -47,8 +51,18 @@ def createExpense():
 
             # Check if user has permissions to add the expense to the expense group
             try:
-                if not(isMember(user_id, expense_group_id, cursor)):
-                    return jsonify(error=412, text="User must be member of the expense group to add an expense."), 412
+                # If caller is also user to be added
+                if user == None or user == user_id:
+                    if not(isMember(user_id, expense_group_id, cursor)):
+                        return jsonify(error=412, text="User must be member of the expense group to add an expense."), 412
+                # If caller is not the user to be added
+                else:
+                    # User to be added should be part of the expense group
+                    if not(isMember(user, expense_group_id, cursor)):
+                        return jsonify(error=412, text="User must be member of the expense group to add an expense."), 412
+                    # The person trying to add the expense should be a moderator
+                    if (not(isModerator(user_id, expense_group_id, cursor))):
+                        return jsonify(error=412, text="Caller must be moderator to create expense for someone else."), 412
             except Exception as e:
                 return jsonify(error=412, text="Cannot determine if caller has permissions"), 412
 

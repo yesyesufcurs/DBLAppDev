@@ -34,7 +34,7 @@ public abstract class AbstractAPIRequest<T, K> {
      * Returns the VolleyRequest to be executed.
      *
      * @param responseListener Volley responseListener
-     * @param errorListener Volley errorListener
+     * @param errorListener    Volley errorListener
      * @return Volley Request that must be executed
      */
     protected abstract Request<T> doAPIRequest(Response.Listener<T> responseListener,
@@ -53,26 +53,19 @@ public abstract class AbstractAPIRequest<T, K> {
      * Converts data from VolleyRequest to data expected by APIResponse
      *
      * @param data data returned by VolleyRequest
+     * @throws IllegalStateException if data cannot be converted
      * @return converted data object in type K
-     *
-     * Default implementation:
-     * Cast data of type T to K.
-     *
-     * If K != T this method MUST BE overwritten!
      */
-    protected K convertData(T data) {
-        return (K) data;
-    }
+    protected abstract K convertData(T data);
 
 
     /**
      * Template method to be executed to run the API request.
      *
-     * @param context       Context of caller
-     * @param apiResponse   APIResponse of caller
+     * @param context     Context of caller
+     * @param apiResponse APIResponse of caller
      * @throws IllegalArgumentException if {@code context == null || apiResponse == null}
      * @pre {@code context != null && apiResponse != null}
-     *
      */
     public void run(Context context, APIResponse<K> apiResponse) {
         if (context == null) {
@@ -85,7 +78,14 @@ public abstract class AbstractAPIRequest<T, K> {
         responseListener = new Response.Listener<T>() {
             @Override
             public void onResponse(T response) {
-                apiResponse.onResponse(convertData(response));
+                K convertedData;
+                try {
+                    convertedData = convertData(response);
+                } catch (IllegalStateException e) {
+                    apiResponse.onErrorResponse(new VolleyError(e.getMessage()), e.getMessage());
+                    return;
+                }
+                apiResponse.onResponse(convertedData);
             }
         };
 

@@ -40,38 +40,54 @@ public class MainActivity extends AppCompatActivity {
         URL url = null;
         Bitmap bmp = null;
         try {
-            url = new URL("https://i.ibb.co/5chxVNr/IMG-20210309-211018.jpg");
+            url = new URL("https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/ReceiptSwiss.jpg/800px-ReceiptSwiss.jpg");
             bmp = BitmapFactory.decodeStream(url.openConnection().getInputStream());
         } catch (Exception e) {
             throw new IllegalStateException(e.getMessage());
         }
-        APIService.createExpenseGroup("832062e78d25084853dd00edd1e9bc430b810a163482431da7446941fe893fd3","newTestGroup", this, new APIResponse<String>(){
-            @Override
-            public void onResponse(String data) {
-                textView.setText(data);
-            }
 
-            @Override
-            public void onErrorResponse(VolleyError error, String errorMessage) {
-                textView.setText(errorMessage);
-            }
-
-
-        });
-//        APIService.getExpensePicture("aea35fd516cb721c5a32451d9cf78764533f64fc3ab2c92305be461fbe4c183b","4",this, new APIResponse<Bitmap>() {
-//                    @Override
-//                    public void onResponse(Bitmap data) {
-////                        textView.setText(data.toString());
-//                        im1.setImageBitmap(data);
-//                    }
+//        APIService.createExpense("832062e78d25084853dd00edd1e9bc430b810a163482431da7446941fe893fd3",
+//                null,"Title","10", bmp,"1","1",
+//                this, new APIResponse<String>(){
+//            @Override
+//            public void onResponse(String data) {
+//                textView.setText("Expense ID: " + data);
+//            }
 //
-//                    @Override
-//                    public void onErrorResponse(VolleyError error, String errorMessage) {
-//                        textView.setText(error.toString());
-////                        throw error;
-////                        textView.setText(errorMessage);
-//                    }
-//                });
+//            @Override
+//            public void onErrorResponse(VolleyError error, String errorMessage) {
+//                textView.setText(errorMessage);
+//            }
+//        });
+
+        APIService.getExpensePicture("832062e78d25084853dd00edd1e9bc430b810a163482431da7446941fe893fd3",
+                "3",this, new APIResponse<Bitmap>() {
+                    @Override
+                    public void onResponse(Bitmap data) {
+//                        textView.setText(data.toString());
+                        im1.setImageBitmap(data);
+                    }
+
+                    @Override
+                    public void onErrorResponse(VolleyError error, String errorMessage) {
+                        textView.setText(error.toString());
+//                        throw error;
+//                        textView.setText(errorMessage);
+                    }
+                });
+
+//        APIService.createExpense("832062e78d25084853dd00edd1e9bc430b810a163482431da7446941fe893fd3", "physicalTest", "NewExpense","10",null,"b","42957",this, new APIResponse<String>(){
+//
+//            @Override
+//            public void onResponse(String data) {
+//                textView.setText(data);
+//            }
+//
+//            @Override
+//            public void onErrorResponse(VolleyError error, String errorMessage) {
+//                textView.setText(errorMessage);
+//            }
+//        });
     }
 
 
