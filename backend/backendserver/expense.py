@@ -590,7 +590,7 @@ def detect_text(content):
     print('Texts:')
     foundText = "";
     for text in texts:
-        foundText += text + " "
+        foundText += text.description + " "
         # print('\n"{}"'.format(text.description))
 
         # vertices = (['({},{})'.format(vertex.x, vertex.y)
