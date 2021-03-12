@@ -192,7 +192,8 @@ public abstract class APIService {
      * @pre {@code apiKey != null && context != null && response != null}
      * @post {@code APIResponse.data == expenseGroups}
      */
-    public static void getAllExpenseGroups(String apiKey, Context context, APIResponse<List<Map<String, String>>> response) {
+    public static void getAllExpenseGroups(String apiKey, Context context,
+                                           APIResponse<List<Map<String, String>>> response) {
         // Check preconditions
         if (apiKey == null) {
             throw new IllegalArgumentException("APIService.getAllExpenseGroups.pre: apiKey is" +
@@ -523,6 +524,44 @@ public abstract class APIService {
         }
         response.onResponse(picture);
 
+    }
+
+    /**
+     * Returns the detected text from a picture
+     *
+     * @param apiKey    apiKey of the user calling this method
+     * @param picture   bitmap of the picture of which the text must be recognized
+     * @param context   context of request, often AppActivity (instance of calling object)
+     * @param response  contains a callback method that is called on (un)successful request.
+     */
+    public static void detectText(String apiKey, Bitmap picture, Context context,
+                                      APIResponse<String> response){
+        if (apiKey == null || picture == null) {
+            throw new IllegalArgumentException("APIService.getPictureText.pre: " +
+                    "apiKey or picture is null");
+        }
+
+        // Initialize base64 string of picture
+        String pictureBase64;
+        try {
+            pictureBase64 = bitmapToBase64(picture);
+        } catch (IllegalArgumentException e) {
+            String errorMessage = "Picture too large, should be smaller than 10MB.";
+            response.onErrorResponse(new VolleyError(errorMessage), errorMessage);
+            return;
+        }
+
+        // Set headers
+        Map<String, String> headers = new HashMap<String, String>();
+        headers.put("api_key", apiKey);
+
+        // Set params
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("picture", pictureBase64);
+
+        // Do API Request
+        new StringAPIRequest(AbstractAPIRequest.getAPIUrl() + "detectText",
+                Request.Method.POST, headers, params).run(context, response);
     }
 
     /**

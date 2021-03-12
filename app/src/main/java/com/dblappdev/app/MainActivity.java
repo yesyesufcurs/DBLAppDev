@@ -46,8 +46,22 @@ public class MainActivity extends AppCompatActivity {
             throw new IllegalStateException(e.getMessage());
         }
 
-//        APIService.createExpense("832062e78d25084853dd00edd1e9bc430b810a163482431da7446941fe893fd3",
-//                null,"Title","10", bmp,"1","1",
+        APIService.detectText("0949d532d55b0cb6da0ee09753d6900dce0eb3926bb127c2f3d6b9f1c1db7d5b", bmp, this, new APIResponse<String>() {
+
+            @Override
+            public void onResponse(String data) {
+                textView.setText(data);
+            }
+
+            @Override
+            public void onErrorResponse(VolleyError error, String errorMessage) {
+                textView.setText(errorMessage);
+            }
+        });
+
+
+//        APIService.createExpense("0949d532d55b0cb6da0ee09753d6900dce0eb3926bb127c2f3d6b9f1c1db7d5b",
+//                null,"Title","10", bmp,"1","42957",
 //                this, new APIResponse<String>(){
 //            @Override
 //            public void onResponse(String data) {
@@ -60,21 +74,21 @@ public class MainActivity extends AppCompatActivity {
 //            }
 //        });
 
-        APIService.getExpensePicture("832062e78d25084853dd00edd1e9bc430b810a163482431da7446941fe893fd3",
-                "3",this, new APIResponse<Bitmap>() {
-                    @Override
-                    public void onResponse(Bitmap data) {
-//                        textView.setText(data.toString());
-                        im1.setImageBitmap(data);
-                    }
-
-                    @Override
-                    public void onErrorResponse(VolleyError error, String errorMessage) {
-                        textView.setText(error.toString());
-//                        throw error;
-//                        textView.setText(errorMessage);
-                    }
-                });
+//        APIService.getExpensePicture("832062e78d25084853dd00edd1e9bc430b810a163482431da7446941fe893fd3",
+//                "3",this, new APIResponse<Bitmap>() {
+//                    @Override
+//                    public void onResponse(Bitmap data) {
+////                        textView.setText(data.toString());
+//                        im1.setImageBitmap(data);
+//                    }
+//
+//                    @Override
+//                    public void onErrorResponse(VolleyError error, String errorMessage) {
+//                        textView.setText(error.toString());
+////                        throw error;
+////                        textView.setText(errorMessage);
+//                    }
+//                });
 
 //        APIService.createExpense("832062e78d25084853dd00edd1e9bc430b810a163482431da7446941fe893fd3", "physicalTest", "NewExpense","10",null,"b","42957",this, new APIResponse<String>(){
 //

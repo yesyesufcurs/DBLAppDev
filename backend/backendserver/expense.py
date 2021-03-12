@@ -3,6 +3,7 @@ from backendserver import app, db_file, create_connection
 from backendserver.abstractAPI import AbstractAPI
 import backendserver.expense_group
 from backendserver.permissionChecks import isModerator, isMember, isExpenseCreator, getExpenseGroup
+from backendserver.googleCloud import detect_text
 import werkzeug
 import re
 import sqlite3
@@ -247,7 +248,30 @@ def getExpensePicture(expenseid, apikey):
                              mimetype='image/jpg')
     return GetExpensePicture.template_method(GetExpensePicture, apikey)
 
-
+@app.route("/detectText", methods=["GET", "POST"])
+def detectText():
+    """
+    Returns the text detected in an image by the Google Cloud Vision API.
+    Expects headers:
+    picture
+    """
+    class DetectText(AbstractAPI):
+        def api_operation(self, user_id, conn):
+            picture = None
+            try:
+                picture = request.form['picture']
+            except Exception as e:
+                return jsonify(error=412, text="Cannot retrieve picture."), 412
+            # Convert picture to bytes
+            bytePicture = base64.b64decode(picture)
+            foundText = ""
+            try:
+                foundText = detect_text(bytePicture)
+            except Exception as e:
+                return jsonify(error=412, text="Cannot use text detection."), 412
+            return jsonify(foundText)
+    return DetectText.template_method(DetectText, request.headers["api_key"] if "api_key" in request.headers else None)
+    
 @app.route("/createExpenseIOU/<iouJson>")
 def createExpenseIOU(iouJson):
     '''
@@ -539,67 +563,3 @@ def setUserPaidExpense():
             return jsonify("Set successfully")
     return SetUserPaidExpense.template_method(SetUserPaidExpense, request.headers["api_key"] if "api_key" in request.headers else None)
 
-# def detect_document(image):
-#     """Detects document features in an image."""
-#     from google.cloud import vision
-#     import io
-#     client = vision.ImageAnnotatorClient()
-
-#     content = image
-
-#     image = vision.Image(content=content)
-
-#     response = client.document_text_detection(image=image)
-
-#     for page in response.full_text_annotation.pages:
-#         for block in page.blocks:
-#             print('\nBlock confidence: {}\n'.format(block.confidence))
-
-#             for paragraph in block.paragraphs:
-#                 print('Paragraph confidence: {}'.format(
-#                     paragraph.confidence))
-
-#                 for word in paragraph.words:
-#                     word_text = ''.join([
-#                         symbol.text for symbol in word.symbols
-#                     ])
-#                     print('Word text: {} (confidence: {})'.format(
-#                         word_text, word.confidence))
-
-#                     for symbol in word.symbols:
-#                         print('\tSymbol: {} (confidence: {})'.format(
-#                             symbol.text, symbol.confidence))
-
-#     if response.error.message:
-#         raise Exception(
-#             '{}\nFor more info on error messages, check: '
-#             'https://cloud.google.com/apis/design/errors'.format(
-#                 response.error.message))
-
-def detect_text(content):
-    """Detects text in the file."""
-    from google.cloud import vision
-    import io
-    client = vision.ImageAnnotatorClient()
-
-
-    image = vision.Image(content=content)
-
-    response = client.text_detection(image=image)
-    texts = response.text_annotations
-    print('Texts:')
-    foundText = "";
-    for text in texts:
-        foundText += text.description + " "
-        # print('\n"{}"'.format(text.description))
-
-        # vertices = (['({},{})'.format(vertex.x, vertex.y)
-        #             for vertex in text.bounding_poly.vertices])
-
-        # print('bounds: {}'.format(','.join(vertices)))
-    print(foundText)
-    if response.error.message:
-        raise Exception(
-            '{}\nFor more info on error messages, check: '
-            'https://cloud.google.com/apis/design/errors'.format(
-                response.error.message))
