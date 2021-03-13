@@ -8,6 +8,7 @@
     tools:context=".HomeScreenActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraintLayout"
         android:layout_width="match_parent"
         android:layout_height="64dp"
         android:background="?colorPrimaryDark"
@@ -68,17 +69,27 @@
             app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <Button
-        android:id="@+id/tempButton"
-        style="@style/button"
+<!--    <Button-->
+<!--        android:id="@+id/tempButton"-->
+<!--        style="@style/button"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="64dp"-->
+<!--        android:onClick="onTempClick"-->
+<!--        android:text="temp button"-->
+<!--        app:layout_constraintBottom_toBottomOf="parent"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        app:layout_constraintStart_toStartOf="parent"-->
+<!--        app:layout_constraintTop_toTopOf="parent" />-->
+
+    <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
-        android:layout_height="64dp"
-        android:onClick="onTempClick"
-        android:text="temp button"
+        android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/constraintLayout"
+        tools:itemCount="20"
+        tools:listitem="@layout/recycler_view_item" />
 
     <!--
         TODO: The rest of this page should go here

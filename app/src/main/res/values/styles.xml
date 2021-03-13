@@ -26,6 +26,22 @@
         <item name="android:textColor">?colorOnPrimary</item>
     </style>
 
+    <style name="text_listitem">
+        <item name="android:textSize">18sp</item>
+        <item name="android:fontFamily">@font/montserrat</item>
+        <item name="fontFamily">@font/montserrat</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">?colorOnPrimary</item>
+    </style>
+
+    <style name="text_listbalance">
+        <item name="android:textSize">18sp</item>
+        <item name="android:fontFamily">@font/montserrat</item>
+        <item name="fontFamily">@font/montserrat</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">?colorOnPrimaryWeak</item>
+    </style>
+
     <style name="input_edittext">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">match_parent</item>
