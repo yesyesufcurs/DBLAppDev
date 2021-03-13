@@ -11,13 +11,16 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.StringRequest;
+import com.google.gson.Gson;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public abstract class APIService {
@@ -83,31 +86,15 @@ public abstract class APIService {
             return;
         }
 
-        // Send request
-        AbstractAPIRequest<String, String> apiRequest = new AbstractAPIRequest<String, String>() {
-            @Override
-            protected Request<String> doAPIRequest(Response.Listener<String> responseListener,
-                                                   Response.ErrorListener errorListener) {
-                return new StringRequest(Request.Method.GET,
-                        AbstractAPIRequest.getAPIUrl() + "register",
-                        responseListener, errorListener) {
-                    @Override
-                    public Map<String, String> getHeaders() throws AuthFailureError {
-                        Map<String, String> params = new HashMap<String, String>();
-                        params.put("username", username);
-                        params.put("password", password);
-                        params.put("email", email);
+        // Set headers
+        Map<String, String> headers = new HashMap<String, String>();
+        headers.put("username", username);
+        headers.put("password", password);
+        headers.put("email", email);
 
-                        return params;
-                    }
-
-                };
-
-            }
-
-
-        };
-        apiRequest.run(context, response);
+        // Invoke Request
+        new StringAPIRequest(AbstractAPIRequest.getAPIUrl() + "register", Request.Method.GET,
+                headers, null).run(context, response);
     }
 
     /**
@@ -147,31 +134,26 @@ public abstract class APIService {
                     "is null");
         }
 
-        // Send request
-        AbstractAPIRequest<String, String> apiRequest = new AbstractAPIRequest<String, String>() {
-            @Override
-            protected Request<String> doAPIRequest(Response.Listener<String> responseListener,
-                                                   Response.ErrorListener errorListener) {
-                return new StringRequest(Request.Method.GET,
-                        AbstractAPIRequest.getAPIUrl() + "login", responseListener,
-                        errorListener) {
-                    @Override
-                    public Map<String, String> getHeaders() throws AuthFailureError {
-                        Map<String, String> params = new HashMap<String, String>();
-                        params.put("username", username);
-                        params.put("password", password);
+        if (username.length() >= 30 || password.length() >= 30) {
+            String errorMessage = "Username and password must be shorter than 30 characters.";
+            response.onErrorResponse(new VolleyError(errorMessage), errorMessage);
+            return;
+        }
 
-                        return params;
-                    }
-                };
-            }
-        };
-        apiRequest.run(context, response);
+        // Set headers
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("username", username);
+        params.put("password", password);
+
+        // Do request
+        new StringAPIRequest(AbstractAPIRequest.getAPIUrl() + "login", Request.Method.GET,
+                params, null).run(context, response);
+
     }
 
     /**
-     * Returns JSONArray containing expense groups a user is part of.
-     * Each entry is of the form expense_group_id, expense_group_name, user_id of moderator.
+     * Returns List<Map<String, String>> object containing expense groups a user is part of.
+     * Each entry contains expense_group_id, expense_group_name, user_id of moderator.
      *
      * @param apiKey   apiKey of the user calling this method
      * @param context  context of request, often AppActivity (instance of calling object)
@@ -181,38 +163,26 @@ public abstract class APIService {
      * @pre {@code apiKey != null && context != null && response != null}
      * @post {@code APIResponse.data == expenseGroups}
      */
-    public static void getExpenseGroups(String apiKey, Context context, APIResponse<JSONArray> response) {
+    public static void getExpenseGroups(String apiKey, Context context,
+                                        APIResponse<List<Map<String, String>>> response) {
         // Check preconditions
         if (apiKey == null) {
             throw new IllegalArgumentException("APIService.getExpenseGroups.pre: apiKey is null");
         }
 
-        // Send request
-        AbstractAPIRequest<JSONArray, JSONArray> apiRequest = new AbstractAPIRequest<JSONArray, JSONArray>() {
+        // Set headers
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("api_key", apiKey);
 
+        // Do API Request
+        new JSONAPIRequest(AbstractAPIRequest.getAPIUrl() + "getExpenseGroups",
+                Request.Method.GET, params, null).run(context, response);
 
-            @Override
-            protected Request<JSONArray> doAPIRequest(Response.Listener<JSONArray>
-                                                              responseListener,
-                                                      Response.ErrorListener errorListener) {
-                return new JsonArrayRequest(Request.Method.GET,
-                        AbstractAPIRequest.getAPIUrl() + "getExpenseGroups", null,
-                        responseListener, errorListener) {
-                    @Override
-                    public Map<String, String> getHeaders() throws AuthFailureError {
-                        Map<String, String> params = new HashMap<String, String>();
-                        params.put("api_key", apiKey);
-                        return params;
-                    }
-                };
-            }
-        };
-        apiRequest.run(context, response);
     }
 
     /**
-     * Returns JSONArray containing all available expense groups.
-     * Each entry is of the form expense_group_id, expense_group_name, user_id of moderator.
+     * Returns List<Map<String, String>> containing all available expense groups.
+     * Each entry contains expense_group_id, expense_group_name, user_id of moderator.
      *
      * @param apiKey   apiKey of the user calling this method
      * @param context  context of request, often AppActivity (instance of calling object)
@@ -222,34 +192,24 @@ public abstract class APIService {
      * @pre {@code apiKey != null && context != null && response != null}
      * @post {@code APIResponse.data == expenseGroups}
      */
-    public static void getAllExpenseGroups(String apiKey, Context context, APIResponse<JSONArray> response) {
+    public static void getAllExpenseGroups(String apiKey, Context context,
+                                           APIResponse<List<Map<String, String>>> response) {
         // Check preconditions
         if (apiKey == null) {
             throw new IllegalArgumentException("APIService.getAllExpenseGroups.pre: apiKey is" +
                     " null");
         }
 
-        // Send request
-        AbstractAPIRequest<JSONArray, JSONArray> apiRequest = new AbstractAPIRequest<JSONArray, JSONArray>() {
+        // Set headers
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("api_key", apiKey);
 
-            @Override
-            protected Request<JSONArray> doAPIRequest(Response.Listener<JSONArray>
-                                                              responseListener,
-                                                      Response.ErrorListener errorListener) {
-                return new JsonArrayRequest(Request.Method.GET,
-                        AbstractAPIRequest.getAPIUrl() + "getAllExpenseGroups", null,
-                        responseListener, errorListener) {
-                    @Override
-                    public Map<String, String> getHeaders() throws AuthFailureError {
-                        Map<String, String> params = new HashMap<String, String>();
-                        params.put("api_key", apiKey);
-                        return params;
-                    }
-                };
-            }
-        };
-        apiRequest.run(context, response);
+        // Do API Request
+        new JSONAPIRequest(AbstractAPIRequest.getAPIUrl() + "getAllExpenseGroups",
+                Request.Method.GET, params, null).run(context, response);
+
     }
+
 
     /**
      * Creates new expenseGroup and returns the assigned expense_group_id.
@@ -271,27 +231,16 @@ public abstract class APIService {
             throw new IllegalArgumentException("APIService.createExpenseGroup.pre: apiKey or " +
                     "expenseGroupName is null");
         }
-        // Send request
-        AbstractAPIRequest<String, String> apiRequest = new AbstractAPIRequest<String, String>() {
 
-            @Override
-            protected Request<String> doAPIRequest(Response.Listener<String> responseListener,
-                                                   Response.ErrorListener errorListener) {
-                return new StringRequest(Request.Method.GET,
-                        AbstractAPIRequest.getAPIUrl() + "createExpenseGroup",
-                        responseListener, errorListener) {
-                    @Override
-                    public Map<String, String> getHeaders() throws AuthFailureError {
-                        Map<String, String> params = new HashMap<String, String>();
-                        params.put("expense_group_name", expenseGroupName);
-                        params.put("api_key", apiKey);
+        // Set headers
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("expense_group_name", expenseGroupName);
+        params.put("api_key", apiKey);
 
-                        return params;
-                    }
-                };
-            }
-        };
-        apiRequest.run(context, response);
+        // Do request
+        new StringAPIRequest(AbstractAPIRequest.getAPIUrl() + "createExpenseGroup",
+                Request.Method.GET, params, null).run(context, response);
+
     }
 
     /**
@@ -307,32 +256,22 @@ public abstract class APIService {
      * @post {@code APIResponse.data == userIds}
      */
     public static void getExpenseGroupMembers(String apiKey, String expenseGroupId, Context context,
-                                              APIResponse<JSONArray> response) {
+                                              APIResponse<List<Map<String, String>>> response) {
         // Check preconditions
         if (apiKey == null || expenseGroupId == null) {
             throw new IllegalArgumentException("APIService.getExpenseGroupMembers.pre: apiKey or" +
                     "expenseGroupId is null");
         }
-        // Send request
-        AbstractAPIRequest<JSONArray, JSONArray> apiRequest = new AbstractAPIRequest<JSONArray, JSONArray>() {
-            @Override
-            protected Request<JSONArray> doAPIRequest(Response.Listener<JSONArray>
-                                                              responseListener,
-                                                      Response.ErrorListener errorListener) {
-                return new JsonArrayRequest(Request.Method.GET,
-                        AbstractAPIRequest.getAPIUrl() + "getExpenseGroupMembers", null,
-                        responseListener, errorListener) {
-                    @Override
-                    public Map<String, String> getHeaders() throws AuthFailureError {
-                        Map<String, String> params = new HashMap<String, String>();
-                        params.put("api_key", apiKey);
-                        params.put("expense_group_id", expenseGroupId);
-                        return params;
-                    }
-                };
-            }
-        };
-        apiRequest.run(context, response);
+
+        // Set headers
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("api_key", apiKey);
+        params.put("expense_group_id", expenseGroupId);
+
+        // Do API Request
+        new JSONAPIRequest(AbstractAPIRequest.getAPIUrl() + "getExpenseGroupMembers",
+                Request.Method.GET, params, null).run(context, response);
+
     }
 
     /**
@@ -356,32 +295,24 @@ public abstract class APIService {
             throw new IllegalArgumentException("APIService.addToExpenseGroup.pre:" +
                     "apiKey or userId or expenseGroupId is null");
         }
-        // Send request
-        AbstractAPIRequest<String, String> apiRequest = new AbstractAPIRequest<String, String>() {
-            @Override
-            protected Request<String> doAPIRequest(Response.Listener<String> responseListener,
-                                                   Response.ErrorListener errorListener) {
-                return new StringRequest(Request.Method.GET,
-                        AbstractAPIRequest.getAPIUrl() + "addToExpenseGroup",
-                        responseListener, errorListener) {
-                    @Override
-                    public Map<String, String> getHeaders() throws AuthFailureError {
-                        Map<String, String> params = new HashMap<String, String>();
-                        params.put("expense_group_id", expenseGroupId);
-                        params.put("user_id", userId);
-                        params.put("api_key", apiKey);
-                        return params;
-                    }
-                };
-            }
-        };
-        apiRequest.run(context, response);
+
+        // Set headers
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("expense_group_id", expenseGroupId);
+        params.put("user_id", userId);
+        params.put("api_key", apiKey);
+
+        // Do request
+        new StringAPIRequest(AbstractAPIRequest.getAPIUrl() + "addToExpenseGroup",
+                Request.Method.GET, params, null).run(context, response);
+
     }
 
     /**
      * Creates expense and returns expense id of created expense.
      *
      * @param apiKey         apiKey of the user calling this method
+     * @param userId         userId of person that made the expense (if null, caller is assumed)
      * @param title          title of the expense to be added
      * @param amount         amount of the expense to be added
      * @param picture        picture to be added
@@ -398,59 +329,131 @@ public abstract class APIService {
      * response != null}
      * @post {@code APIResponse.data in getExpenseGroupExpenses(apiKey, expenseGroupId)}
      */
-    public static void createExpense(String apiKey, String title, String amount, Bitmap
+    public static void createExpense(String apiKey, String userId, String title, String amount, Bitmap
             picture, String description, String expenseGroupId, Context context,
                                      APIResponse<String> response) {
         // Check preconditions
-        if (apiKey == null || title == null || amount == null || picture == null ||
+        if (apiKey == null || title == null || amount == null ||
                 description == null || expenseGroupId == null) {
             throw new IllegalArgumentException("APIService.createExpense.pre: apiKey or " +
-                    "title or amount or picture or description or expenseGroupId is null");
+                    "title or amount or description or expenseGroupId is null");
         }
+        // Initialize base64 string of picture
         String pictureBase64;
         try {
-            pictureBase64 = bitmapToBase64(picture);
+            pictureBase64 = picture == null ? null : bitmapToBase64(picture);
         } catch (IllegalArgumentException e) {
             String errorMessage = "Picture too large, should be smaller than 10MB.";
             response.onErrorResponse(new VolleyError(errorMessage), errorMessage);
             return;
         }
 
-        AbstractAPIRequest<String, String> apiRequest = new AbstractAPIRequest<String, String>() {
+        // Set headers
+        Map<String, String> headers = new HashMap<String, String>();
+        headers.put("title", title);
+        headers.put("amount", amount);
+        headers.put("description", description);
+        headers.put("expense_group_id", expenseGroupId);
+        headers.put("api_key", apiKey);
+        if (userId != null) {
+            headers.put("user_id", userId);
+        }
 
-            @Override
-            protected Request<String> doAPIRequest(Response.Listener<String> responseListener,
-                                                   Response.ErrorListener errorListener) {
-                return new StringRequest(Request.Method.POST,
-                        AbstractAPIRequest.getAPIUrl() + "createExpense",
-                        responseListener, errorListener) {
-                    // Add correct headers
-                    @Override
-                    public Map<String, String> getHeaders() throws AuthFailureError {
-                        Map<String, String> params = new HashMap<String, String>();
-                        params.put("title", title);
-                        params.put("amount", amount);
-                        params.put("description", description);
-                        params.put("expense_group_id", expenseGroupId);
-                        params.put("api_key", apiKey);
-                        return params;
-                    }
+        // Set parameters
+        Map<String, String> params = new HashMap<>();
+        if (pictureBase64 != null) {
+            params.put("picture", pictureBase64);
+        }
 
-                    // Add picture as a string
-                    @Override
-                    protected Map<String, String> getParams() throws AuthFailureError {
-                        Map<String, String> params = new HashMap<>();
-                        params.put("picture", pictureBase64);
+        // Do request
+        new StringAPIRequest(AbstractAPIRequest.getAPIUrl() + "createExpense",
+                Request.Method.POST, headers, params).run(context, response);
 
-                        return params;
-                    }
+    }
 
-                };
-            }
-        };
-        apiRequest.run(context, response);
+    /**
+     * Modifies expense entry
+     *
+     * @param apiKey         apiKey of the user calling this method
+     * @param title          title of the expense to be modified
+     * @param amount         amount of the expense to be modified
+     * @param picture        picture to be modified
+     * @param description    description of the expense to be modified
+     * @param expenseGroupId expense group id the transaction has to be modified to
+     * @param expenseId      expense id of the transaction to be modified
+     * @param context        context of request, often AppActivity (instance of calling object)
+     * @param response       contains a callback method that is called on (un)successful request.
+     * @throws IllegalArgumentException if {@code apiKey == null || title == null ||
+     *                                  amount == null || picture == null ||
+     *                                  description == null || expenseGroupId == null}
+     */
+    public static void modifyExpense(String apiKey, String title, String amount, Bitmap
+            picture, String description, String expenseGroupId, String expenseId, Context context,
+                                     APIResponse<String> response) {
+        // Check preconditions
+        if (apiKey == null || title == null || amount == null ||
+                description == null || expenseGroupId == null || context == null ||
+                response == null) {
+            throw new IllegalArgumentException("APIService.modifyExpense.pre: apiKey or " +
+                    "title or amount or description or expenseGroupId or expenseId is null");
+        }
 
+        // Initialize base64 string of picture
+        String pictureBase64;
+        try {
+            pictureBase64 = picture == null ? null : bitmapToBase64(picture);
+        } catch (IllegalArgumentException e) {
+            String errorMessage = "Picture too large, should be smaller than 10MB.";
+            response.onErrorResponse(new VolleyError(errorMessage), errorMessage);
+            return;
+        }
 
+        // Set headers
+        Map<String, String> headers = new HashMap<String, String>();
+        headers.put("title", title);
+        headers.put("amount", amount);
+        headers.put("description", description);
+        headers.put("expense_group_id", expenseGroupId);
+        headers.put("expense_id", expenseId);
+        headers.put("api_key", apiKey);
+
+        // Set parameters
+        Map<String, String> params = new HashMap<>();
+        if (pictureBase64 != null) {
+            params.put("picture", pictureBase64);
+        }
+
+        // Do request
+        new StringAPIRequest(AbstractAPIRequest.getAPIUrl() + "modifyExpense",
+                Request.Method.POST, headers, params).run(context, response);
+
+    }
+
+    /**
+     * Removes expense from expense group
+     *
+     * @param apiKey    apiKey of the user calling this method
+     * @param expenseId expense id of the expense
+     * @param context   context of request, often AppActivity (instance of calling object)
+     * @param response  contains a callback method that is called on (un)successful request.
+     */
+    public static void removeExpense(String apiKey, String expenseId, Context context,
+                                     APIResponse<String> response) {
+        // Check preconditions
+        if (apiKey == null || expenseId == null || context == null ||
+                response == null) {
+            throw new IllegalArgumentException("APIService.removeExpense.pre: apiKey or " +
+                    "expenseId is null");
+        }
+
+        // Set headers
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("expense_id", expenseId);
+        params.put("api_key", apiKey);
+
+        // Do request
+        new StringAPIRequest(AbstractAPIRequest.getAPIUrl() + "removeExpense",
+                Request.Method.GET, params, null).run(context, response);
     }
 
     /**
@@ -507,7 +510,7 @@ public abstract class APIService {
                                          APIResponse<Bitmap> response) {
         if (apiKey == null || expenseId == null) {
             throw new IllegalArgumentException("APIService.getExpensePicture.pre: apiKey or " +
-                    "expenseId or iouJson is null");
+                    "expenseId is null");
         }
         String url = AbstractAPIRequest.getAPIUrl() + "getExpensePicture/" + expenseId + "/" +
                 apiKey;
@@ -521,6 +524,44 @@ public abstract class APIService {
         }
         response.onResponse(picture);
 
+    }
+
+    /**
+     * Returns the detected text from a picture
+     *
+     * @param apiKey    apiKey of the user calling this method
+     * @param picture   bitmap of the picture of which the text must be recognized
+     * @param context   context of request, often AppActivity (instance of calling object)
+     * @param response  contains a callback method that is called on (un)successful request.
+     */
+    public static void detectText(String apiKey, Bitmap picture, Context context,
+                                      APIResponse<String> response){
+        if (apiKey == null || picture == null) {
+            throw new IllegalArgumentException("APIService.getPictureText.pre: " +
+                    "apiKey or picture is null");
+        }
+
+        // Initialize base64 string of picture
+        String pictureBase64;
+        try {
+            pictureBase64 = bitmapToBase64(picture);
+        } catch (IllegalArgumentException e) {
+            String errorMessage = "Picture too large, should be smaller than 10MB.";
+            response.onErrorResponse(new VolleyError(errorMessage), errorMessage);
+            return;
+        }
+
+        // Set headers
+        Map<String, String> headers = new HashMap<String, String>();
+        headers.put("api_key", apiKey);
+
+        // Set params
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("picture", pictureBase64);
+
+        // Do API Request
+        new StringAPIRequest(AbstractAPIRequest.getAPIUrl() + "detectText",
+                Request.Method.POST, headers, params).run(context, response);
     }
 
     /**
@@ -546,25 +587,48 @@ public abstract class APIService {
                     "expenseId or iouJson is null");
         }
 
-        // Send request
-        AbstractAPIRequest<String, String> apiRequest = new AbstractAPIRequest<String, String>() {
-            @Override
-            protected Request<String> doAPIRequest(Response.Listener<String> responseListener,
-                                                   Response.ErrorListener errorListener) {
-                return new StringRequest(Request.Method.GET,
-                        AbstractAPIRequest.getAPIUrl() + "createExpenseIOU/" + iouJson.toString(),
-                        responseListener, errorListener) {
-                    @Override
-                    public Map<String, String> getHeaders() throws AuthFailureError {
-                        Map<String, String> params = new HashMap<String, String>();
-                        params.put("expense_id", expenseId);
-                        params.put("api_key", apiKey);
-                        return params;
-                    }
-                };
-            }
-        };
-        apiRequest.run(context, response);
+        // Set headers
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("expense_id", expenseId);
+        params.put("api_key", apiKey);
+
+        // Do request
+        new StringAPIRequest(AbstractAPIRequest.getAPIUrl() + "createExpenseIOU/" +
+                iouJson.toString(),
+                Request.Method.GET, params, null).run(context, response);
+    }
+
+    /**
+     * Removes owed expense of user with userId in expense with expenseId
+     *
+     * @param apiKey    apiKey of the user calling this method
+     * @param expenseId id of the expense
+     * @param userId    id of the user to be removed from owed expenses
+     * @param context   context of request, often AppActivity (instance of calling object)
+     * @param response  contains a callback method that is called on (un)successful request.
+     * @throws IllegalArgumentException if {@code apiKey == null || expenseId == null ||
+     *                                  userId == null || context == null || response == null}
+     * @pre {@code apiKey != null && expenseId != null && userId != null && context != null
+     * && response != null}
+     * @post {@code AccuredExpenses.key(userId, expenseId) does not exist}
+     */
+    public static void removeOwedExpense(String apiKey, String expenseId, String userId,
+                                         Context context, APIResponse<String> response) {
+        // Check preconditions
+        if (apiKey == null || expenseId == null || userId == null) {
+            throw new IllegalArgumentException("APIService.removeOwedExpense.pre: apiKey or " +
+                    "expenseId or userId is null");
+        }
+
+        // Set headers
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("expense_id", expenseId);
+        params.put("user_id", userId);
+        params.put("api_key", apiKey);
+
+        // Do request
+        new StringAPIRequest(AbstractAPIRequest.getAPIUrl() + "removeOwedExpense",
+                Request.Method.GET, params, null).run(context, response);
 
     }
 
@@ -582,38 +646,27 @@ public abstract class APIService {
      * == expenseGroupId}
      */
     public static void getExpenseGroupExpenses(String apiKey, String expenseGroupId,
-                                               Context context, APIResponse<JSONArray> response) {
+                                               Context context,
+                                               APIResponse<List<Map<String, String>>> response) {
         // Check preconditions
         if (apiKey == null || expenseGroupId == null) {
             throw new IllegalArgumentException("APIService.getExpenseGroupExpenses.pre: " +
                     "apiKey or expenseGroupId is null");
         }
 
-        // Send request
-        AbstractAPIRequest<JSONArray, JSONArray> apiRequest = new AbstractAPIRequest<JSONArray, JSONArray>() {
-            @Override
-            protected Request<JSONArray> doAPIRequest(Response.Listener<JSONArray>
-                                                              responseListener,
-                                                      Response.ErrorListener errorListener) {
-                return new JsonArrayRequest(Request.Method.GET,
-                        AbstractAPIRequest.getAPIUrl() + "getExpenseGroupExpenses",
-                        null, responseListener, errorListener) {
-                    @Override
-                    public Map<String, String> getHeaders() throws AuthFailureError {
-                        Map<String, String> params = new HashMap<String, String>();
-                        params.put("api_key", apiKey);
-                        params.put("expense_group_id", expenseGroupId);
-                        return params;
-                    }
-                };
-            }
-        };
-        apiRequest.run(context, response);
+        // Set headers
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("api_key", apiKey);
+        params.put("expense_group_id", expenseGroupId);
+
+        // Do API Request
+        new JSONAPIRequest(AbstractAPIRequest.getAPIUrl() + "getExpenseGroupExpenses",
+                Request.Method.GET, params, null).run(context, response);
 
     }
 
     /**
-     * Returns JSONArray containing expense details of all expenses created by the user that makes the request
+     * Returns List<Map<String, String>> containing expense details of all expenses created by the user that makes the request
      *
      * @param apiKey   apiKey of the user calling this method
      * @param context  context of request, often AppActivity (instance of calling object)
@@ -624,36 +677,24 @@ public abstract class APIService {
      * @post {@code APIResponse.data == userExpenses : userExpenses.expenseGroupId == apiKey.user}
      */
     public static void getUsersExpenses(String apiKey, Context context,
-                                        APIResponse<JSONArray> response) {
+                                        APIResponse<List<Map<String, String>>> response) {
         // Check preconditions
         if (apiKey == null) {
             throw new IllegalArgumentException("APIService.getUserExpenses.pre: apiKey is null");
         }
 
-        // Send request
-        AbstractAPIRequest<JSONArray, JSONArray> apiRequest = new AbstractAPIRequest<JSONArray, JSONArray>() {
-            @Override
-            protected Request<JSONArray> doAPIRequest(Response.Listener<JSONArray>
-                                                              responseListener,
-                                                      Response.ErrorListener errorListener) {
-                return new JsonArrayRequest(Request.Method.GET,
-                        AbstractAPIRequest.getAPIUrl() + "getUsersExpenses",
-                        null, responseListener, errorListener) {
-                    @Override
-                    public Map<String, String> getHeaders() throws AuthFailureError {
-                        Map<String, String> params = new HashMap<String, String>();
-                        params.put("api_key", apiKey);
-                        return params;
-                    }
-                };
-            }
-        };
-        apiRequest.run(context, response);
+        // Set headers
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("api_key", apiKey);
+
+        // Do API Request
+        new JSONAPIRequest(AbstractAPIRequest.getAPIUrl() + "getUsersExpenses",
+                Request.Method.GET, params, null).run(context, response);
 
     }
 
     /**
-     * Returns JSONArray containing all expenses where the user owes someone else money
+     * Returns List<Map<String, String>> containing all expenses where the user owes someone else money
      *
      * @param apiKey   apiKey of the user calling this method
      * @param context  context of request, often AppActivity (instance of calling object)
@@ -665,36 +706,25 @@ public abstract class APIService {
      * getOwedExpenses(userOwedExpenses[i]).ower() == apiKey.user}
      */
     public static void getUserOwedExpenses(String apiKey, Context context,
-                                           APIResponse<JSONArray> response) {
+                                           APIResponse<List<Map<String, String>>> response) {
         // Check preconditions
         if (apiKey == null) {
             throw new IllegalArgumentException("APIService.getUserExpenses.pre: apiKey is null");
         }
 
-        AbstractAPIRequest<JSONArray, JSONArray> apiRequest = new AbstractAPIRequest<JSONArray, JSONArray>() {
+        // Set headers
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("api_key", apiKey);
 
-            @Override
-            protected Request<JSONArray> doAPIRequest(Response.Listener<JSONArray>
-                                                              responseListener,
-                                                      Response.ErrorListener errorListener) {
-                return new JsonArrayRequest(Request.Method.GET,
-                        AbstractAPIRequest.getAPIUrl() + "getUserOwedExpenses",
-                        null, responseListener, errorListener) {
-                    @Override
-                    public Map<String, String> getHeaders() throws AuthFailureError {
-                        Map<String, String> params = new HashMap<String, String>();
-                        params.put("api_key", apiKey);
-                        return params;
-                    }
-                };
-            }
-        };
-        apiRequest.run(context, response);
+        // Do API Request
+        new JSONAPIRequest(AbstractAPIRequest.getAPIUrl() + "getUserOwedExpenses",
+                Request.Method.GET, params, null).run(context, response);
+
     }
 
 
     /**
-     * Returns JSONArray containing the details of an expense given an expenseId
+     * Returns List<Map<String, String>> containing the details of an expense given an expenseId
      *
      * @param apiKey    apiKey of the user calling this method
      * @param expenseId id of the expense
@@ -706,34 +736,21 @@ public abstract class APIService {
      * @post {@code APIResponse.data == expenseDetails : expenseDetails.id() == expenseId}
      */
     public static void getExpenseDetails(String apiKey, String expenseId, Context context,
-                                         APIResponse<JSONArray> response) {
+                                         APIResponse<List<Map<String, String>>> response) {
         // Check preconditions
         if (apiKey == null || expenseId == null) {
             throw new IllegalArgumentException("APIService.getExpenseDetails.pre: " +
                     "apiKey or expenseId is null.");
         }
 
-        // Send request
-        AbstractAPIRequest<JSONArray, JSONArray> apiRequest = new AbstractAPIRequest<JSONArray, JSONArray>() {
+        // Set headers
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("api_key", apiKey);
+        params.put("expense_id", expenseId);
 
-            @Override
-            protected Request<JSONArray> doAPIRequest(Response.Listener<JSONArray>
-                                                              responseListener,
-                                                      Response.ErrorListener errorListener) {
-                return new JsonArrayRequest(Request.Method.GET,
-                        AbstractAPIRequest.getAPIUrl() + "getExpenseDetails",
-                        null, responseListener, errorListener) {
-                    @Override
-                    public Map<String, String> getHeaders() throws AuthFailureError {
-                        Map<String, String> params = new HashMap<String, String>();
-                        params.put("api_key", apiKey);
-                        params.put("expense_id", expenseId);
-                        return params;
-                    }
-                };
-            }
-        };
-        apiRequest.run(context, response);
+        // Do API Request
+        new JSONAPIRequest(AbstractAPIRequest.getAPIUrl() + "getExpenseDetails",
+                Request.Method.GET, params, null).run(context, response);
 
     }
 
@@ -750,34 +767,21 @@ public abstract class APIService {
      * @post {@code APIResponse.data == owedExpenses: owedExpenses.expenseId() == expenseId}
      */
     public static void getOwedExpenses(String apiKey, String expenseId, Context context,
-                                       APIResponse<JSONArray> response) {
+                                       APIResponse<List<Map<String, String>>> response) {
         // Check preconditions
         if (apiKey == null || expenseId == null) {
             throw new IllegalArgumentException("APIService.getOwedExpenses.pre: " +
                     "apiKey or expenseId is null.");
         }
 
-        // Send request
-        AbstractAPIRequest<JSONArray, JSONArray> apiRequest = new AbstractAPIRequest<JSONArray, JSONArray>() {
+        // Set headers
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("api_key", apiKey);
+        params.put("expense_id", expenseId);
 
-            @Override
-            protected Request<JSONArray> doAPIRequest(Response.Listener<JSONArray>
-                                                              responseListener,
-                                                      Response.ErrorListener errorListener) {
-                return new JsonArrayRequest(Request.Method.GET,
-                        AbstractAPIRequest.getAPIUrl() + "getOwedExpenses",
-                        null, responseListener, errorListener) {
-                    @Override
-                    public Map<String, String> getHeaders() throws AuthFailureError {
-                        Map<String, String> params = new HashMap<String, String>();
-                        params.put("api_key", apiKey);
-                        params.put("expense_id", expenseId);
-                        return params;
-                    }
-                };
-            }
-        };
-        apiRequest.run(context, response);
+        // Do API Request
+        new JSONAPIRequest(AbstractAPIRequest.getAPIUrl() + "getOwedExpenses",
+                Request.Method.GET, params, null).run(context, response);
 
     }
 
@@ -802,28 +806,15 @@ public abstract class APIService {
                     "apiKey, expenseId or userId is null.");
         }
 
-        // Send request
-        AbstractAPIRequest<String, String> apiRequest = new AbstractAPIRequest<String, String>() {
-            @Override
-            protected Request<String> doAPIRequest(Response.Listener<String> responseListener,
-                                                   Response.ErrorListener errorListener) {
-                return new StringRequest(Request.Method.GET,
-                        AbstractAPIRequest.getAPIUrl() + "setUserPaidExpense",
-                        responseListener, errorListener) {
-                    @Override
-                    public Map<String, String> getHeaders() throws AuthFailureError {
-                        Map<String, String> params = new HashMap<String, String>();
-                        params.put("expense_id", expenseId);
-                        params.put("api_key", apiKey);
-                        params.put("user_id", userId);
-                        return params;
-                    }
-                };
-            }
-        };
-        apiRequest.run(context, response);
+        // Set headers
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("expense_id", expenseId);
+        params.put("api_key", apiKey);
+        params.put("user_id", userId);
 
+        // Do request
+        new StringAPIRequest(AbstractAPIRequest.getAPIUrl() + "setUserPaidExpense",
+                Request.Method.GET, params, null).run(context, response);
     }
-
 
 }
