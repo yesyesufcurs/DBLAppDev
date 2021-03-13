@@ -2,6 +2,9 @@ from flask import Flask, request, jsonify, Response, send_file
 from backendserver import app, db_file, create_connection
 from backendserver.abstractAPI import AbstractAPI
 import backendserver.expense_group
+from backendserver.permissionChecks import isModerator, isMember, isExpenseCreator, getExpenseGroup
+from backendserver.googleCloud import detect_text
+
 import werkzeug
 import re
 import sqlite3
@@ -16,41 +19,80 @@ from io import BytesIO
 @app.route("/createExpense", methods=["POST"])
 def createExpense():
     '''
-    Create expense WITHOUT UPLOADING PICTURE!
+    Creates new expense and adds it do expense group
     Expects headers:
-    title, amount, description, expense_group_id
+    title, amount, picture, description, expense_group_id
+    Optional headers:
+    user_id (only needed if caller is not the expense creator)
     Returns:
     expense_id
     '''
     class CreateExpense(AbstractAPI):
-        def api_operation(self, user_id, conn):            
+        def api_operation(self, user_id, conn):
             cursor = conn.cursor()
-            expense_title, amount, picture, content, expense_group_id, expense_id = None, None, None, None, None, None
-            
+            expense_title, amount, picture, content, expense_group_id, expense_id, user = None, None, None, None, None, None, None
+
+
             # Get data from request
             try:
                 expense_title = request.headers.get('title')
                 amount = request.headers.get('amount')
-                picture = request.form['picture']
+                # Picture is optional
+                picture = request.form['picture'] if "picture" in request.form else None
                 content = request.headers.get('description')
                 expense_group_id = request.headers.get('expense_group_id')
+                # User is optional
+                user = request.headers['user_id'] if 'user_id' in request.headers else None
             except Exception as e:
                 return jsonify(error=412, text="Expense group details missing."), 412
+
+            # Check requirements for new expense.
             if not(1 <= len(expense_title) < 100):
                 return jsonify(error=412, text="Title should be non-empty and shorter than 100 characters."), 412
             if not(float(amount) < 100000):
                 return jsonify(error=412, text="Expense amount should be lower than 100000"), 412
 
+            # Check if user has permissions to add the expense to the expense group
+            try:
+
+                # If caller is also user to be added
+                if user == None or user == user_id:
+                    if not(isMember(user_id, expense_group_id, cursor)):
+                        return jsonify(error=412, text="User must be member of the expense group to add an expense."), 412
+                # If caller is not the user to be added
+                else:
+                    # User to be added should be part of the expense group
+                    if not(isMember(user, expense_group_id, cursor)):
+                        return jsonify(error=412, text="User must be member of the expense group to add an expense."), 412
+                    # The person trying to add the expense should be a moderator
+                    if (not(isModerator(user_id, expense_group_id, cursor))):
+                        return jsonify(error=412, text="Caller must be moderator to create expense for someone else."), 412
+
+            except Exception as e:
+                return jsonify(error=412, text="Cannot determine if caller has permissions"), 412
+
             # Convert base64 string to bytes
-            bytePicture = base64.b64decode(picture)
+            if picture != None:
+                bytePicture = base64.b64decode(picture)
+                detect_text(bytePicture)
+            else:
+                bytePicture = None
             
+
+
             # Execute query to add expense
             query = '''
             INSERT INTO expense(user_id, title, amount, picture, content, expense_group_id)
             VALUES (?, ?, ?, ?, ?, ?)
             '''
             try:
-                cursor.execute(query, (user_id, expense_title, amount, bytePicture, content, expense_group_id))
+                if user == None:
+                    cursor.execute(query, (user_id, expense_title,
+                     amount, bytePicture, content, expense_group_id))
+                else:
+                    cursor.execute(query, (user, expense_title,
+                     amount, bytePicture, content, expense_group_id))
+
             except Exception as e:
                 return jsonify(error=412, text="Cannot add expense to database"), 412
             # Retrieve expense id
@@ -65,6 +107,112 @@ def createExpense():
             return jsonify(expense_id)
     return CreateExpense.template_method(CreateExpense, request.headers["api_key"] if "api_key" in request.headers else None)
 
+@app.route("/modifyExpense", methods=["POST"])
+def modifyExpense():
+    '''
+    Modifies existing expense 
+    Expects headers:
+    title, amount, description, expense_group_id, expense_id
+    Optional headers:
+    picture (only needed if changed)
+    Returns:
+    Changed successfully
+    '''
+    class ModifyExpense(AbstractAPI):
+        def api_operation(self, user_id, conn):
+            cursor = conn.cursor()
+            expense_title, amount, picture, content, expense_group_id, expense_id = None, None, None, None, None, None
+            # Get data from request
+            try:
+                expense_title = request.headers.get('title')
+                amount = request.headers.get('amount')
+                # Picture is optional
+                picture = request.form['picture'] if "picture" in request.form else None
+                content = request.headers.get('description')
+                expense_group_id = request.headers.get('expense_group_id')
+                expense_id = request.headers.get('expense_id')
+            except Exception as e:
+                return jsonify(error=412, text="Expense group details missing."), 412
+            # Check if user has permission to alter the expense
+            try:
+                if not(isExpenseCreator(user_id, expense_id, cursor) or isModerator(user_id, expense_group_id, cursor)):
+                    return jsonify(error=412, text="User is not a moderator or creator of expense."), 412
+            except Exception as e:
+                return jsonify(error=412, text="Cannot determine if caller has permissions"), 412
+            # Convert base64 string to bytes
+            if picture != None:
+                bytePicture = base64.b64decode(picture)
+            else:
+                bytePicture = None
+
+            query = ""
+            conditions = None
+            if picture == None:
+                query = """
+                UPDATE expense
+                SET title = ?, amount = ?, content = ?, expense_group_id = ?
+                WHERE id = ? 
+                """
+                conditions = (expense_title, amount, content, expense_group_id, expense_id)
+            else:
+                query = """
+                UPDATE expense
+                SET title = ?, amount = ?, picture = ?, content = ?, expense_group_id = ?
+                WHERE id = ? 
+                """
+                conditions = (expense_title, amount, bytePicture, content, expense_group_id, expense_id)
+            try:
+                cursor.execute(query, conditions)
+            except Exception as e:
+                return jsonify(error=412, text="Cannot update expense"), 412
+            conn.commit()
+            # Return expense id
+            return jsonify("Updated Successfully")
+    return ModifyExpense.template_method(ModifyExpense, request.headers["api_key"] if "api_key" in request.headers else None)
+
+@app.route("/removeExpense")
+def removeExpense():
+    """
+    Removes expense from the whole database.
+    Expects headers:
+    expense_id
+    Returns: 
+    'Removed successfully' if removed successfully
+    """ 
+    class RemoveExpense(AbstractAPI):
+        def api_operation(self, user_id, conn):
+            cursor = conn.cursor()
+            expense_id = None
+            # Get Headers
+            try:
+                expense_id = request.headers.get('expense_id')
+            except Exception as e:
+                return jsonify(error=412, text="Expense id missing"), 412
+
+            # Check if user has permissions to delete expense
+            try:
+                expense_group_id = getExpenseGroup(expense_id, cursor)
+                if not(isExpenseCreator(user_id, expense_id, cursor) or isModerator(user_id, expense_group_id, cursor)):
+                    return jsonify(error=412, text="Caller has no permission to remove expense"), 412
+            except Exception as e:
+                return jsonify(error=412, text="Cannot determine if caller has permissions"), 412
+            
+            # Remove expense
+            query1 = """
+            DELETE FROM accured_expenses WHERE expense_id = ?
+            """
+            query2 = """
+            DELETE FROM expense WHERE id = ?
+            """
+            try:
+                cursor.execute(query1, (expense_id,))
+                cursor.execute(query2, (expense_id,))
+            except Exception as e:
+                return jsonify(error=412, text="Cannot remove expense"), 412
+            conn.commit()
+            return jsonify("Removed successfully")
+    return RemoveExpense.template_method(RemoveExpense, request.headers["api_key"] if "api_key" in request.headers else None)
+
 
 @app.route("/getExpensePicture/<expenseid>/<apikey>", methods=["GET", "POST"])
 def getExpensePicture(expenseid, apikey):
@@ -78,26 +226,58 @@ def getExpensePicture(expenseid, apikey):
     class GetExpensePicture(AbstractAPI):
         def api_operation(self, user_id, conn):
             cursor = conn.cursor()
-            expense_id,pictureBytes = None, None
-            
-            #Get headers
+            expense_id, pictureBytes = None, None
+
+            # Get headers
             try:
                 expense_id = expenseid
             except Exception as e:
                 return jsonify(error=412, text="Expense id missing"), 412
-            query = "SELECT picture from expense where id = ?"
-            
+
+            # Check if user has permissions to get the expense picture
             try:
-                cursor.execute(query,(expense_id,))
+                if not(isMember(user_id, expense_group_id, cursor)):
+                    return jsonify(error=412, text="User must be member of the expense group to see an expense picture."), 412
+            except Exception as e:
+                return jsonify(error=412, text="Cannot determine if caller has permissions"), 412
+
+            # Get picture
+            query = "SELECT picture from expense where id = ?"
+
+            try:
+                cursor.execute(query, (expense_id,))
                 pictureBytes = cursor.fetchone()[0]
             except Exception as e:
                 return jsonify(error=412, text="Cannot get picture"), 412
             return send_file(BytesIO(pictureBytes),
-                            attachment_filename=f"expense_id_{expense_id}",
-                            mimetype='image/jpg')
+                             attachment_filename=f"expense_id_{expense_id}",
+                             mimetype='image/jpg')
     return GetExpensePicture.template_method(GetExpensePicture, apikey)
 
-
+@app.route("/detectText", methods=["GET", "POST"])
+def detectText():
+    """
+    Returns the text detected in an image by the Google Cloud Vision API.
+    Expects headers:
+    picture
+    """
+    class DetectText(AbstractAPI):
+        def api_operation(self, user_id, conn):
+            picture = None
+            try:
+                picture = request.form['picture']
+            except Exception as e:
+                return jsonify(error=412, text="Cannot retrieve picture."), 412
+            # Convert picture to bytes
+            bytePicture = base64.b64decode(picture)
+            foundText = ""
+            try:
+                foundText = detect_text(bytePicture)
+            except Exception as e:
+                return jsonify(error=412, text="Cannot use text detection."), 412
+            return jsonify(foundText)
+    return DetectText.template_method(DetectText, request.headers["api_key"] if "api_key" in request.headers else None)
+    
 @app.route("/createExpenseIOU/<iouJson>")
 def createExpenseIOU(iouJson):
     '''
@@ -119,6 +299,14 @@ def createExpenseIOU(iouJson):
                 expense_id = request.headers.get('expense_id')
             except Exception as e:
                 return jsonify(error=412, text="Cannot get expense id"), 412
+
+            # Check permissions of caller
+            try:
+                if not(isExpenseCreator(user_id, expense_id, cursor)):
+                    return jsonify(error=412, text="User must be the creator of the expense to add this."), 412
+            except Exception as e:
+                return jsonify(error=412, text="Cannot determine if caller has permissions"), 412
+
             # Iterate through iouJson and add each Accured Expense to db.
             for key in iou:
                 try:
@@ -146,6 +334,14 @@ def getExpenseGroupExpenses():
                 expense_group_id = request.headers.get('expense_group_id')
             except Exception as e:
                 return jsonify(error=412, text="Cannot get expense_group_id"), 412
+
+            # Check if user has permissions to get the expense picture
+            try:
+                if not(isMember(user_id, expense_group_id, cursor)):
+                    return jsonify(error=412, text="User must be member of the expense group to see group expenses."), 412
+            except Exception as e:
+                return jsonify(error=412, text="Cannot determine if caller has permissions"), 412
+
             # Get expense groups from db.
             query = ''' SELECT id, user_id, title, amount, content, expense_group_id
             FROM expense
@@ -222,6 +418,13 @@ def getExpenseDetails():
             except Exception as e:
                 return jsonify(error=412, text="Missing expense_id"), 412
             cursor = conn.cursor()
+            # Check if user has permissions to get the expense details
+            try:
+                expense_group_id = getExpenseGroup(expense_id, cursor)
+                if not(isMember(user_id, expense_group_id, cursor)):
+                    return jsonify(error=412, text="User must be member of the expense group to see expense details."), 412
+            except Exception as e:
+                return jsonify(error=412, text="Cannot determine if caller has permissions"), 412
             # Get expense details
             query = ''' SELECT * FROM expense WHERE id = ?'''
             try:
@@ -251,6 +454,13 @@ def getOwedExpenses():
             except Exception as e:
                 return jsonify(error=412, text="Missing expense_id"), 412
             cursor = conn.cursor()
+            # Check if user has permissions to get the owed expenses
+            try:
+                expense_group_id = getExpenseGroup(expense_id, cursor)
+                if not(isMember(user_id, expense_group_id, cursor)):
+                    return jsonify(error=412, text="User must be member of the expense group to see an expense picture."), 412
+            except Exception as e:
+                return jsonify(error=412, text="Cannot determine if caller has permissions"), 412
             # Get expenses where user owes someone money
             query = ''' SELECT e.user_id, a.expense_id, a.user_id, a.amount, a.paid
             FROM expense AS e, accured_expenses AS a
@@ -263,6 +473,47 @@ def getOwedExpenses():
             return self.generateJson(self, result)
     return GetOwedExpenses.template_method(GetOwedExpenses, request.headers["api_key"] if "api_key" in request.headers else None)
 
+@app.route("/removeOwedExpense")
+def removeOwedExpense():
+    '''
+    Removes person from owed expenses given an expense_id and user_id.
+    Expects headers:
+    expense_id
+    user_id
+    Returns:
+    "Removed successfully" if successfully removed.
+    '''
+    class RemoveOwedExpense(AbstractAPI):
+        def api_operation(self, user_id, conn):
+            cursor = conn.cursor()
+            expense_id, user = None, None
+            # Get headers
+            try:
+                expense_id = request.headers.get('expense_id')
+                user = request.headers.get('user_id')
+            except Exception as e:
+                return jsonify(error=412, text="MIssing expense_id or user_id"), 412
+
+            # Check if user has permission to remove from owed expenses
+            try:
+                expense_group_id = getExpenseGroup(expense_id, cursor)
+                if not(isExpenseCreator(user_id, expense_id, cursor) or isModerator(user_id, expense_group_id, cursor)):
+                    return jsonify(error=412, text="User must be member of the expense group to see an expense picture."), 412
+            except Exception as e:
+                return jsonify(error=412, text="Cannot determine if caller has permissions"), 412
+            
+            #Execute query
+            query = '''
+            DELETE FROM accured_expenses
+            WHERE expense_id = ? AND user_id = ?
+            '''
+            try:
+                cursor.execute(query, (expense_id, user))
+            except Exception as e:
+                return jsonify(error=412, text="Cannot remove accured expense"), 412
+            cursor.commit()
+            return jsonify("Removed successfully")
+    return RemoveOwedExpense.template_method(RemoveOwedExpense, request.headers["api_key"] if "api_key" in request.headers else None)
 
 @app.route("/setUserPaidExpense")
 def setUserPaidExpense():
@@ -286,6 +537,14 @@ def setUserPaidExpense():
                 user = request.headers.get('user_id')
             except Exception as e:
                 return jsonify(error=412, text="Missing expense_id"), 412
+            # Check if user has permissions to toggle the expense
+            try:
+                expense_group_id = getExpenseGroup(expense_id, cursor)
+                if not(isExpenseCreator(user_id, expense_group_id, cursor) or isModerator(user_id, expense_group_id, cursor)):
+                    return jsonify(error=412, text="User must be member of the expense group to see an expense picture."), 412
+
+            except Exception as e:
+                return jsonify(error=412, text="Cannot determine if caller has permissions"), 412
             # Toggle paid value in accured expenses.
             query = """
             SELECT paid FROM accured_expenses
@@ -310,3 +569,4 @@ def setUserPaidExpense():
             conn.commit()
             return jsonify("Set successfully")
     return SetUserPaidExpense.template_method(SetUserPaidExpense, request.headers["api_key"] if "api_key" in request.headers else None)
+

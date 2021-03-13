@@ -40,7 +40,4 @@
             app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!--
-        TODO: The rest of this page should go here, not 100% sure what should be here though
-    -->
 </androidx.constraintlayout.widget.ConstraintLayout>

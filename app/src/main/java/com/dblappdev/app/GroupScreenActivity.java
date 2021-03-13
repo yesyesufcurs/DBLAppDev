@@ -1,10 +1,14 @@
 package com.dblappdev.app;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+
+import com.dblappdev.app.api.RecyclerViewAdapter;
 
 public class GroupScreenActivity extends AppCompatActivity {
 
@@ -12,6 +16,13 @@ public class GroupScreenActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_group_screen);
+
+        // Set the recyclerview and its settings
+        RecyclerView recView = (RecyclerView) findViewById(R.id.recyclerView);
+        View.OnClickListener listener = view -> onItemClick(view);
+        RecyclerViewAdapter adapter = new RecyclerViewAdapter(listener);
+        recView.setAdapter(adapter);
+        recView.setLayoutManager(new LinearLayoutManager(this));
     }
 
     /**
@@ -20,7 +31,7 @@ public class GroupScreenActivity extends AppCompatActivity {
      */
     public void onSettings(View view) {
 
-        // Redirect to the home screen
+        // Redirect to the settings screen
         Intent groupSettingsIntent = new Intent(this, GroupSettingsActivity.class);
         startActivity(groupSettingsIntent);
     }
@@ -31,7 +42,18 @@ public class GroupScreenActivity extends AppCompatActivity {
      */
     public void onAdd(View view) {
 
-        // Redirect to the home screen
+        // Redirect to the expense details screen
+        Intent expenseDetailsIntent = new Intent(this, ExpenseDetailsActivity.class);
+        startActivity(expenseDetailsIntent);
+    }
+
+    /**
+     * Event handler for the expense list items
+     * @param view The View instance of the expense entry that was pressed in the list
+     */
+    public void onItemClick(View view) {
+
+        // Redirect to the expense details screen
         Intent expenseDetailsIntent = new Intent(this, ExpenseDetailsActivity.class);
         startActivity(expenseDetailsIntent);
     }

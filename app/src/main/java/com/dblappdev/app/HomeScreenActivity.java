@@ -1,10 +1,14 @@
 package com.dblappdev.app;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+
+import com.dblappdev.app.api.RecyclerViewAdapter;
 
 public class HomeScreenActivity extends AppCompatActivity {
 
@@ -12,6 +16,13 @@ public class HomeScreenActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_screen);
+
+        // Set the recyclerview and its settings
+        RecyclerView recView = (RecyclerView) findViewById(R.id.recyclerView);
+        View.OnClickListener listener = view -> onItemClick(view);
+        RecyclerViewAdapter adapter = new RecyclerViewAdapter(listener);
+        recView.setAdapter(adapter);
+        recView.setLayoutManager(new LinearLayoutManager(this));
     }
 
     /**
@@ -30,7 +41,9 @@ public class HomeScreenActivity extends AppCompatActivity {
      * @param view The View instance of the button that was pressed
      */
     public void onAdd(View view) {
-
+        // Redirect to add/join group screen
+        Intent addJoinGroupScreenIntent = new Intent(this, AddJoinGroupActivity.class);
+        startActivity(addJoinGroupScreenIntent);
     }
 
     /**
@@ -47,12 +60,10 @@ public class HomeScreenActivity extends AppCompatActivity {
     }
 
     /**
-     * TODO: Temp function for navigation towards the group screen
-     * Should eventually be replaced by a list of groups the user is part of, each of which redirects to its unique group screen
-     * @param view
+     * Event handler for the group list items
+     * @param view The View instance of the group entry that was pressed in the list
      */
-    public void onTempClick(View view) {
-
+    public void onItemClick(View view) {
         // Redirect to group screen
         Intent groupScreenIntent = new Intent(this, GroupScreenActivity.class);
         startActivity(groupScreenIntent);

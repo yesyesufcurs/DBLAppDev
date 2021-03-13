@@ -13,7 +13,6 @@
 .externalNativeBuild
 .cxx
 local.properties
-/.idea/
 backend/backendserver/app.db
 backend/backendserver/migrations
 backend/backendserver/__pycache__

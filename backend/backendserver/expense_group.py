@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify, Response
 from backendserver import app, db_file, create_connection
 from backendserver.abstractAPI import AbstractAPI
+from backendserver.permissionChecks import number_expense_group_members, isModerator, isMember
 import sqlite3
 import json
 import hashlib
@@ -109,6 +110,12 @@ def getExpenseGroupMembers():
                 expense_group_id = request.headers.get('expense_group_id')
             except Exception as e:
                 return jsonify(error=412, text="Cannot get expense group id"), 412
+            # Check if user has permissions to see members
+            try:
+                if not(isMember(user_id, expense_group_id, cursor)):
+                    return jsonify(error=412, text="User must be member of the expense group to see this."), 412
+            except Exception as e:
+                return jsonify(error=412, text="Cannot determine if caller has permissions"), 412
             # Get expense group members
             query = '''SELECT * FROM expense_group_members WHERE expense_group_id = ?'''
             try:
@@ -184,20 +191,3 @@ def generate_expense_group_id(cursor):
         unique_id_found = len(cursor.fetchall()) == 0
     return id
 
-
-def number_expense_group_members(expense_group_id, cursor):
-    '''
-    Returns number of expense group members in a expense group
-    '''
-    cursor.execute(
-        "SELECT * FROM expense_group_members WHERE expense_group_id = ?", (expense_group_id,))
-    return len(cursor.fetchall())
-
-
-def isModerator(user_id, expense_group_id, cursor):
-    '''
-    Returns if user is moderator of expense group
-    '''
-    query = "SELECT * FROM expense_group WHERE id = ? AND moderator_id = ?"
-    cursor.execute(query, (expense_group_id, user_id))
-    return len(cursor.fetchall()) == 1
