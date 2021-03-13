@@ -30,7 +30,9 @@ public class HomeScreenActivity extends AppCompatActivity {
      * @param view The View instance of the button that was pressed
      */
     public void onAdd(View view) {
-
+        // Redirect to add/join group screen
+        Intent addJoinGroupScreenIntent = new Intent(this, AddJoinGroupActivity.class);
+        startActivity(addJoinGroupScreenIntent);
     }
 
     /**
