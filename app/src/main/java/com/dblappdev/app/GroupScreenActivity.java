@@ -19,7 +19,8 @@ public class GroupScreenActivity extends AppCompatActivity {
 
         // Set the recyclerview and its settings
         RecyclerView recView = (RecyclerView) findViewById(R.id.recyclerView);
-        RecyclerViewAdapter adapter = new RecyclerViewAdapter();
+        View.OnClickListener listener = view -> onItemClick(view);
+        RecyclerViewAdapter adapter = new RecyclerViewAdapter(listener);
         recView.setAdapter(adapter);
         recView.setLayoutManager(new LinearLayoutManager(this));
     }
@@ -30,7 +31,7 @@ public class GroupScreenActivity extends AppCompatActivity {
      */
     public void onSettings(View view) {
 
-        // Redirect to the home screen
+        // Redirect to the settings screen
         Intent groupSettingsIntent = new Intent(this, GroupSettingsActivity.class);
         startActivity(groupSettingsIntent);
     }
@@ -41,7 +42,18 @@ public class GroupScreenActivity extends AppCompatActivity {
      */
     public void onAdd(View view) {
 
-        // Redirect to the home screen
+        // Redirect to the expense details screen
+        Intent expenseDetailsIntent = new Intent(this, ExpenseDetailsActivity.class);
+        startActivity(expenseDetailsIntent);
+    }
+
+    /**
+     * Event handler for the expense list items
+     * @param view The View instance of the expense entry that was pressed in the list
+     */
+    public void onItemClick(View view) {
+
+        // Redirect to the expense details screen
         Intent expenseDetailsIntent = new Intent(this, ExpenseDetailsActivity.class);
         startActivity(expenseDetailsIntent);
     }

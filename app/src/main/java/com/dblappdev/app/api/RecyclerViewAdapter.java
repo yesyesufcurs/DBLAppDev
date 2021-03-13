@@ -1,5 +1,6 @@
 package com.dblappdev.app.api;
 
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -7,6 +8,7 @@ import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.dblappdev.app.GroupScreenActivity;
 import com.dblappdev.app.R;
 
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
@@ -30,6 +32,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     private TempDataObject[] localDataSet;
 
     // END TEMP CODE
+
+    // click event listener for the list entries
+    private View.OnClickListener onClickListener;
 
     /**
      * Provide a reference to the type of views that you are using
@@ -58,13 +63,18 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     /**
      * Initialize the dataset of the Adapter
+     * @param listener View.OnClickListener that deals with the on click event
      * TODO: Update this to fit with the eventual classes
      */
-    public RecyclerViewAdapter() {
+    public RecyclerViewAdapter(View.OnClickListener listener) {
+        onClickListener = listener;
+
+        // START TEMP CODE
         localDataSet = new TempDataObject[20];
         for (int i = 0; i < localDataSet.length; i++) {
             localDataSet[i] = new TempDataObject("Item name " + i, 0.1f * i);
         }
+        // END TEMP CODE
     }
 
     // Create new views (invoked by the layout manager)
@@ -72,6 +82,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
         // Create a new view, which defines the UI of the list item
         View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.recycler_view_item, viewGroup, false);
+        view.setOnClickListener(onClickListener);
 
         return new ViewHolder(view);
     }

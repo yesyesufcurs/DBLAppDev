@@ -19,7 +19,8 @@ public class HomeScreenActivity extends AppCompatActivity {
 
         // Set the recyclerview and its settings
         RecyclerView recView = (RecyclerView) findViewById(R.id.recyclerView);
-        RecyclerViewAdapter adapter = new RecyclerViewAdapter();
+        View.OnClickListener listener = view -> onItemClick(view);
+        RecyclerViewAdapter adapter = new RecyclerViewAdapter(listener);
         recView.setAdapter(adapter);
         recView.setLayoutManager(new LinearLayoutManager(this));
     }
@@ -59,12 +60,10 @@ public class HomeScreenActivity extends AppCompatActivity {
     }
 
     /**
-     * TODO: Temp function for navigation towards the group screen
-     * Should eventually be replaced by a list of groups the user is part of, each of which redirects to its unique group screen
-     * @param view
+     * Event handler for the group list items
+     * @param view The View instance of the group entry that was pressed in the list
      */
-    public void onTempClick(View view) {
-
+    public void onItemClick(View view) {
         // Redirect to group screen
         Intent groupScreenIntent = new Intent(this, GroupScreenActivity.class);
         startActivity(groupScreenIntent);
