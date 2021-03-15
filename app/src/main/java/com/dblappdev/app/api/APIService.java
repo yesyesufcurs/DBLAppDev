@@ -37,8 +37,8 @@ public abstract class APIService {
      * @throws IllegalArgumentException if {@code username.length() >= 30 || password.length() < 6
      *                                  || password.length() >= 30 || !isASCII(username)
      *                                  || !isASCII(password) || email is invalid}
-     * @pre {@code username != null && password != null && email != null && username.length() <= 30
-     * && isASCII(username) && isAscii(password) && 6 <= password.length() <= 30 && email is valid
+     * @pre {@code username != null && password != null && email != null && username.length() < 30
+     * && isASCII(username) && isAscii(password) && 6 <= password.length() < 30 && email is valid
      * && context != null && response != null}
      * @post {@code APIResponse.data == apiKey}
      */
@@ -62,7 +62,7 @@ public abstract class APIService {
         }
 
         if (password.length() < 6 || password.length() >= 30) {
-            String errorMessage = "Password must be at least 6 and at most 30 characters.";
+            String errorMessage = "Password must be at least 6 and less than 30 characters.";
             response.onErrorResponse(new VolleyError(errorMessage), errorMessage);
             return;
         }

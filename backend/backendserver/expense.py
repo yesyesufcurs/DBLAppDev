@@ -4,6 +4,7 @@ from backendserver.abstractAPI import AbstractAPI
 import backendserver.expense_group
 from backendserver.permissionChecks import isModerator, isMember, isExpenseCreator, getExpenseGroup
 from backendserver.googleCloud import detect_text
+
 import werkzeug
 import re
 import sqlite3
@@ -31,6 +32,7 @@ def createExpense():
             cursor = conn.cursor()
             expense_title, amount, picture, content, expense_group_id, expense_id, user = None, None, None, None, None, None, None
 
+
             # Get data from request
             try:
                 expense_title = request.headers.get('title')
@@ -52,6 +54,7 @@ def createExpense():
 
             # Check if user has permissions to add the expense to the expense group
             try:
+
                 # If caller is also user to be added
                 if user == None or user == user_id:
                     if not(isMember(user_id, expense_group_id, cursor)):
@@ -64,6 +67,7 @@ def createExpense():
                     # The person trying to add the expense should be a moderator
                     if (not(isModerator(user_id, expense_group_id, cursor))):
                         return jsonify(error=412, text="Caller must be moderator to create expense for someone else."), 412
+
             except Exception as e:
                 return jsonify(error=412, text="Cannot determine if caller has permissions"), 412
 
@@ -74,6 +78,7 @@ def createExpense():
             else:
                 bytePicture = None
             
+
 
             # Execute query to add expense
             query = '''
@@ -87,6 +92,7 @@ def createExpense():
                 else:
                     cursor.execute(query, (user, expense_title,
                      amount, bytePicture, content, expense_group_id))
+
             except Exception as e:
                 return jsonify(error=412, text="Cannot add expense to database"), 412
             # Retrieve expense id
