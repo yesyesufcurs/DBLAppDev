@@ -336,7 +336,7 @@ def getExpenseGroupExpenses():
             except Exception as e:
                 return jsonify(error=412, text="Cannot get expense_group_id"), 412
 
-            # Check if user has permissions to get the expense picture
+            # Check if user has permissions to get the expense group expenses
             try:
                 if not(isMember(user_id, expense_group_id, cursor)):
                     return jsonify(error=412, text="User must be member of the expense group to see group expenses."), 412

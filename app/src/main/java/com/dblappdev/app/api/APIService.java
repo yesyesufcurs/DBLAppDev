@@ -244,6 +244,36 @@ public abstract class APIService {
     }
 
     /**
+     * Removes an expenseGroup where all debt has been paid back
+     *
+     * @param apiKey         apiKey of the user calling this method
+     * @param expenseGroupId id of the expense group
+     * @param context        context of request, often AppActivity (instance of calling object)
+     * @param response       contains a callback method that is called on (un)successful request.
+     * @throws IllegalArgumentException if {@code apiKey == null || expenseGroupId == null ||
+     *                                  context == null || response == null}
+     * @pre {@code apiKey != null && expenseGroupId != null && context != null & response != null}
+     * @post {@code expenseGroupId not in getAllExpenseGroups()}
+     */
+    public static void removeExpenseGroup(String apiKey, String expenseGroupId, Context context,
+                                          APIResponse<String> response) {
+        // Check preconditions
+        if (apiKey == null || expenseGroupId == null) {
+            throw new IllegalArgumentException("APIService.removeExpenseGroup.pre: apiKey or " +
+                    "expenseGroupId is null");
+        }
+
+        // Set headers
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("api_key", apiKey);
+        params.put("expense_group_id", expenseGroupId);
+
+        // Do request
+        new StringAPIRequest(AbstractAPIRequest.getAPIUrl() + "removeExpenseGroup",
+                Request.Method.GET, params, null).run(context, response);
+    }
+
+    /**
      * Returns JSONArray containing userIds of expense group members
      *
      * @param apiKey         apiKey of the user calling this method
