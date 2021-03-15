@@ -309,6 +309,41 @@ public abstract class APIService {
     }
 
     /**
+     * Removes user from expense group
+     *
+     * @param apiKey         apiKey of the user calling this method
+     * @param userId         id of the user to be removed
+     * @param expenseGroupId id of the expense group
+     * @param context        context of request, often AppActivity (instance of calling object)
+     * @param response       contains a callback method that is called on (un)successful request.
+     * @throws IllegalArgumentException if {@code apiKey == null
+     *                                  expenseGroupId || context == null || response == null}
+     * @pre {@code apiKey != null && expenseGroupId != null
+     * && context != null && response != null}
+     * @post {@code APIResponse.data not in getExpenseGroupMembers(apiKey, expenseGroupId)}
+     */
+    public static void removeFromExpenseGroup(String apiKey, String userId, String expenseGroupId,
+                                              Context context, APIResponse<String> response) {
+        // Check preconditions
+        if (apiKey == null || userId == null || expenseGroupId == null) {
+            throw new IllegalArgumentException("APIService.removeFromExpenseGroup.pre:" +
+                    "apiKey or userId or expenseGroupId is null");
+        }
+
+        // Set headers
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("expense_group_id", expenseGroupId);
+        params.put("user_id", userId);
+        params.put("api_key", apiKey);
+
+        // Do request
+        new StringAPIRequest(AbstractAPIRequest.getAPIUrl() + "removeFromExpenseGroup",
+                Request.Method.GET, params, null).run(context, response);
+
+
+    }
+
+    /**
      * Creates expense and returns expense id of created expense.
      *
      * @param apiKey         apiKey of the user calling this method
@@ -529,13 +564,13 @@ public abstract class APIService {
     /**
      * Returns the detected text from a picture
      *
-     * @param apiKey    apiKey of the user calling this method
-     * @param picture   bitmap of the picture of which the text must be recognized
-     * @param context   context of request, often AppActivity (instance of calling object)
-     * @param response  contains a callback method that is called on (un)successful request.
+     * @param apiKey   apiKey of the user calling this method
+     * @param picture  bitmap of the picture of which the text must be recognized
+     * @param context  context of request, often AppActivity (instance of calling object)
+     * @param response contains a callback method that is called on (un)successful request.
      */
     public static void detectText(String apiKey, Bitmap picture, Context context,
-                                      APIResponse<String> response){
+                                  APIResponse<String> response) {
         if (apiKey == null || picture == null) {
             throw new IllegalArgumentException("APIService.getPictureText.pre: " +
                     "apiKey or picture is null");

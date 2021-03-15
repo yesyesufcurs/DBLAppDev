@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify, Response
 from backendserver import app, db_file, create_connection
 from backendserver.abstractAPI import AbstractAPI
-from backendserver.permissionChecks import number_expense_group_members, isModerator, isMember
+from backendserver.permissionChecks import number_expense_group_members, isModerator, isMember, owesMoney
 import sqlite3
 import json
 import hashlib
@@ -176,6 +176,66 @@ def addToExpenseGroup():
             return jsonify("Added successfully")
     return AddToExpenseGroup.template_method(AddToExpenseGroup, request.headers["api_key"] if "api_key" in request.headers else None)
 
+@app.route("/removeFromExpenseGroup")
+def removeFromExpenseGroup():
+    '''
+    Removes user from expense group if conditions are met
+    Expects headers:
+    user_id: user_id of person to be removed
+    expense_group_id: id of expense_group
+    Returns "Removed successfully" if removed succefully.
+    '''
+    class RemoveFromExpenseGroup(AbstractAPI):
+        def api_operation(self, user_id, conn):
+            cursor = conn.cursor()
+            expense_group_id, user = "", ""
+            hasPermission = False
+            # Get headers
+            try:
+                user = request.headers.get('user_id')
+                expense_group_id = request.headers.get('expense_group_id')
+            except Exception as e:
+                return jsonify(error=412, text="Cannot get expense group id or user id."), 412
+            
+            try:
+                # Moderator cannot remove themselves, the expense group must then be removed.
+                if isModerator(user, expense_group_id, cursor):
+                    return jsonify(error=412, text="Moderator cannot be removed"), 412
+                # Check permission to add person to expense group.
+                # User may remove themselves, or must be moderator.
+                hasPermission = isModerator(
+                    user_id, expense_group_id, cursor) or user == user_id
+            except Exception as e:
+                return jsonify(error=412, text="Cannot determine if caller has permissions."), 412
+            if not(hasPermission):
+                return jsonify(error=412, text="Insufficient permissions to perform this action"), 412
+            
+            # Check that user does not owe anyone money
+            rows = None
+            try:
+                rows = owesMoney(user, expense_group_id, cursor)
+            except Exception as e:
+                return jsonify(error=412, text="Cannot determine if is out of debt."), 412
+            if len(rows) != 0:
+                returnString = f"{user} owes "
+                data = []
+                for row in rows:
+                    returnString += f"{row[1]} to {row[0]}, "
+                    data.append(list(row))
+                return jsonify(error=412, text="Cannot remove as " + returnString[:-2] + "."), 412
+            
+            # Remove user from expense group
+            query = """
+            DELETE FROM expense_group_members
+            WHERE user_id = ? AND expense_group_id = ?
+            """
+            try:
+                cursor.execute(query, (user, expense_group_id))
+            except Exception as e:
+                return jsonify(error=412, text="Cannot delete user from expense group"), 412
+            conn.commit()
+            return jsonify("Removed successfully.")
+    return RemoveFromExpenseGroup.template_method(RemoveFromExpenseGroup, request.headers["api_key"] if "api_key" in request.headers else None)
 
 def generate_expense_group_id(cursor):
     '''

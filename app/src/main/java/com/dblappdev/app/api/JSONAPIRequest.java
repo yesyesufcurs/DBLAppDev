@@ -15,6 +15,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Class that contains a default implementation for an JSONAPIRequest where the
+ * user expects a List<Map<String, String>> object.
+ *
+ */
 public class JSONAPIRequest extends AbstractAPIRequest<JSONArray, List<Map<String, String>>> {
 
     String url;                     // String containing API url

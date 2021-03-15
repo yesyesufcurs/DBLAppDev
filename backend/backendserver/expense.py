@@ -535,7 +535,7 @@ def setUserPaidExpense():
             try:
                 expense_group_id = getExpenseGroup(expense_id, cursor)
                 if not(isExpenseCreator(user_id, expense_group_id, cursor) or isModerator(user_id, expense_group_id, cursor)):
-                    return jsonify(error=412, text="User must be member of the expense group to see an expense picture."), 412
+                    return jsonify(error=412, text="User must be expense creator or moderator to toggle this."), 412
             except Exception as e:
                 return jsonify(error=412, text="Cannot determine if caller has permissions"), 412
             # Toggle paid value in accured expenses.

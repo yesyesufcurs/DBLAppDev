@@ -28,6 +28,10 @@ import TestAPICalls.TestAPILogin;
 
 public class MainActivity extends AppCompatActivity {
 
+    void showExpenses(List<Map<String, String>> data, TextView textView){
+        textView.setText(data.toString());
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
@@ -48,18 +52,37 @@ public class MainActivity extends AppCompatActivity {
             throw new IllegalStateException(e.getMessage());
         }
 
-        APIService.detectText("0949d532d55b0cb6da0ee09753d6900dce0eb3926bb127c2f3d6b9f1c1db7d5b", bmp, this, new APIResponse<String>() {
+        APIService.getExpenseGroupExpenses("0949d532d55b0cb6da0ee09753d6900dce0eb3926bb127c2f3d6b9f1c1db7d5b",
+                "42957", this, new APIResponse<List<Map<String, String>>>() {
 
             @Override
-            public void onResponse(String data) {
-                textView.setText(data);
+            public void onResponse(List<Map<String, String>> data) {
+                showExpenses(data, textView);
             }
 
             @Override
             public void onErrorResponse(VolleyError error, String errorMessage) {
-                textView.setText(errorMessage);
+
             }
         });
+
+
+
+
+
+
+//        APIService.detectText("0949d532d55b0cb6da0ee09753d6900dce0eb3926bb127c2f3d6b9f1c1db7d5b", bmp, this, new APIResponse<String>() {
+//
+//            @Override
+//            public void onResponse(String data) {
+//                textView.setText(data);
+//            }
+//
+//            @Override
+//            public void onErrorResponse(VolleyError error, String errorMessage) {
+//                textView.setText(errorMessage);
+//            }
+//        });
 
 
 //        APIService.createExpense("0949d532d55b0cb6da0ee09753d6900dce0eb3926bb127c2f3d6b9f1c1db7d5b",
