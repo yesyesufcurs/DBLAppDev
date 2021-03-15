@@ -9,10 +9,6 @@ import android.os.StrictMode;
 
 public class MainActivity extends AppCompatActivity {
 
-    void showExpenses(List<Map<String, String>> data, TextView textView){
-        textView.setText(data.toString());
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
