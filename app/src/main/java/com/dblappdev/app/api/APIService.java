@@ -701,7 +701,8 @@ public abstract class APIService {
     }
 
     /**
-     * Returns List<Map<String, String>> containing expense details of all expenses created by the user that makes the request
+     * Returns List<Map<String, String>> containing expense details of all expenses created by
+     * the user that makes the request
      *
      * @param apiKey   apiKey of the user calling this method
      * @param context  context of request, often AppActivity (instance of calling object)
@@ -729,7 +730,8 @@ public abstract class APIService {
     }
 
     /**
-     * Returns List<Map<String, String>> containing all expenses where the user owes someone else money
+     * Returns List<Map<String, String>> containing all expenses where the user owes someone else
+     * money
      *
      * @param apiKey   apiKey of the user calling this method
      * @param context  context of request, often AppActivity (instance of calling object)
@@ -753,6 +755,38 @@ public abstract class APIService {
 
         // Do API Request
         new JSONAPIRequest(AbstractAPIRequest.getAPIUrl() + "getUserOwedExpenses",
+                Request.Method.GET, params, null).run(context, response);
+
+    }
+
+    /**
+     * Returns List<Map<String, String>> containing each person the user owes money to
+     * and the amount the user owes
+     *
+     * @param apiKey         apiKey of the user calling this method
+     * @param expenseGroupId expense group id of which expenses should be considered
+     * @param context        context of request, often AppActivity (instance of calling object)
+     * @param response       contains a callback method that is called on (un)successful request.
+     * @throws IllegalArgumentException if {@code apiKey == null || expenseGroupId == null ||
+     *                                  context == null || response == null}}
+     * @pre {@code apiKey != null && expenseGroupId != null && context != null && response != null}
+     * @post {@code APIResponse.data == sum(userOwedExpenses.amount) grouped by user }
+     */
+    public static void getUserOwedTotal(String apiKey, String expenseGroupId, Context context,
+                                        APIResponse<List<Map<String, String>>> response) {
+        // Check preconditions
+        if (apiKey == null || expenseGroupId == null) {
+            throw new IllegalArgumentException("APIService.getUserOwedTotal.pre: apiKey" +
+                    " or expenseGroupId is null");
+        }
+
+        // Set headers
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("api_key", apiKey);
+        params.put("expense_group_id", expenseGroupId);
+
+        // Do API Request
+        new JSONAPIRequest(AbstractAPIRequest.getAPIUrl() + "getUserOwedTotal",
                 Request.Method.GET, params, null).run(context, response);
 
     }

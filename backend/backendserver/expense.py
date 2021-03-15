@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify, Response, send_file
 from backendserver import app, db_file, create_connection
 from backendserver.abstractAPI import AbstractAPI
 import backendserver.expense_group
-from backendserver.permissionChecks import isModerator, isMember, isExpenseCreator, getExpenseGroup
+from backendserver.permissionChecks import isModerator, isMember, isExpenseCreator, getExpenseGroup, owesMoney
 from backendserver.googleCloud import detect_text
 
 import werkzeug
@@ -275,6 +275,7 @@ def detectText():
                 foundText = detect_text(bytePicture)
             except Exception as e:
                 return jsonify(error=412, text="Cannot use text detection."), 412
+            foundText = foundText.replace("\n", " ")
             return jsonify(foundText)
     return DetectText.template_method(DetectText, request.headers["api_key"] if "api_key" in request.headers else None)
     
@@ -400,6 +401,32 @@ def getUserOwedExpenses():
             return self.generateJson(self, result)
     return GetUserOwedExpenses.template_method(GetUserOwedExpenses, request.headers["api_key"] if "api_key" in request.headers else None)
 
+@app.route("/getUserOwedTotal")
+def getUserOwedTotal():
+    '''
+    Returns JSON object containing each person the user owes money to
+    and the amount the user owes
+    Expects headers:
+    expense_group_id
+    Returns: user_id, amount
+    '''
+    class GetUserOwedTotal(AbstractAPI):
+        def api_operation(self, user_id, conn):
+            expense_group_id = None
+            result = None
+            cursor = conn.cursor()
+            # Get headers
+            try:
+                expense_group_id = request.headers.get('expense_group_id')
+            except Exception as e:
+                return jsonify(error=412, text="Missing expense group id")
+            try:
+                result = owesMoney(user_id, expense_group_id, cursor)
+            except Exception as e:
+                return jsonify(error=412, text="Cannot get the owed amounts")
+            return self.generateJson(self, result)
+    return GetUserOwedTotal.template_method(GetUserOwedTotal, request.headers["api_key"] if "api_key" in request.headers else None)
+            
 
 @app.route("/getExpenseDetails")
 def getExpenseDetails():

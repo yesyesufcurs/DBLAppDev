@@ -44,7 +44,7 @@ def owesMoney(user_id, expense_group, cursor):
     Returns each person the user owes money to in the expense group.
     """
     query = """
-    SELECT e.user_id, SUM(e.amount)
+    SELECT e.user_id, SUM(e.amount) as amount
     FROM accured_expenses AS a, expense AS e
     WHERE a.expense_id = e.id AND a.user_id = ? AND e.expense_group_id = ? AND a.paid = 0
     GROUP BY e.user_id
