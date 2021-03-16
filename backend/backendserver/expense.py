@@ -453,7 +453,7 @@ def getExpenseDetails():
             except Exception as e:
                 return jsonify(error=412, text="Cannot determine if caller has permissions"), 412
             # Get expense details
-            query = ''' SELECT * FROM expense WHERE id = ?'''
+            query = ''' SELECT id, user_id, title, amount, content, expense_group_id FROM expense WHERE id = ?'''
             try:
                 cursor.execute(query, (expense_id,))
             except Exception as e:
@@ -489,7 +489,7 @@ def getOwedExpenses():
             except Exception as e:
                 return jsonify(error=412, text="Cannot determine if caller has permissions"), 412
             # Get expenses where user owes someone money
-            query = ''' SELECT e.user_id, a.expense_id, a.user_id, a.amount, a.paid
+            query = '''SELECT e.user_id, a.expense_id, a.user_id, a.amount, a.paid
             FROM expense AS e, accured_expenses AS a
             WHERE e.id = a.expense_id AND expense_id = ?'''
             try:
