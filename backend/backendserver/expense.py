@@ -49,6 +49,10 @@ def createExpense():
                 return jsonify(error=412, text="Expense group details missing."), 412
 
             # Check requirements for new expense.
+            try:
+                float(amount)
+            except ValueError:
+                return jsonify(error=412, text="Amount is not a valid number"), 412
             if not(1 <= len(expense_title) < 100):
                 return jsonify(error=412, text="Title should be non-empty and shorter than 100 characters."), 412
             if not(float(amount) < 100000):
@@ -135,6 +139,17 @@ def modifyExpense():
                 expense_id = request.headers.get('expense_id')
             except Exception as e:
                 return jsonify(error=412, text="Expense group details missing."), 412
+                
+            # Check requirements for expense.
+            try:
+                float(amount)
+            except ValueError:
+                return jsonify(error=412, text="Amount is not a valid number"), 412
+            if not(1 <= len(expense_title) < 100):
+                return jsonify(error=412, text="Title should be non-empty and shorter than 100 characters."), 412
+            if not(float(amount) < 100000):
+                return jsonify(error=412, text="Expense amount should be lower than 100000"), 412
+
             # Check if user has permission to alter the expense
             try:
                 if not(isExpenseCreator(user_id, expense_id, cursor) or isModerator(user_id, expense_group_id, cursor)):
