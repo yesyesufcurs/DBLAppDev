@@ -353,7 +353,7 @@ def searchExpense():
             FROM expense
             WHERE expense_group_id = ? AND (user_id LIKE ? OR title LIKE ? OR amount LIKE ? OR content LIKE ?)'''
             try:
-                cursor.execute(query1, (query, query, query, query))
+                cursor.execute(query1, (expense_group_id, query, query, query, query))
             except Exception as e:
                 raise e
                 return jsonify(error=412, text="Cannot execute query"), 412
