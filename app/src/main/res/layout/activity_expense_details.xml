@@ -121,7 +121,7 @@
             is the right layout, but this can be changed easily by right clicking on it in the
             component tree in the designer and selecting 'Convert view'.
         -->
-        <FrameLayout
+        <LinearLayout
             android:id="@+id/camera_intent_layout"
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -130,7 +130,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/expense_price_input_constraint">
 
-        </FrameLayout>
+        </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
