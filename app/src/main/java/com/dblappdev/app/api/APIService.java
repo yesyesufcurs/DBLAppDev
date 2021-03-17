@@ -700,6 +700,48 @@ public abstract class APIService {
     }
 
     /**
+     * Returns List<Map<String, String>> containing all expense details of the expenses found
+     * by the query.
+     * Each entry contains: id, title, amount, content, expense_group_id, user_id
+     *
+     * @param apiKey         apiKey of the user calling this method
+     * @param expenseGroupId id of the expense group
+     * @param query          query typed in by the caller
+     * @param context        context of request, often AppActivity (instance of calling object)
+     * @param response       contains a callback method that is called on (un)successful request.
+     * @throws IllegalArgumentException if {@code apiKey == null || expenseGroupId == null
+     *                                  || query == null || context == null || response == null}}
+     * @pre {@code apiKey != null && expenseGroupId != null && query != null &&
+     * context != null && response != null}
+     * @post {@code APIResponse.data == expenseGroupExpenses.search(query) :
+     * expenseGroupExpenses.expenseGroupId == expenseGroupId}
+     */
+    public static void searchExpense(String apiKey, String expenseGroupId, String query, Context context,
+                                     APIResponse<List<Map<String, String>>> response) {
+        // Check preconditions
+        if (apiKey == null || expenseGroupId == null || query == null) {
+            throw new IllegalArgumentException("APIService.searchExpense.pre: apiKey or " +
+                    "expenseGroupId or query is null");
+        }
+
+        // Check query length
+        if (query.length() > 100) {
+            String error = "Query should be less than 100 characters.";
+            response.onErrorResponse(new VolleyError(error), error);
+        }
+
+        // Set headers
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("api_key", apiKey);
+        params.put("expense_group_id", expenseGroupId);
+        params.put("query", query);
+
+        // Do API Request
+        new JSONAPIRequest(AbstractAPIRequest.getAPIUrl() + "searchExpense",
+                Request.Method.GET, params, null).run(context, response);
+    }
+
+    /**
      * Returns List<Map<String, String>> containing all expense details of all expenses in an
      * expense group.
      * Each entry contains: id, title, amount, content, expense_group_id, user_id.

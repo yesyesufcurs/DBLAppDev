@@ -318,12 +318,53 @@ def createExpenseIOU(iouJson):
             return jsonify("Added successfully")
     return CreateExpenseIOU.template_method(CreateExpenseIOU, request.headers["api_key"] if "api_key" in request.headers else None)
 
+@app.route("/searchExpense")
+def searchExpense():
+    '''
+    Returns all expenses that are found in some expense groups when querying.
+    Expects headers:
+    expense_group_id
+    query
+    Returns: expense_id, user_id, title, amount, content, expense_group_id of expense
+    '''
+    class SearchExpense(AbstractAPI):
+        def api_operation(self, user_id, conn):
+            cursor = conn.cursor()
+            expense_group_id, query = "", ""
+            # Get Headers
+            try:
+                expense_group_id = request.headers.get('expense_group_id')
+                query = request.headers.get('query')
+            except Exception as e:
+                return jsonify(error=412, text="Missing expense_group_id or query."), 412
+
+            # Check if user has permission to get the expense group expenses
+            try:
+                if not(isMember(user_id, expense_group_id, cursor)):
+                    return jsonify(error=412, text="User must be member of the expense group to see group expenses."), 412
+            except Exception as e:
+                return jsonify(error=412, text="Cannot determine if caller has permissions."), 412 
+            
+            # Replace spaces in query with wildcards
+            query = query.replace(" ", "%")
+            query = "%" + query + "%"
+            # Get expenses from db.
+            query1 = ''' SELECT id, user_id, title, amount, content, expense_group_id
+            FROM expense
+            WHERE expense_group_id = ? AND (user_id LIKE ? OR title LIKE ? OR amount LIKE ? OR content LIKE ?)'''
+            try:
+                cursor.execute(query1, (query, query, query, query))
+            except Exception as e:
+                return jsonify(error=412, text="Cannot execute query"), 412
+            return self.generateJson(self, cursor.fetchall())
+    return SearchExpense.template_method(SearchExpense, request.headers["api_key"] if "api_key" in request.headers else None)
 
 @app.route("/getExpenseGroupExpenses")
 def getExpenseGroupExpenses():
     ''' 
     Returns all expenses that are in an expense group.
-    Expects: expense_group_id
+    Expects headers: 
+    expense_group_id
     Returns: expense_id, user_id, title, amount, content, expense_group_id of expense
     '''
     class ExpenseGroupExpenses(AbstractAPI):
@@ -341,9 +382,9 @@ def getExpenseGroupExpenses():
                 if not(isMember(user_id, expense_group_id, cursor)):
                     return jsonify(error=412, text="User must be member of the expense group to see group expenses."), 412
             except Exception as e:
-                return jsonify(error=412, text="Cannot determine if caller has permissions"), 412
+                return jsonify(error=412, text="Cannot determine if caller has permissions."), 412
 
-            # Get expense groups from db.
+            # Get expenses from db.
             query = ''' SELECT id, user_id, title, amount, content, expense_group_id
             FROM expense
             WHERE expense_group_id = ?'''
