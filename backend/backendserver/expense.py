@@ -355,6 +355,7 @@ def searchExpense():
             try:
                 cursor.execute(query1, (query, query, query, query))
             except Exception as e:
+                raise e
                 return jsonify(error=412, text="Cannot execute query"), 412
             return self.generateJson(self, cursor.fetchall())
     return SearchExpense.template_method(SearchExpense, request.headers["api_key"] if "api_key" in request.headers else None)
