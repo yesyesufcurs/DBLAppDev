@@ -152,6 +152,37 @@ public abstract class APIService {
     }
 
     /**
+     * Returns List<Map<String, String>> Containing the name and moderator_id of an expense group.
+     * 
+     * @param apiKey   apiKey of the user calling this method
+     * @param expenseGroupId id of the expense group
+     * @param context  context of request, often AppActivity (instance of calling object)
+     * @param response contains a callback method that is called on (un)successful request.
+     * @throws IllegalArgumentException if {@code apiKey == null || context == null ||
+     *                                  || expenseGroupId == null || response == null}}
+     * @pre {@code apiKey != null && expenseGroupId != null && context != null 
+     *      && response != null}
+     * @post {@code APIResponse.data == expenseGroups}
+     */
+    public static void getExpenseGroup(String apiKey, String expenseGroupId, Context context,
+                                           APIResponse<List<Map<String, String>>> response) {
+        // Check preconditions
+        if (apiKey == null || expenseGroupId == null) {
+            throw new IllegalArgumentException("APIService.getExpenseGroup.pre: apiKey or" +
+                    "expenseGroupId is null");
+        }
+
+        // Set headers
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("api_key", apiKey);
+        params.put("expense_group_id", expenseGroupId);
+
+        // Do API Request
+        new JSONAPIRequest(AbstractAPIRequest.getAPIUrl() + "getExpenseGroup",
+                Request.Method.GET, params, null).run(context, response);
+    }
+
+    /**
      * Returns List<Map<String, String>> object containing expense groups a user is part of.
      * Each entry contains expense_group_id, expense_group_name, user_id of moderator.
      *
