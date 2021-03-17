@@ -3,6 +3,8 @@ package com.dblappdev.app.adapters;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
+import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -19,11 +21,35 @@ public class MemberWeightAdapter extends RecyclerView.Adapter<GregViewHolder> {
     // This map keeps track of how many times each user weighs in on the expense
     private HashMap<User, Integer> amountMap;
 
+    // On click listeners for the plus and minus buttons
+    private View.OnClickListener plusListener;
+    private View.OnClickListener minusListener;
+
+    /**
+     * Extended version of the ViewHolder that adds support for the plus and minus buttons
+     */
+    public static class ViewHolder extends GregViewHolder {
+        private final ImageButton plusButton;
+        private final ImageButton minusButton;
+
+        public ViewHolder(View view) {
+            super(view);
+
+            plusButton = (ImageButton) view.findViewById(R.id.plus_button);
+            minusButton = (ImageButton) view.findViewById(R.id.minus_button);
+        }
+
+        public ImageButton getPlusButton() { return plusButton; }
+
+        public ImageButton getMinusButton() { return minusButton; }
+
+    }
+
     /**
      * Initialize the dataset of the adapter
      * TODO: Update this to fit the loading in of the data, which should be added as a parameter
      */
-    public MemberWeightAdapter() {
+    public MemberWeightAdapter(View.OnClickListener plusListener, View.OnClickListener minusListener) {
         // START TEMP CODE
         // generate mockup data
         userList = new ArrayList<>();
@@ -35,6 +61,10 @@ public class MemberWeightAdapter extends RecyclerView.Adapter<GregViewHolder> {
             amountMap.put(user, 1);
         }
         // END TEMP CODE
+
+        // Set the listeners
+        this.plusListener = plusListener;
+        this.minusListener = minusListener;
     }
 
     // Create new views (invoked by the layout manager)
@@ -42,6 +72,10 @@ public class MemberWeightAdapter extends RecyclerView.Adapter<GregViewHolder> {
     public GregViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
         // Create a new view, which defines the UI of the list item
         View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.recycler_view_item_members, viewGroup, false);
+        // Bind the on click listeners for the plus and minus buttons
+        view.findViewById(R.id.plus_button).setOnClickListener(plusListener);
+        view.findViewById(R.id.minus_button).setOnClickListener(minusListener);
+
         return new GregViewHolder(view);
     }
 

@@ -20,7 +20,9 @@ public class SelectMembersActivity extends AppCompatActivity {
 
         // Set the recyclerview and its settings
         RecyclerView recView = (RecyclerView) findViewById(R.id.recyclerViewMembers);
-        MemberWeightAdapter adapter = new MemberWeightAdapter();
+        View.OnClickListener plusListener = view -> onPlusClick(view);
+        View.OnClickListener minusListener = view -> onMinusClick(view);
+        MemberWeightAdapter adapter = new MemberWeightAdapter(plusListener, minusListener);
         recView.setAdapter(adapter);
         recView.setLayoutManager(new LinearLayoutManager(this));
     }
@@ -47,4 +49,19 @@ public class SelectMembersActivity extends AppCompatActivity {
         finish();
     }
 
+    /**
+     * Event handler for the plus buttons in the recyclerview
+     * @param view The View instance of the member list entry that was pressed
+     */
+    public void onPlusClick(View view) {
+
+    }
+
+    /**
+     * Event handler for the minus buttons in the recyclerview
+     * @param view The View instance of the member list entry that was pressed
+     */
+    public void onMinusClick(View view) {
+
+    }
 }
