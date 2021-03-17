@@ -13,6 +13,7 @@ import hashlib
 import os
 import base64
 import time
+from datetime import datetime
 from io import BytesIO
 
 
@@ -83,16 +84,16 @@ def createExpense():
 
             # Execute query to add expense
             query = '''
-            INSERT INTO expense(user_id, title, amount, picture, content, expense_group_id)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO expense(user_id, title, amount, picture, content, expense_group_id, timestamp)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
             '''
             try:
                 if user == None:
                     cursor.execute(query, (user_id, expense_title,
-                     amount, bytePicture, content, expense_group_id))
+                     amount, bytePicture, content, expense_group_id, datetime.now()))
                 else:
                     cursor.execute(query, (user, expense_title,
-                     amount, bytePicture, content, expense_group_id))
+                     amount, bytePicture, content, expense_group_id, datetime.now()))
 
             except Exception as e:
                 return jsonify(error=412, text="Cannot add expense to database"), 412
