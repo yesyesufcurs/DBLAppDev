@@ -588,6 +588,7 @@ public abstract class APIService {
         } catch (IllegalStateException e) {
             String error = "Cannot retrieve picture";
             response.onErrorResponse(new VolleyError(error), error);
+            return;
         }
         response.onResponse(picture);
 
@@ -758,6 +759,7 @@ public abstract class APIService {
         if (query.length() > 100) {
             String error = "Query should be less than 100 characters.";
             response.onErrorResponse(new VolleyError(error), error);
+            return;
         }
 
         // Set headers
