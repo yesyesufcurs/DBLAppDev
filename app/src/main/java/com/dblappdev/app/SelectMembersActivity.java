@@ -8,7 +8,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
-import com.dblappdev.app.api.RecyclerViewAdapter;
+import com.dblappdev.app.adapters.ExpenseGroupAdapter;
+import com.dblappdev.app.adapters.MemberWeightAdapter;
 
 public class SelectMembersActivity extends AppCompatActivity {
 
@@ -19,8 +20,7 @@ public class SelectMembersActivity extends AppCompatActivity {
 
         // Set the recyclerview and its settings
         RecyclerView recView = (RecyclerView) findViewById(R.id.recyclerViewMembers);
-        View.OnClickListener listener = view -> onItemClick(view);
-        RecyclerViewAdapter adapter = new RecyclerViewAdapter(listener);
+        MemberWeightAdapter adapter = new MemberWeightAdapter();
         recView.setAdapter(adapter);
         recView.setLayoutManager(new LinearLayoutManager(this));
     }
@@ -47,11 +47,4 @@ public class SelectMembersActivity extends AppCompatActivity {
         finish();
     }
 
-    /**
-     * Event handler for the member list items
-     * @param view The View instance of the group entry that was pressed in the list
-     */
-    public void onItemClick(View view) {
-        // do nothing for this recyclerview
-    }
 }

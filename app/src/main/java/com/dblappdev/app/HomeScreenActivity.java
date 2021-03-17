@@ -8,7 +8,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
-import com.dblappdev.app.api.RecyclerViewAdapter;
+import com.dblappdev.app.adapters.ExpenseGroupAdapter;
 
 public class HomeScreenActivity extends AppCompatActivity {
 
@@ -18,9 +18,9 @@ public class HomeScreenActivity extends AppCompatActivity {
         setContentView(R.layout.activity_home_screen);
 
         // Set the recyclerview and its settings
-        RecyclerView recView = (RecyclerView) findViewById(R.id.recyclerView);
+        RecyclerView recView = (RecyclerView) findViewById(R.id.recyclerViewExpenseGroup);
         View.OnClickListener listener = view -> onItemClick(view);
-        RecyclerViewAdapter adapter = new RecyclerViewAdapter(listener);
+        ExpenseGroupAdapter adapter = new ExpenseGroupAdapter(listener);
         recView.setAdapter(adapter);
         recView.setLayoutManager(new LinearLayoutManager(this));
     }
