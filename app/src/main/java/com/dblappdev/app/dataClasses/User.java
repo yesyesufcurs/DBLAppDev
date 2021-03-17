@@ -9,10 +9,18 @@ public class User {
         this.email = email;
     }
 
+    /**
+     * gets the email of the user
+     * @return {@code this.email}
+     */
     public String getEmail() {
         return email;
     }
 
+    /**
+     * gets the username of the user
+     * @return {@code this.username}
+     */
     public String getUsername() {
         return username;
     }

@@ -12,25 +12,44 @@ public class LoggedInUser {
     private String apiKey;
     private static LoggedInUser instance;
 
+    //Private to force use of logIn
     private LoggedInUser (String apiKey, String username, String email) {
         user = new User(username, email);
         this.apiKey = apiKey;
     }
 
+    /**
+     * creates an instance of LoggedInUser if none exist yet. Saves it to this.instance
+     * @post {@code this.instance.getApiKey() == apiKey
+     * && this.instance.getUser().getUsername() == username
+     * && this.instance.getUser().getEmail() == email}
+     */
     public static void logIn(String apiKey, String username, String email) {
         if (instance == null) {
             instance = new LoggedInUser(apiKey, username, email);
         }
     }
 
-    public LoggedInUser getInstance() {
+    /**
+     * gets the loggedInUser instance
+     * @return {@code this.instance}
+     */
+    public static LoggedInUser getInstance() {
         return instance;
     }
 
+    /**
+     * gets the apiKey
+     * @return {@code this.apiKey}
+     */
     public String getApiKey() {
         return apiKey;
     }
 
+    /**
+     * gets the user
+     * @return {@code this.user}
+     */
     public User getUser() {
         return user;
     }
