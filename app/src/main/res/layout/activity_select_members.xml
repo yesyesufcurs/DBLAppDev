@@ -65,7 +65,4 @@
         tools:itemCount="5"
         tools:listitem="@layout/recycler_view_item_members" />
 
-    <!--
-        TODO: The rest of this page should go here
-    -->
 </androidx.constraintlayout.widget.ConstraintLayout>

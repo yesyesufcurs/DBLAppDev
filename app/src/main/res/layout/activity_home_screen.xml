@@ -53,15 +53,12 @@
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/ic_logout" />
 
-        <!--
-            TODO: Programatically set the username text
-        -->
         <TextView
             android:id="@+id/usernameText"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:gravity="center_vertical"
-            android:text="Username"
+            android:text="Greg"
             android:textAppearance="@style/text_topbar"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
