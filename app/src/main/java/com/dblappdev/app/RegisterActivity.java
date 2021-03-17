@@ -21,8 +21,15 @@ public class RegisterActivity extends AppCompatActivity {
     public void onRegisterClick(View view) {
 
         // Redirect to the Create profile screen
-        Intent createProfileIntent = new Intent(this, CreateProfileActivity.class);
-        startActivity(createProfileIntent);
+        // Old, decided not to include the screen since it will be empty anyways; no requirements
+        // involve changing profile related things
+//        Intent createProfileIntent = new Intent(this, CreateProfileActivity.class);
+//        startActivity(createProfileIntent);
+//        finish();
+
+        // Redirect to the home screen
+        Intent homeScreenIntent = new Intent(this, HomeScreenActivity.class);
+        startActivity(homeScreenIntent);
         finish();
     }
 
