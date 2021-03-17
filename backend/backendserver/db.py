@@ -1,7 +1,9 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.sql import func
 from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
+from datetime import datetime
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
@@ -37,10 +39,11 @@ class Expense(db.Model):
     amount = db.Column(db.Float, nullable=False)        # = Expense Amount
     picture = db.Column(db.LargeBinary, nullable=True)  # = Picture
     # Content of picture found by OCR
-    content = db.Column(db.Text, nullable=True)
+    content = db.Column(db.Text, nullable=True)         # = description of contents
     # Expense group the expense belongs to
     expense_group_id = db.Column(db.Integer, db.ForeignKey(
         'expense_group.id'))
+    timestamp = db.Column(db.DateTime, default=datetime.now())  # = Timestamp of the transaction
 
 # Contains the amount each person owes for some expense
 

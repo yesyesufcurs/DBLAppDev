@@ -21,9 +21,10 @@ def createExpense():
     '''
     Creates new expense and adds it do expense group
     Expects headers:
-    title, amount, picture, description, expense_group_id
+    title, amount, description, expense_group_id
     Optional headers:
     user_id (only needed if caller is not the expense creator)
+    picture (only if picture is made)
     Returns:
     expense_id
     '''

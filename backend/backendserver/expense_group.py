@@ -222,7 +222,7 @@ def addToExpenseGroup():
             except Exception as e:
                 return jsonify(error=412, text="Cannot determine if caller has permissions."), 412
             if not(hasPermission):
-                return jsonify(error=412, text="Insufficient permissions to perform this action"), 412
+                return jsonify(error=412, text="Only the moderator can add other people to an expense group."), 412
             # Add person to expense group.
             try:
                 number_of_members = number_expense_group_members(
