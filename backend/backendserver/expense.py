@@ -305,7 +305,8 @@ def createExpenseIOU(iouJson):
 
             # Check permissions of caller
             try:
-                if not(isExpenseCreator(user_id, expense_id, cursor)):
+                if not(isExpenseCreator(user_id, expense_id, cursor) or
+                 isModerator(user_id, getExpenseGroup(expense_id, cursor), cursor)):
                     return jsonify(error=412, text="User must be the creator of the expense to add this."), 412
             except Exception as e:
                 return jsonify(error=412, text="Cannot determine if caller has permissions"), 412
@@ -319,6 +320,39 @@ def createExpenseIOU(iouJson):
             conn.commit()
             return jsonify("Added successfully")
     return CreateExpenseIOU.template_method(CreateExpenseIOU, request.headers["api_key"] if "api_key" in request.headers else None)
+
+@app.route("/getExpenseIOU")
+def getExpenseIOU():
+    '''
+    Returns how much each person owes the creator of this expense.
+    Expects headers:
+    expense_id
+    Returns: expense_id, user_id, amount, paid
+    ''' 
+    class GetExpenseIOU(AbstractAPI):
+        def api_operation(self, user_id, conn):
+            cursor = conn.cursor()
+            expense_id = None
+            # Get headers
+            try:
+                expense_id = request.headers.get('expense_id')
+            except Exception as e:
+                return jsonify(error=412, text="Missing expense id"), 412
+            # Check if user has permission to get the expense group expenses
+            try:
+                if not(isMember(user_id, getExpenseGroup(expense_id, cursor), cursor)):
+                    return jsonify(error=412, text="User must be member of the expense group to see group expenses"), 412
+            except Exception as e:
+                return jsonify(error=412, text="Cannot determine if caller has permissions"), 412 
+            
+            # Execute query
+            query = "SELECT * FROM accured_expenses WHERE expense_id = ? "
+            try:
+                cursor.execute(query, (expense_id,))
+            except Exception as e:
+                return jsonify(error=412, text="Cannot retrieve the expense information"), 412
+            return self.generateJson(self, cursor.fetchall())
+    return GetExpenseIOU.template_method(GetExpenseIOU, request.headers["api_key"] if "api_key" in request.headers else None)
 
 @app.route("/searchExpense")
 def searchExpense():

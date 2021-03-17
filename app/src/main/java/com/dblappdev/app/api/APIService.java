@@ -388,11 +388,11 @@ public abstract class APIService {
      * @param context        context of request, often AppActivity (instance of calling object)
      * @param response       contains a callback method that is called on (un)successful request.
      * @throws IllegalArgumentException if {@code apiKey == null || title == null ||
-     *                                  amount == null || picture == null ||
+     *                                  amount == null ||
      *                                  description == null || expenseGroupId == null ||
      *                                  context == null || response == null}}
      * @pre {@code apiKey != null && title != null && amount != null &&
-     * picture != null && description != null && expenseGroupId != null && context != null &&
+     * description != null && expenseGroupId != null && context != null &&
      * response != null}
      * @post {@code APIResponse.data in getExpenseGroupExpenses(apiKey, expenseGroupId)}
      */
@@ -662,6 +662,36 @@ public abstract class APIService {
         // Do request
         new StringAPIRequest(AbstractAPIRequest.getAPIUrl() + "createExpenseIOU/" +
                 iouJson.toString(),
+                Request.Method.GET, params, null).run(context, response);
+    }
+
+    /**
+     * Returns List<Map<String, String>> containing how much each person owes the creator of the
+     * expense.
+     * Each entry contains: expense_id, user_id, amount, paid
+     *
+     * @param apiKey    apiKey of the user calling this method
+     * @param expenseId id of the expense
+     * @param context   context of request, often AppActivity (instance of calling object)
+     * @param response  contains a callback method that is called on (un)successful request.
+     * @pre {@code apiKey != null && expenseId != null && context != null &&
+     * response != null}
+     * @post {@code APIResponse.data == getOwedExpenses(apiKey, expenseId)}
+     */
+    public static void getExpenseIOU(String apiKey, String expenseId, Context context,
+                                     APIResponse<List<Map<String, String>>> response) {
+        // Check preconditions
+        if (apiKey == null || expenseId == null) {
+            throw new IllegalArgumentException("APIService.getExpenseIOU.pre: apiKey or " +
+                    "expenseId or iouJson is null");
+        }
+        // Set headers
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("expense_id", expenseId);
+        params.put("api_key", apiKey);
+
+        // Do request
+        new JSONAPIRequest(AbstractAPIRequest.getAPIUrl() + "getExpenseIOU",
                 Request.Method.GET, params, null).run(context, response);
     }
 
