@@ -3,7 +3,6 @@ package com.dblappdev.app.adapters;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -12,34 +11,13 @@ import com.dblappdev.app.dataClasses.Expense;
 
 import java.util.ArrayList;
 
-public class ExpenseAdapter extends RecyclerView.Adapter<ExpenseAdapter.ViewHolder> {
+public class ExpenseAdapter extends RecyclerView.Adapter<GregViewHolder> {
 
     // click event listener for the list entries
     private View.OnClickListener onClickListener;
 
     // dataset used in the recyclerview
     private ArrayList<Expense> localDataSet;
-
-    /**
-     * Provide a reference to the type of views that are being used
-     * (custom ViewHolder)
-     */
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-        private final TextView textViewName;
-        private final TextView textViewBalance;
-
-        public ViewHolder(View view) {
-            super(view);
-            // Define click listener for the ViewHolder's View
-
-            textViewName = (TextView) view.findViewById(R.id.item_name);
-            textViewBalance = (TextView) view.findViewById(R.id.item_balance);
-        }
-
-        public TextView getTextViewName() { return textViewName; }
-
-        public TextView getTextViewBalance() { return textViewBalance; }
-    }
 
     /**
      * Initialize the dataset of the adapter
@@ -60,17 +38,17 @@ public class ExpenseAdapter extends RecyclerView.Adapter<ExpenseAdapter.ViewHold
 
     // Create new views (invoked by the layout manager)
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
+    public GregViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
         // Create a new view, which defines the UI of the list item
         View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.recycler_view_item, viewGroup, false);
         view.setOnClickListener(onClickListener);
 
-        return new ViewHolder(view);
+        return new GregViewHolder(view);
     }
 
     // Replace the contents of a view (invoked by the layout manager)
     @Override
-    public void onBindViewHolder(ViewHolder viewHolder, final int position) {
+    public void onBindViewHolder(GregViewHolder viewHolder, final int position) {
         // Get element from the dataset at the given position and replace the contents of the view
         viewHolder.getTextViewName().setText(localDataSet.get(position).getTitle());
         viewHolder.getTextViewBalance().setText("€" + localDataSet.get(position).getAmount());
