@@ -16,6 +16,10 @@ import com.dblappdev.app.dataClasses.LoggedInUser;
 
 public class RegisterActivity extends AppCompatActivity {
 
+    // This boolean checks whether there is a current request going on
+    // This is to prevent the user from sending a new request while waiting for a response
+    private boolean isRequestHappening = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,8 +60,11 @@ public class RegisterActivity extends AppCompatActivity {
 
         // Check if the input conforms to the requirements
         if (isValidInput(username, email, password, passwordConfirm)) {
-            // Create a register API request
-            registerAPICall(username, password, email, this);
+            // Create a register API request if there is none going on
+            if (!isRequestHappening) {
+                isRequestHappening = true;
+                registerAPICall(username, password, email, this);
+            }
         } else {
             // Show a toast message notifying the user that the input was invalid
             showErrorToast("Invalid input!");
@@ -111,12 +118,16 @@ public class RegisterActivity extends AppCompatActivity {
                         Intent homeScreenIntent = new Intent(context, HomeScreenActivity.class);
                         startActivity(homeScreenIntent);
                         finish();
+                        // Allow a new request to be made
+                        isRequestHappening = false;
                     }
 
                     @Override
                     public void onErrorResponse(VolleyError error, String errorMessage) {
                         // Show a toast message notifying the user that the input was invalid
                         showErrorToast(errorMessage);
+                        // Allow a new request to be made
+                        isRequestHappening = false;
                     }
                 });
     }
