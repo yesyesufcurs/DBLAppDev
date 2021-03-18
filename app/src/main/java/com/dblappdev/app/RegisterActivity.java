@@ -56,38 +56,11 @@ public class RegisterActivity extends AppCompatActivity {
 
         // Check if the input conforms to the requirements
         if (isValidInput(username, email, password, passwordConfirm)) {
-            // Declare the context separately, this is needed in the request response
-            Context context = this;
             // Create a register API request
-            APIService.register(username, password, email, this,
-                    new APIResponse<String>() {
-                        @Override
-                        public void onResponse(String data) {
-                            // Save the API key in the LoggedInUser singleton
-                            LoggedInUser.logIn(data, username, email);
-                            // Create a new HomeScreen activity, navigate there and finish this activity
-                            Intent homeScreenIntent = new Intent(context, HomeScreenActivity.class);
-                            startActivity(homeScreenIntent);
-                            finish();
-                        }
-
-                        @Override
-                        public void onErrorResponse(VolleyError error, String errorMessage) {
-                            // Show a toast message notifying the user that the input was invalid
-                            Context context = getApplicationContext();
-                            int duration = Toast.LENGTH_SHORT;
-                            Toast toast = Toast.makeText(context, errorMessage, duration);
-                            toast.show();
-                        }
-                    });
+            registerAPICall(username, password, email, this);
         } else {
             // Show a toast message notifying the user that the input was invalid
-            Context context = getApplicationContext();
-            CharSequence text = "Invalid input!";
-            int duration = Toast.LENGTH_SHORT;
-
-            Toast toast = Toast.makeText(context, text, duration);
-            toast.show();
+            showErrorToast("Invalid input!");
         }
     }
 
@@ -120,6 +93,46 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     /**
+     * Makes a register API request that saves the apiKey and moves to the HomeScreen activity
+     * upon success, shows a toast containing the error message upon failure.
+     * @param username String containing the username to be used in the request
+     * @param password String containing the password to be used in the request
+     * @param email String containing the email to be used in the request
+     * @param context Context to be used in the request
+     */
+    private void registerAPICall(String username, String password, String email, Context context) {
+        APIService.register(username, password, email, context,
+                new APIResponse<String>() {
+                    @Override
+                    public void onResponse(String data) {
+                        // Save the API key in the LoggedInUser singleton
+                        LoggedInUser.logIn(data, username, email);
+                        // Create a new HomeScreen activity, navigate there and finish this activity
+                        Intent homeScreenIntent = new Intent(context, HomeScreenActivity.class);
+                        startActivity(homeScreenIntent);
+                        finish();
+                    }
+
+                    @Override
+                    public void onErrorResponse(VolleyError error, String errorMessage) {
+                        // Show a toast message notifying the user that the input was invalid
+                        showErrorToast(errorMessage);
+                    }
+                });
+    }
+
+    /**
+     * Shows a toast containing the provided error message
+     * @param errorMessage String to be displayed in the toast message
+     */
+    private void showErrorToast(String errorMessage) {
+        Context context = getApplicationContext();
+        int duration = Toast.LENGTH_SHORT;
+        Toast toast = Toast.makeText(context, errorMessage, duration);
+        toast.show();
+    }
+
+    /**
      * TODO: Copied this one from APIService, should maybe look into refactoring that to prevent copying
      * Returns if string only contains ASCII characters
      *
@@ -135,4 +148,5 @@ public class RegisterActivity extends AppCompatActivity {
         }
         return true;
     }
+
 }
