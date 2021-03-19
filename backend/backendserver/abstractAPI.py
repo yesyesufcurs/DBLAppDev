@@ -59,7 +59,8 @@ class AbstractAPI():
         json_result = []
         for row in rows:
             drow = dict(zip(row.keys(), row))
-            print(drow)
+            for i in range(len(drow.keys())):
+                drow[i] = str(drow[i])
             json_result.append(drow)
         return jsonify(json_result)
 
