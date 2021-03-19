@@ -59,18 +59,16 @@ public class ExpenseDetailsActivity extends AppCompatActivity {
 
         Intent cameraIntent = new Intent (MediaStore.ACTION_IMAGE_CAPTURE);
 
-        if (cameraIntent.resolveActivity(getPackageManager()) != null) {
-            File imageFile = null;
-            try {
-                imageFile = getImageFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            if (imageFile != null) {
-                Uri imageUri = FileProvider.getUriForFile(this, "${applicationId}.provider", imageFile );
-                cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
-                startActivityForResult(cameraIntent, IMAGE_REQUEST);
-            }
+        File imageFile = null;
+        try {
+            imageFile = getImageFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (imageFile != null) {
+            Uri imageUri = FileProvider.getUriForFile(this, "com.example.android.fileprovider", imageFile );
+            cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
+            startActivityForResult(cameraIntent, IMAGE_REQUEST);
         }
     }
 
@@ -79,7 +77,6 @@ public class ExpenseDetailsActivity extends AppCompatActivity {
      * @param view
      */
     public void displayImage(View view) {
-
         Intent intent = new Intent(this, DisplayImageActivity.class);
         intent.putExtra("image_path", currentImagePath);
         startActivity(intent);
@@ -87,7 +84,7 @@ public class ExpenseDetailsActivity extends AppCompatActivity {
 
     private File getImageFile() throws IOException{
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageName = "jpg_"+ timeStamp+ "_";
+        String imageName = "jpg_"+ timeStamp + "_";
         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
 
         File imageFile = File.createTempFile(imageName, ".jpg", storageDir);
