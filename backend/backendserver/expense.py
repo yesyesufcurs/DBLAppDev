@@ -416,7 +416,7 @@ def getExpenseGroupExpenses():
     Returns all expenses that are in an expense group.
     Expects headers: 
     expense_group_id
-    Returns: expense_id, user_id, title, amount, content, expense_group_id of expense
+    Returns: expense_id, user_id, title, amount, content, timestamp, expense_group_id of expense
     '''
     class ExpenseGroupExpenses(AbstractAPI):
         def api_operation(self, user_id, conn):
@@ -436,7 +436,7 @@ def getExpenseGroupExpenses():
                 return jsonify(error=412, text="Cannot determine if caller has permissions."), 412
 
             # Get expenses from db.
-            query = ''' SELECT id, user_id, title, amount, content, expense_group_id
+            query = ''' SELECT id, user_id, title, amount, content, expense_group_id, timestamp
             FROM expense
             WHERE expense_group_id = ?'''
             try:
@@ -453,13 +453,13 @@ def getUsersExpenses():
     '''
     Returns all expenses created by user that makes the request
     Expects: None
-    Returns: expense_id, user_id, title, amount, content, expense_group_id of expense
+    Returns: expense_id, user_id, title, amount, content, timestamp, expense_group_id of expense
     '''
     class GetUsersExpenses(AbstractAPI):
         def api_operation(self, user_id, conn):
             cursor = conn.cursor()
             # Get users expenses from db.
-            query = ''' SELECT id, user_id, title, amount, content, expense_group_id
+            query = ''' SELECT id, user_id, title, amount, content, expense_group_id, timestamp
             FROM expense
             WHERE user_id = ?'''
             try:
@@ -476,13 +476,13 @@ def getUserOwedExpenses():
     '''
     Returns all expenses where the user owes someone money.
     Expects: None
-    Returns: expense_id, user_id, title, amount, content, amount, paid
+    Returns: expense_id, user_id, title, amount, content, timestamp, amount, paid
     '''
     class GetUserOwedExpenses(AbstractAPI):
         def api_operation(self, user_id, conn):
             cursor = conn.cursor()
             # Get users expenses from db.
-            query = ''' SELECT e.id, e.user_id, e.title, e.amount, e.content, e.expense_group_id, a.amount, a.paid
+            query = ''' SELECT e.id, e.user_id, e.title, e.amount, e.content, e.timestamp, e.expense_group_id, a.amount, a.paid
             FROM expense AS e, accured_expenses AS a
             WHERE e.id = a.expense_id AND a.user_id = ?'''
             try:
@@ -526,7 +526,7 @@ def getExpenseDetails():
     Returns expense details given expense_id
     Expects headers:
     expense_id: id of expense
-    Returns: expense_id, user_id, title, amount, content, expense_group_id of expense
+    Returns: expense_id, user_id, title, amount, content, timestamp, expense_group_id of expense
     '''
     class GetExpenseDetails(AbstractAPI):
         def api_operation(self, user_id, conn):
@@ -545,7 +545,7 @@ def getExpenseDetails():
             except Exception as e:
                 return jsonify(error=412, text="Cannot determine if caller has permissions"), 412
             # Get expense details
-            query = ''' SELECT id, user_id, title, amount, content, expense_group_id FROM expense WHERE id = ?'''
+            query = ''' SELECT id, user_id, title, amount, content, timestamp, expense_group_id FROM expense WHERE id = ?'''
             try:
                 cursor.execute(query, (expense_id,))
             except Exception as e:
