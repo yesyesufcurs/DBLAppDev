@@ -81,7 +81,7 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerView"
+        android:id="@+id/recyclerViewExpense"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -91,7 +91,4 @@
         tools:itemCount="20"
         tools:listitem="@layout/recycler_view_item" />
 
-    <!--
-        TODO: The rest of this page should go here
-    -->
 </androidx.constraintlayout.widget.ConstraintLayout>
