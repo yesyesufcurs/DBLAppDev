@@ -9,15 +9,15 @@ import os
 import random
 import time
 
-@app.route("/getExpenseGroup")
-def getExpenseGroup():
+@app.route("/getExpenseGroups")
+def getExpenseGroups():
     '''
     Returns JSON containing the expense group name and moderator_id
     given a moderator
     expects headers:
     expense_group_id
     '''
-    class GetExpenseGroup(AbstractAPI):
+    class GetExpenseGroups(AbstractAPI):
         def api_operation(self, user_id, conn):
             cursor = conn.cursor()
             query = '''SELECT expense_group.id, expense_group.name, moderator_id
@@ -31,15 +31,15 @@ def getExpenseGroup():
             result = cursor.fetchall()
             return self.generateJson(self, result)
 
-    return GetExpenseGroup.template_method(GetExpenseGroup, request.headers["api_key"] if "api_key" in request.headers else None)
+    return GetExpenseGroups.template_method(GetExpenseGroups, request.headers["api_key"] if "api_key" in request.headers else None)
 
-@app.route("/getExpenseGroups")
-def getExpenseGroups():
+@app.route("/getExpenseGroup")
+def getExpenseGroup():
     '''
     Returns JSON containing all expense group a user is part of.
     Each entry is of the form expense_group_id, expense_group_name, moderator.
     '''
-    class GetExpenseGroups(AbstractAPI):
+    class GetExpenseGroup(AbstractAPI):
         def api_operation(self, user_id, conn):
             cursor = conn.cursor()
             expense_group_id = 0
@@ -58,7 +58,7 @@ def getExpenseGroups():
             result = cursor.fetchall()
             return self.generateJson(self, result)
 
-    return GetExpenseGroups.template_method(GetExpenseGroups, request.headers["api_key"] if "api_key" in request.headers else None)
+    return GetExpenseGroup.template_method(GetExpenseGroup, request.headers["api_key"] if "api_key" in request.headers else None)
 
 
 @app.route("/getAllExpenseGroups")
