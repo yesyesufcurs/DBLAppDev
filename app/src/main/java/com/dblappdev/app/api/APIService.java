@@ -153,7 +153,7 @@ public abstract class APIService {
 
     /**
      * Returns List<Map<String, String>>
-     * Containing the name and moderator_id of an expense group.
+     * Each entry contains name, moderator_id.
      * 
      * @param apiKey   apiKey of the user calling this method
      * @param expenseGroupId id of the expense group
@@ -185,7 +185,7 @@ public abstract class APIService {
 
     /**
      * Returns List<Map<String, String>> object containing expense groups a user is part of.
-     * Each entry contains id, expense_group_name, moderator_id.
+     * Each entry contains id, name, moderator_id.
      *
      * @param apiKey   apiKey of the user calling this method
      * @param context  context of request, often AppActivity (instance of calling object)
