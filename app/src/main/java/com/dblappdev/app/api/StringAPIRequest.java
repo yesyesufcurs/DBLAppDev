@@ -8,6 +8,10 @@ import com.android.volley.toolbox.StringRequest;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Class that contains a default implementation for an StringAPIRequest.
+ *
+ */
 public class StringAPIRequest extends AbstractAPIRequest<String, String> {
 
     String url;                     // String containing API url

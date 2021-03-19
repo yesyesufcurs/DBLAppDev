@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify, Response, send_file
 from backendserver import app, db_file, create_connection
 from backendserver.abstractAPI import AbstractAPI
 import backendserver.expense_group
-from backendserver.permissionChecks import isModerator, isMember, isExpenseCreator, getExpenseGroup
+from backendserver.permissionChecks import isModerator, isMember, isExpenseCreator, getExpenseGroup, owesMoney
 from backendserver.googleCloud import detect_text
 
 import werkzeug
@@ -13,6 +13,7 @@ import hashlib
 import os
 import base64
 import time
+from datetime import datetime
 from io import BytesIO
 
 
@@ -21,9 +22,10 @@ def createExpense():
     '''
     Creates new expense and adds it do expense group
     Expects headers:
-    title, amount, picture, description, expense_group_id
+    title, amount, description, expense_group_id
     Optional headers:
     user_id (only needed if caller is not the expense creator)
+    picture (only if picture is made)
     Returns:
     expense_id
     '''
@@ -47,6 +49,10 @@ def createExpense():
                 return jsonify(error=412, text="Expense group details missing."), 412
 
             # Check requirements for new expense.
+            try:
+                float(amount)
+            except ValueError:
+                return jsonify(error=412, text="Amount is not a valid number"), 412
             if not(1 <= len(expense_title) < 100):
                 return jsonify(error=412, text="Title should be non-empty and shorter than 100 characters."), 412
             if not(float(amount) < 100000):
@@ -82,16 +88,16 @@ def createExpense():
 
             # Execute query to add expense
             query = '''
-            INSERT INTO expense(user_id, title, amount, picture, content, expense_group_id)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO expense(user_id, title, amount, picture, content, expense_group_id, timestamp)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
             '''
             try:
                 if user == None:
                     cursor.execute(query, (user_id, expense_title,
-                     amount, bytePicture, content, expense_group_id))
+                     amount, bytePicture, content, expense_group_id, datetime.now()))
                 else:
                     cursor.execute(query, (user, expense_title,
-                     amount, bytePicture, content, expense_group_id))
+                     amount, bytePicture, content, expense_group_id, datetime.now()))
 
             except Exception as e:
                 return jsonify(error=412, text="Cannot add expense to database"), 412
@@ -133,6 +139,17 @@ def modifyExpense():
                 expense_id = request.headers.get('expense_id')
             except Exception as e:
                 return jsonify(error=412, text="Expense group details missing."), 412
+                
+            # Check requirements for expense.
+            try:
+                float(amount)
+            except ValueError:
+                return jsonify(error=412, text="Amount is not a valid number"), 412
+            if not(1 <= len(expense_title) < 100):
+                return jsonify(error=412, text="Title should be non-empty and shorter than 100 characters."), 412
+            if not(float(amount) < 100000):
+                return jsonify(error=412, text="Expense amount should be lower than 100000"), 412
+
             # Check if user has permission to alter the expense
             try:
                 if not(isExpenseCreator(user_id, expense_id, cursor) or isModerator(user_id, expense_group_id, cursor)):
@@ -275,6 +292,7 @@ def detectText():
                 foundText = detect_text(bytePicture)
             except Exception as e:
                 return jsonify(error=412, text="Cannot use text detection."), 412
+            foundText = foundText.replace("\n", " ")
             return jsonify(foundText)
     return DetectText.template_method(DetectText, request.headers["api_key"] if "api_key" in request.headers else None)
     
@@ -302,7 +320,8 @@ def createExpenseIOU(iouJson):
 
             # Check permissions of caller
             try:
-                if not(isExpenseCreator(user_id, expense_id, cursor)):
+                if not(isExpenseCreator(user_id, expense_id, cursor) or
+                 isModerator(user_id, getExpenseGroup(expense_id, cursor), cursor)):
                     return jsonify(error=412, text="User must be the creator of the expense to add this."), 412
             except Exception as e:
                 return jsonify(error=412, text="Cannot determine if caller has permissions"), 412
@@ -317,12 +336,86 @@ def createExpenseIOU(iouJson):
             return jsonify("Added successfully")
     return CreateExpenseIOU.template_method(CreateExpenseIOU, request.headers["api_key"] if "api_key" in request.headers else None)
 
+@app.route("/getExpenseIOU")
+def getExpenseIOU():
+    '''
+    Returns how much each person owes the creator of this expense.
+    Expects headers:
+    expense_id
+    Returns: expense_id, user_id, amount, paid
+    ''' 
+    class GetExpenseIOU(AbstractAPI):
+        def api_operation(self, user_id, conn):
+            cursor = conn.cursor()
+            expense_id = None
+            # Get headers
+            try:
+                expense_id = request.headers.get('expense_id')
+            except Exception as e:
+                return jsonify(error=412, text="Missing expense id"), 412
+            # Check if user has permission to get the expense group expenses
+            try:
+                if not(isMember(user_id, getExpenseGroup(expense_id, cursor), cursor)):
+                    return jsonify(error=412, text="User must be member of the expense group to see group expenses"), 412
+            except Exception as e:
+                return jsonify(error=412, text="Cannot determine if caller has permissions"), 412 
+            
+            # Execute query
+            query = "SELECT * FROM accured_expenses WHERE expense_id = ? "
+            try:
+                cursor.execute(query, (expense_id,))
+            except Exception as e:
+                return jsonify(error=412, text="Cannot retrieve the expense information"), 412
+            return self.generateJson(self, cursor.fetchall())
+    return GetExpenseIOU.template_method(GetExpenseIOU, request.headers["api_key"] if "api_key" in request.headers else None)
+
+@app.route("/searchExpense")
+def searchExpense():
+    '''
+    Returns all expenses that are found in some expense groups when querying.
+    Expects headers:
+    expense_group_id
+    query
+    Returns: expense_id, user_id, title, amount, content, expense_group_id of expense
+    '''
+    class SearchExpense(AbstractAPI):
+        def api_operation(self, user_id, conn):
+            cursor = conn.cursor()
+            expense_group_id, query = "", ""
+            # Get Headers
+            try:
+                expense_group_id = request.headers.get('expense_group_id')
+                query = request.headers.get('query')
+            except Exception as e:
+                return jsonify(error=412, text="Missing expense_group_id or query."), 412
+
+            # Check if user has permission to get the expense group expenses
+            try:
+                if not(isMember(user_id, expense_group_id, cursor)):
+                    return jsonify(error=412, text="User must be member of the expense group to see group expenses."), 412
+            except Exception as e:
+                return jsonify(error=412, text="Cannot determine if caller has permissions."), 412 
+            
+            # Replace spaces in query with wildcards
+            query = query.replace(" ", "%")
+            query = "%" + query + "%"
+            # Get expenses from db.
+            query1 = ''' SELECT id, user_id, title, amount, content, expense_group_id
+            FROM expense
+            WHERE expense_group_id = ? AND (user_id LIKE ? OR title LIKE ? OR amount LIKE ? OR content LIKE ?)'''
+            try:
+                cursor.execute(query1, (expense_group_id, query, query, query, query))
+            except Exception as e:
+                return jsonify(error=412, text="Cannot execute query"), 412
+            return self.generateJson(self, cursor.fetchall())
+    return SearchExpense.template_method(SearchExpense, request.headers["api_key"] if "api_key" in request.headers else None)
 
 @app.route("/getExpenseGroupExpenses")
 def getExpenseGroupExpenses():
     ''' 
     Returns all expenses that are in an expense group.
-    Expects: expense_group_id
+    Expects headers: 
+    expense_group_id
     Returns: expense_id, user_id, title, amount, content, expense_group_id of expense
     '''
     class ExpenseGroupExpenses(AbstractAPI):
@@ -335,14 +428,14 @@ def getExpenseGroupExpenses():
             except Exception as e:
                 return jsonify(error=412, text="Cannot get expense_group_id"), 412
 
-            # Check if user has permissions to get the expense picture
+            # Check if user has permissions to get the expense group expenses
             try:
                 if not(isMember(user_id, expense_group_id, cursor)):
                     return jsonify(error=412, text="User must be member of the expense group to see group expenses."), 412
             except Exception as e:
-                return jsonify(error=412, text="Cannot determine if caller has permissions"), 412
+                return jsonify(error=412, text="Cannot determine if caller has permissions."), 412
 
-            # Get expense groups from db.
+            # Get expenses from db.
             query = ''' SELECT id, user_id, title, amount, content, expense_group_id
             FROM expense
             WHERE expense_group_id = ?'''
@@ -400,6 +493,32 @@ def getUserOwedExpenses():
             return self.generateJson(self, result)
     return GetUserOwedExpenses.template_method(GetUserOwedExpenses, request.headers["api_key"] if "api_key" in request.headers else None)
 
+@app.route("/getUserOwedTotal")
+def getUserOwedTotal():
+    '''
+    Returns JSON object containing each person the user owes money to
+    and the amount the user owes
+    Expects headers:
+    expense_group_id
+    Returns: user_id, amount
+    '''
+    class GetUserOwedTotal(AbstractAPI):
+        def api_operation(self, user_id, conn):
+            expense_group_id = None
+            result = None
+            cursor = conn.cursor()
+            # Get headers
+            try:
+                expense_group_id = request.headers.get('expense_group_id')
+            except Exception as e:
+                return jsonify(error=412, text="Missing expense group id")
+            try:
+                result = owesMoney(user_id, expense_group_id, cursor)
+            except Exception as e:
+                return jsonify(error=412, text="Cannot get the owed amounts")
+            return self.generateJson(self, result)
+    return GetUserOwedTotal.template_method(GetUserOwedTotal, request.headers["api_key"] if "api_key" in request.headers else None)
+            
 
 @app.route("/getExpenseDetails")
 def getExpenseDetails():
@@ -426,7 +545,7 @@ def getExpenseDetails():
             except Exception as e:
                 return jsonify(error=412, text="Cannot determine if caller has permissions"), 412
             # Get expense details
-            query = ''' SELECT * FROM expense WHERE id = ?'''
+            query = ''' SELECT id, user_id, title, amount, content, expense_group_id FROM expense WHERE id = ?'''
             try:
                 cursor.execute(query, (expense_id,))
             except Exception as e:
@@ -462,7 +581,7 @@ def getOwedExpenses():
             except Exception as e:
                 return jsonify(error=412, text="Cannot determine if caller has permissions"), 412
             # Get expenses where user owes someone money
-            query = ''' SELECT e.user_id, a.expense_id, a.user_id, a.amount, a.paid
+            query = '''SELECT e.user_id, a.expense_id, a.user_id, a.amount, a.paid
             FROM expense AS e, accured_expenses AS a
             WHERE e.id = a.expense_id AND expense_id = ?'''
             try:
@@ -541,8 +660,7 @@ def setUserPaidExpense():
             try:
                 expense_group_id = getExpenseGroup(expense_id, cursor)
                 if not(isExpenseCreator(user_id, expense_group_id, cursor) or isModerator(user_id, expense_group_id, cursor)):
-                    return jsonify(error=412, text="User must be member of the expense group to see an expense picture."), 412
-
+                    return jsonify(error=412, text="User must be expense creator or moderator to toggle this."), 412
             except Exception as e:
                 return jsonify(error=412, text="Cannot determine if caller has permissions"), 412
             # Toggle paid value in accured expenses.
