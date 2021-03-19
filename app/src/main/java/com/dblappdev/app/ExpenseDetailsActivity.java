@@ -31,6 +31,7 @@ public class ExpenseDetailsActivity extends AppCompatActivity {
 
     /**
      * Event handler for the back button
+     *
      * @param view The View instance of the button that was pressed
      */
     public void onBack(View view) {
@@ -41,6 +42,7 @@ public class ExpenseDetailsActivity extends AppCompatActivity {
 
     /**
      * Event handler for the back button
+     *
      * @param view The View instance of the button that was pressed
      */
     public void onCheckmark(View view) {
@@ -53,12 +55,11 @@ public class ExpenseDetailsActivity extends AppCompatActivity {
 
     /**
      * Captures an Image through an Intent
+     *
      * @param view
      */
     public void captureImage(View view) {
-
-        Intent cameraIntent = new Intent (MediaStore.ACTION_IMAGE_CAPTURE);
-
+        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         File imageFile = null;
         try {
             imageFile = getImageFile();
@@ -66,7 +67,10 @@ public class ExpenseDetailsActivity extends AppCompatActivity {
             e.printStackTrace();
         }
         if (imageFile != null) {
-            Uri imageUri = FileProvider.getUriForFile(this, "com.example.android.fileprovider", imageFile );
+            Uri imageUri = FileProvider.getUriForFile(
+                    this,
+                    "com.example.android.fileprovider",
+                    imageFile);
             cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
             startActivityForResult(cameraIntent, IMAGE_REQUEST);
         }
@@ -74,6 +78,7 @@ public class ExpenseDetailsActivity extends AppCompatActivity {
 
     /**
      * Displays an Image
+     *
      * @param view
      */
     public void displayImage(View view) {
@@ -82,9 +87,9 @@ public class ExpenseDetailsActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    private File getImageFile() throws IOException{
+    private File getImageFile() throws IOException {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageName = "jpg_"+ timeStamp + "_";
+        String imageName = "jpg_" + timeStamp + "_";
         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
 
         File imageFile = File.createTempFile(imageName, ".jpg", storageDir);
