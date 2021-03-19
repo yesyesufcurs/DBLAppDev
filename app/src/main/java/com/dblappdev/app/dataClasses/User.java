@@ -9,6 +9,10 @@ public class User {
         this.email = email;
     }
 
+    public User (String username) {
+        this(username, "");
+    }
+
     /**
      * gets the email of the user
      * @return {@code this.email}

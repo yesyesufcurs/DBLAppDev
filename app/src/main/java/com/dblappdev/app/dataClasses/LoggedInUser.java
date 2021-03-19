@@ -20,6 +20,8 @@ public class LoggedInUser {
 
     /**
      * creates an instance of LoggedInUser if none exist yet. Saves it to this.instance
+     * @throws IllegalStateException if {@code instance != null}
+     * @pre {@code instance == null}
      * @post {@code this.instance.getApiKey() == apiKey
      * && this.instance.getUser().getUsername() == username
      * && this.instance.getUser().getEmail() == email}
@@ -27,7 +29,17 @@ public class LoggedInUser {
     public static void logIn(String apiKey, String username, String email) {
         if (instance == null) {
             instance = new LoggedInUser(apiKey, username, email);
+        } else {
+            throw new IllegalStateException("Cannot log in: already logged in");
         }
+    }
+
+    public static void logIn(String apiKey, String username) {
+        logIn(apiKey, username, "");
+    }
+
+    public static void logOut() {
+        instance = null;
     }
 
     /**
