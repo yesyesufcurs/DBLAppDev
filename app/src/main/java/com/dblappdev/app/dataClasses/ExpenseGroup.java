@@ -94,4 +94,10 @@ public class ExpenseGroup {
     public HashMap<User, Float> getBalance() {
         return balance;
     }
+
+    /**
+     * gets the title of the expense group
+     * @return {@code this.title}
+     */
+    public String getTitle() { return title; }
 }

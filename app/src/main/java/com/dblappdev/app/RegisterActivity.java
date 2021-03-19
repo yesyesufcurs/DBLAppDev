@@ -69,6 +69,7 @@ public class RegisterActivity extends AppCompatActivity {
             // Show a toast message notifying the user that the input was invalid
             showErrorToast("Invalid input!");
         }
+
     }
 
     // Send the user back to the login screen when pressing the back button on their device

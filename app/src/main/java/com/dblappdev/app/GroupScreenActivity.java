@@ -8,7 +8,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
-import com.dblappdev.app.api.RecyclerViewAdapter;
+import com.dblappdev.app.adapters.ExpenseAdapter;
+import com.dblappdev.app.adapters.ExpenseGroupAdapter;
 
 public class GroupScreenActivity extends AppCompatActivity {
 
@@ -18,9 +19,9 @@ public class GroupScreenActivity extends AppCompatActivity {
         setContentView(R.layout.activity_group_screen);
 
         // Set the recyclerview and its settings
-        RecyclerView recView = (RecyclerView) findViewById(R.id.recyclerView);
+        RecyclerView recView = (RecyclerView) findViewById(R.id.recyclerViewExpense);
         View.OnClickListener listener = view -> onItemClick(view);
-        RecyclerViewAdapter adapter = new RecyclerViewAdapter(listener);
+        ExpenseAdapter adapter = new ExpenseAdapter(listener);
         recView.setAdapter(adapter);
         recView.setLayoutManager(new LinearLayoutManager(this));
     }

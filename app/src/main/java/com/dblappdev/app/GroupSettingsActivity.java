@@ -1,10 +1,14 @@
 package com.dblappdev.app;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+
+import com.dblappdev.app.adapters.MemberBalanceAdapter;
 
 public class GroupSettingsActivity extends AppCompatActivity {
 
@@ -12,6 +16,12 @@ public class GroupSettingsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_group_settings);
+
+        // Set the recyclerview and its settings
+        RecyclerView recView = (RecyclerView) findViewById(R.id.recyclerViewMembersBalance);
+        MemberBalanceAdapter adapter = new MemberBalanceAdapter();
+        recView.setAdapter(adapter);
+        recView.setLayoutManager(new LinearLayoutManager(this));
     }
 
     /**
