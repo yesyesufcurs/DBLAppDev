@@ -1,5 +1,7 @@
 package com.dblappdev.app.dataClasses;
 
+import java.util.HashMap;
+
 public class Expense {
     //Set on instance creation, after that only Get
     private int id;
@@ -10,14 +12,16 @@ public class Expense {
     private float amount;
     private String title;
     private String description;
+    private HashMap<User, Integer> distribution;
 
-    public Expense(int id, int expenseGroupId, User creator, float amount, String title, String description) {
+    public Expense(int id, int expenseGroupId, User creator, float amount, String title, String description, HashMap<User, Integer> distribution) {
         this.id = id;
         this.expenseGroupId = expenseGroupId;
         this.creator = creator;
         this.amount = amount;
         this.title = title;
         this.description = description;
+        this.distribution = distribution;
     }
 
     /**
@@ -67,6 +71,28 @@ public class Expense {
     public User getCreator() {
         return creator;
     }
+
+    /**
+     * sets the distribution map of the expense
+     * @post {@code this.distribution == distribution}
+     */
+    public void setDistribution(HashMap<User, Integer> distribution) {
+        this.distribution = distribution;
+    }
+
+    /**
+     * sets the distribution of a single user
+     * @post {@code this.distribution.get(user) == amount}
+     */
+    public void setSingleDistribution(User user, int amount) {
+        distribution.put(user, amount);
+    }
+
+    /**
+     * gets the distribution map of the expense
+     * @return {@code this.distribution}
+     */
+    public HashMap<User, Integer> getDistribution() { return distribution; }
 
     /**
      * sets description of this expense instance
