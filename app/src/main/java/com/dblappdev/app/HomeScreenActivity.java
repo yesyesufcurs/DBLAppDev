@@ -24,6 +24,8 @@ import java.util.Map;
 
 public class HomeScreenActivity extends AppCompatActivity {
 
+    boolean isRequestHappening = false;
+
     // List containing the expense groups to be shown
     private ArrayList<ExpenseGroup> expenseGroups = new ArrayList<>();
     // Map with a balance
@@ -53,16 +55,9 @@ public class HomeScreenActivity extends AppCompatActivity {
         }
 
         // First get all the expense groups the logged in user is part of
-        getExpenseGroups();
-
-        // Get the total amount of money each user owes / is owed in each expense group
-
-        // Set the recyclerview and its settings
-        RecyclerView recView = (RecyclerView) findViewById(R.id.recyclerViewExpenseGroup);
-        View.OnClickListener listener = view -> onItemClick(view);
-        ExpenseGroupAdapter adapter = new ExpenseGroupAdapter(listener, expenseGroups);
-        recView.setAdapter(adapter);
-        recView.setLayoutManager(new LinearLayoutManager(this));
+        if (!isRequestHappening) {
+            getExpenseGroups(this);
+        }
     }
 
     /**
@@ -134,24 +129,32 @@ public class HomeScreenActivity extends AppCompatActivity {
      * This method creates a getExpenseGroups API call to retrieve all the expenses the currently
      * logged in user is part of.
      */
-    private void getExpenseGroups() {
-        APIService.getExpenseGroups(LoggedInUser.getInstance().getApiKey(), this,
+    private void getExpenseGroups(Context context) {
+        APIService.getExpenseGroups(LoggedInUser.getInstance().getApiKey(), context,
                 new APIResponse<List<Map<String, String>>>() {
                     @Override
                     public void onResponse(List<Map<String, String>> data) {
                         for (Map<String, String> group : data) {
-                            int id = Integer.parseInt(group.get("expense_group_id"));
-                            String title = group.get("expense_group_name");
+                            int id = Integer.parseInt(group.get("id"));
+                            String title = group.get("name");
                             User moderator = new User(group.get("moderator_id"));
                             ExpenseGroup expenseGroup = new ExpenseGroup(id, title, moderator);
                             expenseGroups.add(expenseGroup);
                         }
+                        // Set the recyclerview and its settings
+                        RecyclerView recView = (RecyclerView) findViewById(R.id.recyclerViewExpenseGroup);
+                        View.OnClickListener listener = view -> onItemClick(view);
+                        ExpenseGroupAdapter adapter = new ExpenseGroupAdapter(listener, expenseGroups);
+                        recView.setAdapter(adapter);
+                        recView.setLayoutManager(new LinearLayoutManager(context));
+                        isRequestHappening = false;
                     }
 
                     @Override
                     public void onErrorResponse(VolleyError error, String errorMessage) {
                         // TODO: make this into generic function
                         showErrorToast(errorMessage);
+                        isRequestHappening = false;
                     }
                 });
     }
