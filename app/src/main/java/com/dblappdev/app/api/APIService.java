@@ -776,7 +776,7 @@ public abstract class APIService {
     /**
      * Returns List<Map<String, String>> containing all expense details of all expenses in an
      * expense group.
-     * Each entry contains: id, title, amount, content, expense_group_id, user_id.
+     * Each entry contains: id, title, amount, content, expense_group_id, user_id, timestamp.
      *
      * @param apiKey         apiKey of the user calling this method
      * @param expenseGroupId id of the expense group
@@ -811,7 +811,7 @@ public abstract class APIService {
     /**
      * Returns List<Map<String, String>> containing expense details of all expenses created by
      * the user that makes the request
-     * Each entry contains: id, title, amount, content, expense_group_id, user_id.
+     * Each entry contains: id, title, amount, content, expense_group_id, user_id, timestamp.
      *
      * @param apiKey   apiKey of the user calling this method
      * @param context  context of request, often AppActivity (instance of calling object)
@@ -841,7 +841,7 @@ public abstract class APIService {
     /**
      * Returns List<Map<String, String>> containing all expenses where the user owes someone else
      * money
-     * Each entry contains: id, title, amount, content, expense_group_id, user_id.
+     * Each entry contains: id, title, amount, content, expense_group_id, user_id, timestamp.
      *
      * @param apiKey   apiKey of the user calling this method
      * @param context  context of request, often AppActivity (instance of calling object)
@@ -905,7 +905,7 @@ public abstract class APIService {
 
     /**
      * Returns List<Map<String, String>> containing the details of an expense given an expenseId
-     * Each entry contains: id, user_id, title, amount, content, expense_group_id
+     * Each entry contains: id, user_id, title, amount, content, expense_group_id, timestamp.
      *
      * @param apiKey    apiKey of the user calling this method
      * @param expenseId id of the expense
