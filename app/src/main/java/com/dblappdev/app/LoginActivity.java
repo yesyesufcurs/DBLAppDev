@@ -59,8 +59,9 @@ public class LoginActivity extends AppCompatActivity {
                 loginAPICall(username, password, this);
             }
         } else {
-            showErrorToast("invalid input");
+            showErrorToast("Invalid input!");
         }
+        
     }
 
     void loginAPICall(String username, String password, Context context) {
@@ -99,7 +100,6 @@ public class LoginActivity extends AppCompatActivity {
      *             finally finish this activity.
      */
     public void onRegisterClick(View view) {
-
         // Redirect to the Register screen
         // Start this as a new activity to make sure pressing the back button takes you back to this
         // screen again
