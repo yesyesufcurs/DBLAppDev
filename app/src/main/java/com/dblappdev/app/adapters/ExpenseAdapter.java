@@ -27,13 +27,13 @@ public class ExpenseAdapter extends RecyclerView.Adapter<GregViewHolder> {
     public ExpenseAdapter(View.OnClickListener listener) {
         onClickListener = listener;
 
-        // START TEMP CODE
-        // generate mockup data
-        localDataSet = new ArrayList<>();
-        for (int i = 0; i < 20; i++) {
-            localDataSet.add(new Expense(i, i, null, 0.01f * i, "Expense no. " + i, "Description no. " + i));
-        }
-        // END TEMP CODE
+//        // START TEMP CODE
+//        // generate mockup data
+//        localDataSet = new ArrayList<>();
+//        for (int i = 0; i < 20; i++) {
+//            localDataSet.add(new Expense(i, i, null, 0.01f * i, "Expense no. " + i, "Description no. " + i));
+//        }
+//        // END TEMP CODE
     }
 
     // Create new views (invoked by the layout manager)

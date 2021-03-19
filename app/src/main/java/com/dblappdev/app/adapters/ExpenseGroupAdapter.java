@@ -25,16 +25,17 @@ public class ExpenseGroupAdapter extends RecyclerView.Adapter<GregViewHolder> {
      * @param listener View.OnClickListener that deals with the on click event
      * TODO: Update this to fit with the loading in of the data (data should probably be added as a parameter)
      */
-    public ExpenseGroupAdapter(View.OnClickListener listener) {
+    public ExpenseGroupAdapter(View.OnClickListener listener, ArrayList<ExpenseGroup> dataset) {
         onClickListener = listener;
+        localDataSet = dataset;
 
-        // START TEMP CODE
-        // generate mockup data
-        localDataSet = new ArrayList<>();
-        for (int i = 0; i < 20; i++) {
-            localDataSet.add(new ExpenseGroup(i, "Group no. " + i, null));
-        }
-        // END TEMP CODE
+//        // START TEMP CODE
+//        // generate mockup data
+//        localDataSet = new ArrayList<>();
+//        for (int i = 0; i < 20; i++) {
+//            localDataSet.add(new ExpenseGroup(i, "Group no. " + i, null));
+//        }
+//        // END TEMP CODE
     }
 
     // Create new views (invoked by the layout manager)
@@ -48,11 +49,17 @@ public class ExpenseGroupAdapter extends RecyclerView.Adapter<GregViewHolder> {
     }
 
     // Replace the contents of a view (invoked by the layout manager)
-    // TODO: Update mock data to check whether the grabbing of the balance actually works
     @Override
     public void onBindViewHolder(GregViewHolder viewHolder, final int position) {
+        ExpenseGroup group = localDataSet.get(position);
         // Get element from the dataset at the given position and replace the contents of the view
-        viewHolder.getTextViewName().setText(localDataSet.get(position).getTitle());
+        // Set the name to the title of the group and add (mod) if the logged in user is the moderator
+        String nameString = group.getTitle();
+        if (LoggedInUser.getInstance().getUser() == group.getModerator()) {
+            nameString += " (mod)";
+        }
+        viewHolder.getTextViewName().setText(nameString);
+        // Set the balance to the balance of the logged in user in the group
         String balanceString;
         try {
             float balance = localDataSet.get(position).getBalance().get(LoggedInUser.getInstance().getUser());
@@ -61,6 +68,8 @@ public class ExpenseGroupAdapter extends RecyclerView.Adapter<GregViewHolder> {
             balanceString = "€--,--";
         }
         viewHolder.getTextViewBalance().setText(balanceString);
+        // Link the ExpenseGroup instance with the view
+        viewHolder.getView().setTag(localDataSet.get(position).getId());
     }
 
     // Return the size of your dataset (invoked by the layout manager)

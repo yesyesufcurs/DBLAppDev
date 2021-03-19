@@ -4,9 +4,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Toast;
 
 import com.android.volley.VolleyError;
 import com.dblappdev.app.adapters.ExpenseGroupAdapter;
@@ -24,6 +26,7 @@ public class HomeScreenActivity extends AppCompatActivity {
 
     // List containing the expense groups to be shown
     private ArrayList<ExpenseGroup> expenseGroups = new ArrayList<>();
+    // Map with a balance
 
     /**
      * This method gets invoked by Android upon the creation of a HomeScreenActivity
@@ -31,7 +34,7 @@ public class HomeScreenActivity extends AppCompatActivity {
      * {@link LoggedInUser} is not null.
      * If this is null, throw a RuntimeException stating that something went wrong with logging in.
      * Otherwise, this method should obtain all the ExpenseGroups that the currently
-     * logged in user is a part of.
+     * logged in user is a part of, as well as the balance of the logged in user in all those groups.
      * Once these have been loaded, a recyclerview adapter for the ExpenseGroups should be
      * initiated with the retrieved ExpenseGroups as dataset.
      * @pre {@code {@link LoggedInUser#getInstance()} != null}
@@ -52,12 +55,12 @@ public class HomeScreenActivity extends AppCompatActivity {
         // First get all the expense groups the logged in user is part of
         getExpenseGroups();
 
-        // Get the amount of money the current user is owed in this group, to show in the list
+        // Get the total amount of money each user owes / is owed in each expense group
 
         // Set the recyclerview and its settings
         RecyclerView recView = (RecyclerView) findViewById(R.id.recyclerViewExpenseGroup);
         View.OnClickListener listener = view -> onItemClick(view);
-        ExpenseGroupAdapter adapter = new ExpenseGroupAdapter(listener);
+        ExpenseGroupAdapter adapter = new ExpenseGroupAdapter(listener, expenseGroups);
         recView.setAdapter(adapter);
         recView.setLayoutManager(new LinearLayoutManager(this));
     }
@@ -65,7 +68,7 @@ public class HomeScreenActivity extends AppCompatActivity {
     /**
      * This method gets called when the user presses the account button on the home screen.
      * When the user does so, a new EditProfile activity should be created and started.
-     * This activity should not be closed, such that the user gets redirected to this screen
+     * The current activity should not be closed, such that the user gets redirected to this screen
      * when they perform a backPress action in the newly created EditProfile activity.
      * Event handler for the account button
      * @param view The View instance of the button that was pressed
@@ -79,7 +82,7 @@ public class HomeScreenActivity extends AppCompatActivity {
     /**
      * This method gets called when the user presses the add button on the home screen.
      * When the user does so, a new AddJoinGroup activity should be created and started.
-     * This activity should not be closed, such that the user gets redirected to this screen
+     * The current activity should not be closed, such that the user gets redirected to this screen
      * when they perform a backPress action in the newly created AddJoinGroup activity.
      * Event handler for the add button
      * @param view The View instance of the button that was pressed
@@ -93,7 +96,7 @@ public class HomeScreenActivity extends AppCompatActivity {
     /**
      * This method gets called when the user presses the logout button on the home screen.
      * When the user does so, this method should logout the user from the {@link LoggedInUser}
-     * singleton class by calling {@code {@link LoggedInUser#logout()}}.
+     * singleton class by calling {@code {@link LoggedInUser#logOut()}}.
      * After this, a new Login activity should be created and started.
      * Lastly, this current activity should be finished, to prevent the user from being able to
      * go back without logging in.
@@ -101,7 +104,8 @@ public class HomeScreenActivity extends AppCompatActivity {
      * @param view The View instance of the button that was pressed
      */
     public void onLogout(View view) {
-
+        // Clear the current instance of the LoggedInUser singleton
+        LoggedInUser.logOut();
         // Redirect to the login screen
         Intent loginScreenIntent = new Intent(this, LoginActivity.class);
         startActivity(loginScreenIntent);
@@ -121,6 +125,8 @@ public class HomeScreenActivity extends AppCompatActivity {
     public void onItemClick(View view) {
         // Redirect to group screen
         Intent groupScreenIntent = new Intent(this, GroupScreenActivity.class);
+        // Link the ExpenseGroup by adding the group ID as extra on the intent
+        groupScreenIntent.putExtra("EXPENSE_GROUP_ID", (Integer) view.getTag());
         startActivity(groupScreenIntent);
     }
 
@@ -136,8 +142,7 @@ public class HomeScreenActivity extends AppCompatActivity {
                         for (Map<String, String> group : data) {
                             int id = Integer.parseInt(group.get("expense_group_id"));
                             String title = group.get("expense_group_name");
-                            // TODO: remove empty email once merge goes through
-                            User moderator = new User(group.get("moderator_id"), "");
+                            User moderator = new User(group.get("moderator_id"));
                             ExpenseGroup expenseGroup = new ExpenseGroup(id, title, moderator);
                             expenseGroups.add(expenseGroup);
                         }
@@ -145,9 +150,22 @@ public class HomeScreenActivity extends AppCompatActivity {
 
                     @Override
                     public void onErrorResponse(VolleyError error, String errorMessage) {
-                        // TODO: uncomment once merge goes through
-//                        showErrorToast(errorMessage);
+                        // TODO: make this into generic function
+                        showErrorToast(errorMessage);
                     }
                 });
     }
+
+    /**
+     * TODO: Make general method
+     * Shows a toast containing the provided error message
+     * @param errorMessage String to be displayed in the toast message
+     */
+    private void showErrorToast(String errorMessage) {
+        Context context = getApplicationContext();
+        int duration = Toast.LENGTH_SHORT;
+        Toast toast = Toast.makeText(context, errorMessage, duration);
+        toast.show();
+    }
+
 }
