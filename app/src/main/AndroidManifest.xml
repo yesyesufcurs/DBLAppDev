@@ -3,16 +3,12 @@
     package="com.dblappdev.app">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-feature
-        android:name="android.permission.CAMERA"
-        android:required="true"/>
-    <uses-feature
-        android:name="android.permission.READ_EXTERNAL_STORAGE"
-        android:required="true"/>
-    <uses-feature
-        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-        android:required="true"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.CAMERA" />
 
+    <uses-feature
+        android:name="android.hardware.camera2"
+        android:required="true" />
 
     <application
         android:allowBackup="true"
@@ -22,7 +18,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.App"
         android:usesCleartextTraffic="true">
-        <activity android:name=".AddJoinGroupActivity"></activity>
+        <activity android:name=".DisplayImageActivity"></activity>
+        <activity android:name=".AddJoinGroupActivity" />
         <activity android:name=".SelectMembersActivity" />
         <activity android:name=".ExpenseDetailsActivity" />
         <activity android:name=".GroupSettingsActivity" />
@@ -41,13 +38,13 @@
         </activity>
 
         <provider
-            android:authorities="${applicationId}.provider"
             android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.provider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_path"/>
+                android:resource="@xml/file_path" />
         </provider>
     </application>
 

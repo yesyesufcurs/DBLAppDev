@@ -22,7 +22,6 @@ public class ExpenseDetailsActivity extends AppCompatActivity {
 
     String currentImagePath = null;
     private static final int IMAGE_REQUEST = 1;
-    ImageView imageView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,19 +57,19 @@ public class ExpenseDetailsActivity extends AppCompatActivity {
      */
     public void captureImage(View view) {
 
-        Intent cameraInent = new Intent (MediaStore.ACTION_IMAGE_CAPTURE);
+        Intent cameraIntent = new Intent (MediaStore.ACTION_IMAGE_CAPTURE);
 
-        if (cameraInent.resolveActivity(getPackageManager()) != null) {
+        if (cameraIntent.resolveActivity(getPackageManager()) != null) {
             File imageFile = null;
             try {
                 imageFile = getImageFile();
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            if (imageFile!= null) {
+            if (imageFile != null) {
                 Uri imageUri = FileProvider.getUriForFile(this, "${applicationId}.provider", imageFile );
-                cameraInent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
-                startActivityForResult(cameraInent, IMAGE_REQUEST);
+                cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
+                startActivityForResult(cameraIntent, IMAGE_REQUEST);
             }
         }
     }
@@ -81,10 +80,9 @@ public class ExpenseDetailsActivity extends AppCompatActivity {
      */
     public void displayImage(View view) {
 
-        imageView = findViewById(R.id.mimageView);
-
-        Bitmap bitmap = BitmapFactory.decodeFile(currentImagePath);
-        imageView.setImageBitmap(bitmap);
+        Intent intent = new Intent(this, DisplayImageActivity.class);
+        intent.putExtra("image_path", currentImagePath);
+        startActivity(intent);
     }
 
     private File getImageFile() throws IOException{
