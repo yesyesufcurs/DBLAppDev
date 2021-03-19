@@ -10,7 +10,7 @@ public class ExpenseGroup {
     private ArrayList<User> users;
     private User moderator;
     private ArrayList<Expense> expenses;
-    private HashMap<User, Float> balance;
+    private HashMap<User, Integer> balance;
 
     public ExpenseGroup(int id, String title, User moderator) {
         this.id = id;
@@ -75,7 +75,7 @@ public class ExpenseGroup {
      * sets the balance map of the expense group
      * @post {@code this.balance == balance}
      */
-    public void setBalance(HashMap<User, Float> balance) {
+    public void setBalance(HashMap<User, Integer> balance) {
         this.balance = balance;
     }
 
@@ -83,7 +83,7 @@ public class ExpenseGroup {
      * sets the balance of a single user
      * @post {@code this.balance.get(user) == amount}
      */
-    public void setSingleBalance(User user, float amount) {
+    public void setSingleBalance(User user, int amount) {
         balance.put(user, amount);
     }
 
@@ -91,7 +91,13 @@ public class ExpenseGroup {
      * gets the balance map of the expense group
      * @return {@code this.balance}
      */
-    public HashMap<User, Float> getBalance() {
+    public HashMap<User, Integer> getBalance() {
         return balance;
     }
+
+    /**
+     * gets the title of the expense group
+     * @return {@code this.title}
+     */
+    public String getTitle() { return title; }
 }
