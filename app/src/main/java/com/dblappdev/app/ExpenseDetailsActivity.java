@@ -1,12 +1,28 @@
 package com.dblappdev.app;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.view.View;
+import android.widget.ImageView;
+
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class ExpenseDetailsActivity extends AppCompatActivity {
+
+    String currentImagePath = null;
+    private static final int IMAGE_REQUEST = 1;
+    ImageView imageView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,5 +50,50 @@ public class ExpenseDetailsActivity extends AppCompatActivity {
         Intent selectMembersIntent = new Intent(this, SelectMembersActivity.class);
         startActivity(selectMembersIntent);
         finish();
+    }
+
+    /**
+     * Captures an Image through an Intent
+     * @param view
+     */
+    public void captureImage(View view) {
+
+        Intent cameraInent = new Intent (MediaStore.ACTION_IMAGE_CAPTURE);
+
+        if (cameraInent.resolveActivity(getPackageManager()) != null) {
+            File imageFile = null;
+            try {
+                imageFile = getImageFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            if (imageFile!= null) {
+                Uri imageUri = FileProvider.getUriForFile(this, "${applicationId}.provider", imageFile );
+                cameraInent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
+                startActivityForResult(cameraInent, IMAGE_REQUEST);
+            }
+        }
+    }
+
+    /**
+     * Displays an Image
+     * @param view
+     */
+    public void displayImage(View view) {
+
+        imageView = findViewById(R.id.mimageView);
+
+        Bitmap bitmap = BitmapFactory.decodeFile(currentImagePath);
+        imageView.setImageBitmap(bitmap);
+    }
+
+    private File getImageFile() throws IOException{
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageName = "jpg_"+ timeStamp+ "_";
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+
+        File imageFile = File.createTempFile(imageName, ".jpg", storageDir);
+        currentImagePath = imageFile.getAbsolutePath();
+        return imageFile;
     }
 }
