@@ -55,7 +55,7 @@ public class ExpenseGroupAdapter extends RecyclerView.Adapter<GregViewHolder> {
         // Get element from the dataset at the given position and replace the contents of the view
         // Set the name to the title of the group and add (mod) if the logged in user is the moderator
         String nameString = group.getTitle();
-        if (LoggedInUser.getInstance().getUser() == group.getModerator()) {
+        if (LoggedInUser.getInstance().getUser().getUsername().equals(group.getModerator().getUsername())) {
             nameString += " (mod)";
         }
         viewHolder.getTextViewName().setText(nameString);
