@@ -58,6 +58,7 @@ class AbstractAPI():
     def generateJson(self, rows):
         json_result = []
         for row in rows:
+            print(row)
             drow = dict(zip(row.keys(), row))
             json_result.append(drow)
         return jsonify(json_result)
