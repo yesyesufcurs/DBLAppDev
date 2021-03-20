@@ -13,6 +13,7 @@ import com.android.volley.VolleyError;
 import com.dblappdev.app.api.APIResponse;
 import com.dblappdev.app.api.APIService;
 import com.dblappdev.app.dataClasses.LoggedInUser;
+import com.dblappdev.app.gregservice.GregService;
 
 public class LoginActivity extends AppCompatActivity {
     boolean isRequestHappening = false;
@@ -59,7 +60,7 @@ public class LoginActivity extends AppCompatActivity {
                 loginAPICall(username, password, this);
             }
         } else {
-            showErrorToast("Invalid input!");
+            GregService.showErrorToast("Invalid input!", this);
         }
         
     }
@@ -68,10 +69,9 @@ public class LoginActivity extends AppCompatActivity {
         APIService.login(username, password, context,
                 new APIResponse<String>() {
                     @Override
-                    //TODO: remove email requirement for login request
                     public void onResponse(String data) {
                         //Save the API key in the LoggedInUser singleton
-                        LoggedInUser.logIn(data, username, "");
+                        LoggedInUser.logIn(data, username);
                         // Create a new HomeScreen activity, navigate there and finish this activity
                         Intent homeScreenIntent = new Intent(context, HomeScreenActivity.class);
                         startActivity(homeScreenIntent);
@@ -83,7 +83,7 @@ public class LoginActivity extends AppCompatActivity {
                     @Override
                     public void onErrorResponse(VolleyError error, String errorMessage) {
                         // Show a toast message notifying the user that the input was invalid
-                        showErrorToast(errorMessage);
+                        GregService.showErrorToast(errorMessage, context);
                         // Allow a new request to be made
                         isRequestHappening = false;
                     }
@@ -113,38 +113,10 @@ public class LoginActivity extends AppCompatActivity {
      * @return {@code true} iff the strings conform to the specification explained at {@link #onLoginClick(View)}
      */
     private boolean isValidInput(String username, String password) {
-        boolean validUsername = username.length() >= 1 && username.length() <= 30 && isASCII(username);
-        boolean validPassword = password.length() >= 7 && password.length() <= 30 && isASCII(password);
+        boolean validUsername = username.length() >= 1 && username.length() <= 30 && GregService.isASCII(username);
+        boolean validPassword = password.length() >= 7 && password.length() <= 30 && GregService.isASCII(password);
 
         return validUsername && validPassword;
     }
 
-    /**
-     * TODO: Make general method
-     * Shows a toast containing the provided error message
-     * @param errorMessage String to be displayed in the toast message
-     */
-    private void showErrorToast(String errorMessage) {
-        Context context = getApplicationContext();
-        int duration = Toast.LENGTH_SHORT;
-        Toast toast = Toast.makeText(context, errorMessage, duration);
-        toast.show();
-    }
-
-    /**
-     * TODO: Copied this one from APIService, should maybe look into refactoring that to prevent copying
-     * Returns if string only contains ASCII characters
-     *
-     * @param string string to be checked
-     * @return true if string only contains ASCII, else false
-     */
-    private static boolean isASCII(String string) {
-        for (char c : string.toCharArray()) {
-            // The characters between 0 - 127 are the ASCII characters
-            if (c >= 128) {
-                return false;
-            }
-        }
-        return true;
-    }
 }
