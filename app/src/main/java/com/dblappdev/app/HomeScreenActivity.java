@@ -24,11 +24,12 @@ import java.util.Map;
 
 public class HomeScreenActivity extends AppCompatActivity {
 
+    // Semaphore to prevent multiple requests from happening at the same time, potentially
+    // interfering with each other
     boolean isRequestHappening = false;
 
     // List containing the expense groups to be shown
     private ArrayList<ExpenseGroup> expenseGroups = new ArrayList<>();
-    // Map with a balance
 
     /**
      * This method gets invoked by Android upon the creation of a HomeScreenActivity
@@ -36,7 +37,7 @@ public class HomeScreenActivity extends AppCompatActivity {
      * {@link LoggedInUser} is not null.
      * If this is null, throw a RuntimeException stating that something went wrong with logging in.
      * Otherwise, this method should obtain all the ExpenseGroups that the currently
-     * logged in user is a part of, as well as the balance of the logged in user in all those groups.
+     * logged in user is a part of.
      * Once these have been loaded, a recyclerview adapter for the ExpenseGroups should be
      * initiated with the retrieved ExpenseGroups as dataset.
      * @pre {@code {@link LoggedInUser#getInstance()} != null}
@@ -54,8 +55,11 @@ public class HomeScreenActivity extends AppCompatActivity {
                     " found upon creation of the home screen!");
         }
 
-        // First get all the expense groups the logged in user is part of
+        // Get all the expense groups the logged in user is part of
         if (!isRequestHappening) {
+            // Update semaphore
+            isRequestHappening = true;
+            // This method will also deal with the instantiating of the recycler view
             getExpenseGroups(this);
         }
     }
@@ -128,12 +132,17 @@ public class HomeScreenActivity extends AppCompatActivity {
     /**
      * This method creates a getExpenseGroups API call to retrieve all the expenses the currently
      * logged in user is part of.
+     * Upon success, it parses the data into an ArrayList of ExpenseGroups and instantiates
+     * a recycler view with the retrieved data.
+     * Upon failure, it shows a Toast with the error message.
+     * @param context Context in which the API request and RecyclerView instantiating happens
      */
     private void getExpenseGroups(Context context) {
         APIService.getExpenseGroups(LoggedInUser.getInstance().getApiKey(), context,
                 new APIResponse<List<Map<String, String>>>() {
                     @Override
                     public void onResponse(List<Map<String, String>> data) {
+                        // Parse the data into the ExpenseGroup ArrayList
                         for (Map<String, String> group : data) {
                             int id = Integer.parseInt(group.get("id"));
                             String title = group.get("name");
@@ -147,12 +156,13 @@ public class HomeScreenActivity extends AppCompatActivity {
                         ExpenseGroupAdapter adapter = new ExpenseGroupAdapter(listener, expenseGroups);
                         recView.setAdapter(adapter);
                         recView.setLayoutManager(new LinearLayoutManager(context));
+                        // Update semaphore
                         isRequestHappening = false;
                     }
 
                     @Override
                     public void onErrorResponse(VolleyError error, String errorMessage) {
-                        // TODO: make this into generic function
+                        // Show error and update semaphore
                         showErrorToast(errorMessage);
                         isRequestHappening = false;
                     }

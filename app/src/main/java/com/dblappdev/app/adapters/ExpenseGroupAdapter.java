@@ -23,19 +23,11 @@ public class ExpenseGroupAdapter extends RecyclerView.Adapter<GregViewHolder> {
     /**
      * Initialize the dataset of the Adapter
      * @param listener View.OnClickListener that deals with the on click event
-     * TODO: Update this to fit with the loading in of the data (data should probably be added as a parameter)
+     * @param dataset ArrayList that contains the ExpenseGroups to be shown in the view
      */
     public ExpenseGroupAdapter(View.OnClickListener listener, ArrayList<ExpenseGroup> dataset) {
         onClickListener = listener;
         localDataSet = dataset;
-
-//        // START TEMP CODE
-//        // generate mockup data
-//        localDataSet = new ArrayList<>();
-//        for (int i = 0; i < 20; i++) {
-//            localDataSet.add(new ExpenseGroup(i, "Group no. " + i, null));
-//        }
-//        // END TEMP CODE
     }
 
     // Create new views (invoked by the layout manager)
@@ -48,28 +40,40 @@ public class ExpenseGroupAdapter extends RecyclerView.Adapter<GregViewHolder> {
         return new GregViewHolder(view);
     }
 
-    // Replace the contents of a view (invoked by the layout manager)
+    /**
+     * This method should replace the contents of a view (invoked by the layout manager)
+     * This means it should set {@link GregViewHolder#getTextViewName()} to the
+     * {@link ExpenseGroup#getTitle()} and set {@link GregViewHolder#getTextViewBalance()} to '(mod)'
+     * if and only if the currently logged in user is the moderator of the ExpenseGroup.
+     * Lastly, it should also link the {@link ExpenseGroup#getId()} with the view such that it can
+     * be used in the onClickListener of the ViewHolder.
+     * @param viewHolder View holder of the view whose contents have to be replaced
+     * @param position index of the dataset that is to be used to set the data
+     */
     @Override
     public void onBindViewHolder(GregViewHolder viewHolder, final int position) {
+        // Get the name of the ExpenseGroup
         ExpenseGroup group = localDataSet.get(position);
-        // Get element from the dataset at the given position and replace the contents of the view
-        // Set the name to the title of the group and add (mod) if the logged in user is the moderator
         String nameString = group.getTitle();
-        if (LoggedInUser.getInstance().getUser().getUsername().equals(group.getModerator().getUsername())) {
-            nameString += " (mod)";
-        }
-        viewHolder.getTextViewName().setText(nameString);
-        // Set the balance to the balance of the logged in user in the group
-        String balanceString;
+
+        // Check whether the logged in user is the moderator of the group
+        String loggedInUsername;
         try {
-            float balance = localDataSet.get(position).getBalance().get(LoggedInUser.getInstance().getUser());
-            balanceString = "€" + balance;
-        } catch (Exception e) {
-            balanceString = "€--,--";
+           loggedInUsername = LoggedInUser.getInstance().getUser().getUsername();
+        } catch(Exception e) {
+            // If no user is logged in, they obviously cannot be the moderator
+            loggedInUsername = "";
         }
-        viewHolder.getTextViewBalance().setText(balanceString);
-        // Link the ExpenseGroup instance with the view
-        viewHolder.getView().setTag(localDataSet.get(position).getId());
+        String modUsername = group.getModerator().getUsername();
+        // If the logged in user is the moderator, add the (mod) text on the view
+        String moderatorString = loggedInUsername.equals(modUsername) ? "(mod)" : "";
+
+        // Set the name and moderator text on the view
+        viewHolder.getTextViewName().setText(nameString);
+        viewHolder.getTextViewBalance().setText(moderatorString);
+
+        // Link the ExpenseGroup with the view
+        viewHolder.getView().setTag(group.getId());
     }
 
     // Return the size of your dataset (invoked by the layout manager)
