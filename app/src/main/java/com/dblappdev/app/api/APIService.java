@@ -23,6 +23,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.dblappdev.app.gregservice.GregService.isASCII;
+
 public abstract class APIService {
     /**
      * Registers user in backend and returns apiKey
@@ -96,23 +98,6 @@ public abstract class APIService {
         new StringAPIRequest(AbstractAPIRequest.getAPIUrl() + "register", Request.Method.GET,
                 headers, null).run(context, response);
     }
-
-    /**
-     * Returns if string only contains ASCII characters
-     *
-     * @param string string to be checked
-     * @return true if string only contains ASCII, else false
-     */
-    private static boolean isASCII(String string) {
-        for (char c : string.toCharArray()) {
-            // The characters between 0 - 127 are the ASCII characters
-            if (c >= 128) {
-                return false;
-            }
-        }
-        return true;
-    }
-
 
     /**
      * Logs user in and returns apiKey.

@@ -17,6 +17,7 @@ import com.dblappdev.app.api.APIService;
 import com.dblappdev.app.dataClasses.ExpenseGroup;
 import com.dblappdev.app.dataClasses.LoggedInUser;
 import com.dblappdev.app.dataClasses.User;
+import com.dblappdev.app.gregservice.GregService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -163,22 +164,10 @@ public class HomeScreenActivity extends AppCompatActivity {
                     @Override
                     public void onErrorResponse(VolleyError error, String errorMessage) {
                         // Show error and update semaphore
-                        showErrorToast(errorMessage);
+                        GregService.showErrorToast(errorMessage, context);
                         isRequestHappening = false;
                     }
                 });
-    }
-
-    /**
-     * TODO: Make general method
-     * Shows a toast containing the provided error message
-     * @param errorMessage String to be displayed in the toast message
-     */
-    private void showErrorToast(String errorMessage) {
-        Context context = getApplicationContext();
-        int duration = Toast.LENGTH_SHORT;
-        Toast toast = Toast.makeText(context, errorMessage, duration);
-        toast.show();
     }
 
 }
