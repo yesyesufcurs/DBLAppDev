@@ -54,11 +54,12 @@ public class ExpenseDetailsActivity extends AppCompatActivity {
     }
 
     /**
+     * Event handler for the capture image button
      * Captures an Image through an Intent
      *
-     * @param view
+     * @param view The View instance of the button that was pressed
      */
-    public void captureImage(View view) {
+    public void onCaptureImage(View view) {
         Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         File imageFile = null;
         try {
@@ -77,11 +78,12 @@ public class ExpenseDetailsActivity extends AppCompatActivity {
     }
 
     /**
+     * Event handler for the display image button
      * Displays an Image
      *
-     * @param view
+     * @param view The View instance of the button that was pressed
      */
-    public void displayImage(View view) {
+    public void onDisplayImage(View view) {
         Intent intent = new Intent(this, DisplayImageActivity.class);
         intent.putExtra("image_path", currentImagePath);
         startActivity(intent);
