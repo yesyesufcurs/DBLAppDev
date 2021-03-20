@@ -100,4 +100,16 @@ public class ExpenseGroup {
      * @return {@code this.title}
      */
     public String getTitle() { return title; }
+
+    /**
+     * gets the id of the expense group
+     * @return {@code this.id}
+     */
+    public int getId() { return id; }
+
+    /**
+     * gets the moderator of the expense group
+     * @return {@code this.moderator}
+     */
+    public User getModerator() { return moderator; }
 }
