@@ -114,7 +114,7 @@ public class LoginActivity extends AppCompatActivity {
      */
     private boolean isValidInput(String username, String password) {
         boolean validUsername = username.length() >= 1 && username.length() <= 30 && GregService.isASCII(username);
-        boolean validPassword = password.length() >= 7 && password.length() <= 30 && GregService.isASCII(password);
+        boolean validPassword = password.length() >= 6 && password.length() <= 30 && GregService.isASCII(password);
 
         return validUsername && validPassword;
     }
