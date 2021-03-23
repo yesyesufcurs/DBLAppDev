@@ -312,6 +312,7 @@ def createExpenseIOU(iouJson):
             iou = json.loads(iouJson)
             expense_id = ""
             query = ''' INSERT INTO accured_expenses VALUES (?, ?, ?, ?) '''
+            queryRemove = "DELETE FROM accured_expenses WHERE expense_id = ? AND user_id = ?"
             # Get headers
             try:
                 expense_id = request.headers.get('expense_id')
@@ -329,6 +330,9 @@ def createExpenseIOU(iouJson):
             # Iterate through iouJson and add each Accured Expense to db.
             for key in iou:
                 try:
+                    # Make sure that this iou does not exist.
+                    cursor.execute(queryRemove, (expense_id, key))
+                    # Add a new iou.
                     cursor.execute(query, (expense_id, key, iou[key], False))
                 except Exception as e:
                     return jsonify(error=412, text="Cannot add transaction"), 412
