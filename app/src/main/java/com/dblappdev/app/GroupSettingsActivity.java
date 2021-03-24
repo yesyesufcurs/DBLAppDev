@@ -4,16 +4,30 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
+import com.android.volley.VolleyError;
+import com.dblappdev.app.adapters.ExpenseAdapter;
 import com.dblappdev.app.adapters.MemberBalanceAdapter;
+import com.dblappdev.app.api.APIResponse;
+import com.dblappdev.app.api.APIService;
+import com.dblappdev.app.dataClasses.Expense;
+import com.dblappdev.app.dataClasses.ExpenseGroup;
 import com.dblappdev.app.dataClasses.LoggedInUser;
+import com.dblappdev.app.dataClasses.User;
+import com.dblappdev.app.gregservice.GregService;
+
+import java.util.List;
+import java.util.Map;
 
 public class GroupSettingsActivity extends AppCompatActivity {
-    int expenseGroupID;
+
+    boolean isRequestHappening = false;
+    ExpenseGroup expenseGroup;
 
     /**
      * This method gets invoked by Android upon the creation of a GroupScreenActivity
@@ -24,7 +38,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
      * throw a RuntimeException stating that something went wrong with displaying the expense group
      * settings.
      * Otherwise, this method should obtain all the Users that are in the group and the amount
-     * of money owed by the user to each of them. 
+     * of money owed by the user to each of them.
      * Once these have been loaded, a recyclerview adapter for the users should be
      * initiated with the retrieved Users as dataset.
      * @pre {@code {@link LoggedInUser#getInstance()} != null}
@@ -41,16 +55,16 @@ public class GroupSettingsActivity extends AppCompatActivity {
         if (!getIntent().hasExtra("EXPENSE_GROUP_ID")) {
             throw new RuntimeException("runtime exc");
         }
-        expenseGroupID = bundle.getInt("EXPENSE_GROUP_ID");
+        int expenseGroupID = bundle.getInt("EXPENSE_GROUP_ID");
 
         ((TextView) findViewById(R.id.groupNameText)).setText(Integer.toString(expenseGroupID));
 
-        // Set the recyclerview and its settings
-        RecyclerView recView = (RecyclerView) findViewById(R.id.recyclerViewMembersBalance);
-        View.OnClickListener listener = view -> onRemove(view);
-        MemberBalanceAdapter adapter = new MemberBalanceAdapter(listener);
-        recView.setAdapter(adapter);
-        recView.setLayoutManager(new LinearLayoutManager(this));
+        if (!isRequestHappening) {
+            // Update semaphore
+            isRequestHappening = true;
+            // This method will also deal with the instantiating of the recycler view
+            getExpenseGroup(this,  expenseGroupID);
+        }
     }
 
     /**
@@ -106,5 +120,63 @@ public class GroupSettingsActivity extends AppCompatActivity {
      */
     public void onRemoveGroup(View view) {
 
+    }
+
+    private void getUsers(Context context, int expenseGroupID) {
+        GregService.showErrorToast(Integer.toString(expenseGroupID), context);
+        APIService.getUserOwedTotal(LoggedInUser.getInstance().getApiKey(),
+                Integer.toString(expenseGroupID), context,
+                new APIResponse<List<Map<String, String>>>() {
+                    @Override
+                    public void onResponse(List<Map<String, String>> data) {
+                        // Parse the data into the expenses ArrayList
+                        for (Map<String, String> group : data) {
+                            String id = group.get("user_id");
+                            float amount = Float.parseFloat(group.get("amount"));
+                            User user = new User(id);
+                            expenseGroup.addUser(user);
+                            expenseGroup.setSingleBalance(user, amount);
+                        }
+                        // Set the recyclerview and its settings
+                        RecyclerView recView = (RecyclerView) findViewById(R.id.recyclerViewMembersBalance);
+                        View.OnClickListener listener = view -> onRemove(view);
+                        MemberBalanceAdapter adapter = new MemberBalanceAdapter(listener,
+                                expenseGroup.getUsers(), expenseGroup.getBalance());
+                        recView.setAdapter(adapter);
+                        recView.setLayoutManager(new LinearLayoutManager(context));
+                        // Update semaphore
+                        isRequestHappening = false;
+                    }
+
+                    @Override
+                    public void onErrorResponse(VolleyError error, String errorMessage) {
+                        // Show error and update semaphore
+                        GregService.showErrorToast(errorMessage, context);
+                        isRequestHappening = false;
+                    }
+                });
+    }
+
+    private void getExpenseGroup(Context context, int expenseGroupID) {
+        APIService.getExpenseGroup(LoggedInUser.getInstance().getApiKey(),
+                Integer.toString(expenseGroupID),
+                context,
+                new APIResponse<List<Map<String, String>>>() {
+                    @Override
+                    public void onResponse(List<Map<String, String>> data) {
+                        String name =data.get(0).get("name");
+                        String mod = data.get(0).get("moderator_id");
+                        expenseGroup = new ExpenseGroup(expenseGroupID, name, new User(mod));
+                        // Set the recyclerview and its settings
+                        getUsers(context, expenseGroupID);
+                    }
+
+                    @Override
+                    public void onErrorResponse(VolleyError error, String errorMessage) {
+                        // Show error and update semaphore
+                        GregService.showErrorToast(errorMessage + " in a", context);
+                        isRequestHappening = false;
+                    }
+                });
     }
 }

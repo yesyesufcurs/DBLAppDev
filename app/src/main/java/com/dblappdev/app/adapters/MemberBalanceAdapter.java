@@ -41,19 +41,11 @@ public class MemberBalanceAdapter extends RecyclerView.Adapter<GregViewHolder> {
      * Initialize the dataset of the adapter
      * TODO: Add data needed for this as a parameter instead of using mockup data
      */
-    public MemberBalanceAdapter(View.OnClickListener removeListener) {
+    public MemberBalanceAdapter(View.OnClickListener removeListener, ArrayList<User> userList,
+                                HashMap<User, Float> balanceMap) {
         this.removeListener = removeListener;
-        // START TEMP CODE
-        // generate mockup data
-        userList = new ArrayList<>();
-        for (int i = 0; i < 5; i++) {
-            userList.add(new User("User no. " + i, i + "@" + i + ".com"));
-        }
-        balanceMap = new HashMap<>();
-        for (User user : userList) {
-            balanceMap.put(user, 1.0f);
-        }
-        // END TEMP CODE
+        this.userList = userList;
+        this.balanceMap = balanceMap;
     }
 
     // Create new views (invoked by the layout manager)

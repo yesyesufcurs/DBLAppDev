@@ -31,6 +31,7 @@ public class GroupScreenActivity extends AppCompatActivity {
     boolean isRequestHappening = false;
     int expenseGroupID;
 
+
     // List containing the expenses to be shown
     private ArrayList<Expense> expenses = new ArrayList<>();
 
