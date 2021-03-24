@@ -122,6 +122,16 @@ public class GroupSettingsActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * This method creates a getExpenseGroupMembers API call to retrieve information about the
+     * users in the expense group
+     * Upon success, it parses the data and adds all the users to the expenseGroup as User
+     * instances. It then sets the balance of all those users to 0 and calls getBalance to
+     * correct this value.
+     * Upon failure, it shows a Toast with the error message.
+     * @param context Context in which the API request and RecyclerView instantiating happens
+     * @param expenseGroupID id of the group this screen was opened for
+     */
     private void getUsers(Context context, int expenseGroupID) {
         APIService.getExpenseGroupMembers(LoggedInUser.getInstance().getApiKey(),
                 Integer.toString(expenseGroupID), context,
@@ -149,6 +159,14 @@ public class GroupSettingsActivity extends AppCompatActivity {
                 });
     }
 
+    /**
+     * This method creates a getUserOwedTotal API call to retrieve information about the
+     * users in the expense group
+     * Upon success, it parses the data and sets the balance of all users to the correct amount
+     * Upon failure, it shows a Toast with the error message.
+     * @param context Context in which the API request and RecyclerView instantiating happens
+     * @param expenseGroupID id of the group this screen was opened for
+     */
     private void getBalance(Context context, int expenseGroupID) {
         APIService.getUserOwedTotal(LoggedInUser.getInstance().getApiKey(),
                 Integer.toString(expenseGroupID), context,
@@ -186,6 +204,15 @@ public class GroupSettingsActivity extends AppCompatActivity {
                 });
     }
 
+    /**
+     * This method creates a getExpenseGroup API call to retrieve information about the current
+     * expense group.
+     * Upon success, it parses the data into an ExpenseGroup instance and calls getUsers to collect
+     * more data about the group.
+     * Upon failure, it shows a Toast with the error message.
+     * @param context Context in which the API request and RecyclerView instantiating happens
+     * @param expenseGroupID id of the group this screen was opened for
+     */
     private void getExpenseGroup(Context context, int expenseGroupID) {
         APIService.getExpenseGroup(LoggedInUser.getInstance().getApiKey(),
                 Integer.toString(expenseGroupID),
