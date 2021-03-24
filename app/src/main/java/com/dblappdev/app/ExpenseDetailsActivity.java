@@ -49,6 +49,8 @@ public class ExpenseDetailsActivity extends AppCompatActivity {
 
         // Redirect to the select members screen
         Intent selectMembersIntent = new Intent(this, SelectMembersActivity.class);
+        Bitmap bitmap = BitmapFactory.decodeFile(currentImagePath);
+        selectMembersIntent.putExtra("BitmapImage", bitmap);
         startActivity(selectMembersIntent);
         finish();
     }
