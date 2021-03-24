@@ -29,6 +29,7 @@ public class GroupScreenActivity extends AppCompatActivity {
     // Semaphore to prevent multiple requests from happening at the same time, potentially
     // interfering with each other
     boolean isRequestHappening = false;
+    int expenseGroupID;
 
     // List containing the expenses to be shown
     private ArrayList<Expense> expenses = new ArrayList<>();
@@ -67,14 +68,14 @@ public class GroupScreenActivity extends AppCompatActivity {
             throw new RuntimeException("Something went wrong with opening the expense group: no " +
                     "expense group selected.");
         }
-        int expenseGroupId = bundle.getInt("EXPENSE_GROUP_ID");
+        expenseGroupID = bundle.getInt("EXPENSE_GROUP_ID");
 
         // Get all the expense groups the logged in user is part of
         if (!isRequestHappening) {
             // Update semaphore
             isRequestHappening = true;
             // This method will also deal with the instantiating of the recycler view
-            getExpenses(this, expenseGroupId);
+            getExpenses(this);
         }
     }
 
@@ -89,6 +90,8 @@ public class GroupScreenActivity extends AppCompatActivity {
     public void onSettings(View view) {
         // Redirect to the settings screen
         Intent groupSettingsIntent = new Intent(this, GroupSettingsActivity.class);
+        // Link the ExpenseGroup by adding the group ID as extra on the intent
+        groupSettingsIntent.putExtra("EXPENSE_GROUP_ID", expenseGroupID);
         startActivity(groupSettingsIntent);
     }
 
@@ -101,9 +104,12 @@ public class GroupScreenActivity extends AppCompatActivity {
      * @param view The View instance of the button that was pressed
      */
     public void onAdd(View view) {
-
         // Redirect to the expense details screen
         Intent expenseDetailsIntent = new Intent(this, ExpenseDetailsActivity.class);
+        // Link the ExpenseGroup by adding the group ID as extra on the intent
+        expenseDetailsIntent.putExtra("EXPENSE_GROUP_ID", expenseGroupID);
+        // Link the mode
+        expenseDetailsIntent.putExtra("MODE", "ADD");
         startActivity(expenseDetailsIntent);
     }
 
@@ -120,6 +126,12 @@ public class GroupScreenActivity extends AppCompatActivity {
 
         // Redirect to the expense details screen
         Intent expenseDetailsIntent = new Intent(this, ExpenseDetailsActivity.class);
+        // Link the ExpenseGroup by adding the group ID as extra on the intent
+        expenseDetailsIntent.putExtra("EXPENSE_GROUP_ID", expenseGroupID);
+        // Link the mode
+        expenseDetailsIntent.putExtra("MODE", "EDIT");
+        // Link the expense ID
+        expenseDetailsIntent.putExtra("EXPENSE_ID", (Integer) view.getTag());
         startActivity(expenseDetailsIntent);
     }
 
@@ -151,7 +163,7 @@ public class GroupScreenActivity extends AppCompatActivity {
      * Upon failure, it shows a Toast with the error message.
      * @param context Context in which the API request and RecyclerView instantiating happens
      */
-    private void getExpenses(Context context, int expenseGroupID) {
+    private void getExpenses(Context context) {
         APIService.getExpenseGroupExpenses(LoggedInUser.getInstance().getApiKey(),
                 Integer.toString(expenseGroupID), context,
                 new APIResponse<List<Map<String, String>>>() {
