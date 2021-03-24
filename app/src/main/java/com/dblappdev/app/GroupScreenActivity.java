@@ -4,28 +4,49 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
+import com.android.volley.VolleyError;
 import com.dblappdev.app.adapters.ExpenseAdapter;
 import com.dblappdev.app.adapters.ExpenseGroupAdapter;
+import com.dblappdev.app.api.APIResponse;
+import com.dblappdev.app.api.APIService;
+import com.dblappdev.app.dataClasses.Expense;
+import com.dblappdev.app.dataClasses.ExpenseGroup;
 import com.dblappdev.app.dataClasses.LoggedInUser;
+import com.dblappdev.app.dataClasses.User;
+import com.dblappdev.app.gregservice.GregService;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class GroupScreenActivity extends AppCompatActivity {
 
+    // Semaphore to prevent multiple requests from happening at the same time, potentially
+    // interfering with each other
+    boolean isRequestHappening = false;
+
+    // List containing the expenses to be shown
+    private ArrayList<Expense> expenses = new ArrayList<>();
 
     /**
      * This method gets invoked by Android upon the creation of a GroupScreenActivity
      * Firstly, this method should check whether the logged in instance in
      * {@link LoggedInUser} is not null.
      * If this is null, throw a RuntimeException stating that something went wrong with logging in.
+     * Secondly, this method should check which expense group ID is linked. If the ID is null,
+     * throw a RuntimeException stating that something went wrong with displaying the expense group.
      * Otherwise, this method should obtain all the Expenses that are in the group the user is
      * currently looking at.
      * Once these have been loaded, a recyclerview adapter for the Expenses should be
      * initiated with the retrieved Expenses as dataset.
      * @pre {@code {@link LoggedInUser#getInstance()} != null}
      * @throws RuntimeException if {@code {@link LoggedInUser#getInstance()} == null}
+     * @throws RuntimeException if no expense group ID is linked
      */
 
     @Override
@@ -40,12 +61,21 @@ public class GroupScreenActivity extends AppCompatActivity {
                     " found upon creation of the home screen!");
         }
 
-        // Set the recyclerview and its settings
-        RecyclerView recView = (RecyclerView) findViewById(R.id.recyclerViewExpense);
-        View.OnClickListener listener = view -> onItemClick(view);
-        ExpenseAdapter adapter = new ExpenseAdapter(listener);
-        recView.setAdapter(adapter);
-        recView.setLayoutManager(new LinearLayoutManager(this));
+        // Get the linked expense group ID and check if it was properly defined
+        Bundle bundle = getIntent().getExtras();
+        if (!getIntent().hasExtra("EXPENSE_GROUP_ID")) {
+            throw new RuntimeException("Something went wrong with opening the expense group: no " +
+                    "expense group selected.");
+        }
+        int expenseGroupId = bundle.getInt("EXPENSE_GROUP_ID");
+
+        // Get all the expense groups the logged in user is part of
+        if (!isRequestHappening) {
+            // Update semaphore
+            isRequestHappening = true;
+            // This method will also deal with the instantiating of the recycler view
+            getExpenses(this, expenseGroupId);
+        }
     }
 
     /**
@@ -112,5 +142,50 @@ public class GroupScreenActivity extends AppCompatActivity {
 
         // Redirect to the home screen
         finish();
+    }
+    /**
+     * This method creates a getExpenseGroups API call to retrieve all the expenses the currently
+     * logged in user is part of.
+     * Upon success, it parses the data into an ArrayList of ExpenseGroups and instantiates
+     * a recycler view with the retrieved data.
+     * Upon failure, it shows a Toast with the error message.
+     * @param context Context in which the API request and RecyclerView instantiating happens
+     */
+    private void getExpenses(Context context, int expenseGroupID) {
+        APIService.getExpenseGroupExpenses(LoggedInUser.getInstance().getApiKey(),
+                Integer.toString(expenseGroupID), context,
+                new APIResponse<List<Map<String, String>>>() {
+                    @Override
+                    public void onResponse(List<Map<String, String>> data) {
+                        // Parse the data into the expenses ArrayList
+                        for (Map<String, String> group : data) {
+                            int id = Integer.parseInt(group.get("id"));
+                            String title = group.get("name");
+                            float amount = Float.parseFloat(group.get("amount"));
+                            String content = group.get("content");
+                            int expense_group_id = Integer.parseInt(group.get("expense_group_id"));
+                            User user = new User(group.get("user_id"));
+                            // int timestamp = Integer.parseInt(group.get("timestamp"));
+                            Expense expense = new Expense(id, expense_group_id, user, amount, title,
+                                    content, null);
+                            expenses.add(expense);
+                        }
+                        // Set the recyclerview and its settings
+                        RecyclerView recView = (RecyclerView) findViewById(R.id.recyclerViewExpense);
+                        View.OnClickListener listener = view -> onItemClick(view);
+                        ExpenseAdapter adapter = new ExpenseAdapter(listener);
+                        recView.setAdapter(adapter);
+                        recView.setLayoutManager(new LinearLayoutManager(context));
+                        // Update semaphore
+                        isRequestHappening = false;
+                    }
+
+                    @Override
+                    public void onErrorResponse(VolleyError error, String errorMessage) {
+                        // Show error and update semaphore
+                        GregService.showErrorToast(errorMessage, context);
+                        isRequestHappening = false;
+                    }
+                });
     }
 }
