@@ -177,6 +177,7 @@ public class GroupScreenActivity extends AppCompatActivity {
                             String content = group.get("content");
                             int expense_group_id = Integer.parseInt(group.get("expense_group_id"));
                             User user = new User(group.get("user_id"));
+                            // TODO: Fix timestamp property of Expense class
                             // int timestamp = Integer.parseInt(group.get("timestamp"));
                             Expense expense = new Expense(id, expense_group_id, user, amount, title,
                                     content, null);
