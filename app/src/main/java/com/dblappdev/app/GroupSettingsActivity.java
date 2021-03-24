@@ -10,10 +10,27 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.dblappdev.app.adapters.MemberBalanceAdapter;
+import com.dblappdev.app.dataClasses.LoggedInUser;
 
 public class GroupSettingsActivity extends AppCompatActivity {
     int expenseGroupID;
 
+    /**
+     * This method gets invoked by Android upon the creation of a GroupScreenActivity
+     * Firstly, this method should check whether the logged in instance in
+     * {@link LoggedInUser} is not null.
+     * If this is null, throw a RuntimeException stating that something went wrong with logging in.
+     * Secondly, this method should check which expense group ID is linked. If the ID is null,
+     * throw a RuntimeException stating that something went wrong with displaying the expense group
+     * settings.
+     * Otherwise, this method should obtain all the Users that are in the group and the amount
+     * of money owed by the user to each of them. 
+     * Once these have been loaded, a recyclerview adapter for the users should be
+     * initiated with the retrieved Users as dataset.
+     * @pre {@code {@link LoggedInUser#getInstance()} != null}
+     * @throws RuntimeException if {@code {@link LoggedInUser#getInstance()} == null}
+     * @throws RuntimeException if no expense group ID is linked
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
