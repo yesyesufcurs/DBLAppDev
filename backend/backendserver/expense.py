@@ -253,7 +253,7 @@ def getExpensePicture(expenseid, apikey):
 
             # Check if user has permissions to get the expense picture
             try:
-                if not(isMember(user_id, expense_group_id, cursor)):
+                if not(isMember(user_id, getExpenseGroup(expense_id, cursor), cursor)):
                     return jsonify(error=412, text="User must be member of the expense group to see an expense picture."), 412
             except Exception as e:
                 return jsonify(error=412, text="Cannot determine if caller has permissions"), 412
