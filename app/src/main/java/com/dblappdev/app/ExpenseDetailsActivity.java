@@ -84,24 +84,26 @@ public class ExpenseDetailsActivity extends AppCompatActivity {
                             "http://94.130.144.25:5000/getExpensePicture/" + ourData.get("id") + "/" + LoggedInUser.getInstance().getApiKey()
                     );
                     //create a file to write bitmap data
-                    try {
-                        File f = new File(currentContext.getCacheDir(), "tempicture");
-                        f.createNewFile();
+                    if (picture != null) {
+                        try {
+                            File f = new File(currentContext.getCacheDir(), "tempicture");
+                            f.createNewFile();
 
-                        //Convert bitmap to byte array
+                            //Convert bitmap to byte array
 
-                        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                        picture.compress(Bitmap.CompressFormat.PNG, 0 /*ignored for PNG*/, bos);
-                        byte[] bitmapdata = bos.toByteArray();
+                            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                            picture.compress(Bitmap.CompressFormat.PNG, 0 /*ignored for PNG*/, bos);
+                            byte[] bitmapdata = bos.toByteArray();
 
-                        //write the bytes in file
-                        FileOutputStream fos = new FileOutputStream(f);
-                        fos.write(bitmapdata);
-                        fos.flush();
-                        fos.close();
-                        currentImagePath = f.getAbsolutePath();
-                    } catch( Exception e){
-                        throw new IllegalStateException("Cannot save picture");
+                            //write the bytes in file
+                            FileOutputStream fos = new FileOutputStream(f);
+                            fos.write(bitmapdata);
+                            fos.flush();
+                            fos.close();
+                            currentImagePath = f.getAbsolutePath();
+                        } catch (Exception e) {
+                            throw new IllegalStateException("Cannot save picture");
+                        }
                     }
                 }
 
@@ -127,7 +129,6 @@ public class ExpenseDetailsActivity extends AppCompatActivity {
             url = new URL(weblink);
             bmp = BitmapFactory.decodeStream(url.openConnection().getInputStream());
         } catch (Exception e) {
-            throw new IllegalStateException(e.getMessage());
         }
         return bmp;
     }
@@ -157,7 +158,7 @@ public class ExpenseDetailsActivity extends AppCompatActivity {
         selectMembersIntent.putExtra("imagePath", currentImagePath);
         selectMembersIntent.putExtra("expenseGroupId", expenseGroupId);
         selectMembersIntent.putExtra("MODE", MODE);
-        if (MODE.equals("EDIT")){
+        if (MODE.equals("EDIT")) {
             selectMembersIntent.putExtra("EXPENSE_ID", EXPENSE_ID);
         }
         startActivity(selectMembersIntent);
