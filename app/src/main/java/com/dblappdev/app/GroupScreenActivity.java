@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.TextView;
 
 import com.android.volley.VolleyError;
 import com.dblappdev.app.adapters.ExpenseAdapter;
@@ -69,6 +70,9 @@ public class GroupScreenActivity extends AppCompatActivity {
                     "expense group selected.");
         }
         expenseGroupID = bundle.getInt("EXPENSE_GROUP_ID");
+        // Set the group name in the UI
+        String name = bundle.getString("EXPENSE_GROUP_NAME");
+        ((TextView) findViewById(R.id.usernameText)).setText(name);
 
         // Get all the expense groups the logged in user is part of
         if (!isRequestHappening) {
