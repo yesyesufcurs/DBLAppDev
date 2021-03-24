@@ -54,6 +54,8 @@ public class GroupSettingsActivity extends AppCompatActivity {
     }
 
     /**
+     * This method gets called when the user presses the Back button.
+     * When this happens, this activity should be finished without saving any changes.
      * Event handler for the back button
      * @param view The View instance of the button that was pressed
      */
@@ -64,6 +66,12 @@ public class GroupSettingsActivity extends AppCompatActivity {
     }
 
     /**
+     * This method gets called when the user presses the leave button
+     * When this happens, this method should make a request to remove the currently logged in user
+     * from the expense group that is linked to this activity.
+     * If this request gives an error, a Toast with the error messages should be displayed.
+     * If this request is successful, this activity should be finished, as well as the
+     * GroupScreenActivity that is still opened.
      * Event handler for the leave button
      * @param view The View instance of the button that was pressed
      */
@@ -72,6 +80,13 @@ public class GroupSettingsActivity extends AppCompatActivity {
     }
 
     /**
+     * This method gets called when the user presses the remove button in an item in the member list.
+     * When this happens, this method should make a request to remove the user that is linked to
+     * the clicked item in the member list from the expense group that is linked to this activity.
+     * If this request gives an error, a Toast with the error message should be displayed.
+     * If this request is successful, a Toast message saying the user has been removed should be
+     * displayed.
+     * TODO: Possibly, the RecyclerView can be updated, but this is not needed for the initial implementation.
      * Event handler for removing a user
      * @param view
      */
@@ -80,6 +95,12 @@ public class GroupSettingsActivity extends AppCompatActivity {
     }
 
     /**
+     * This method gets called when the user presses the remove group button on the end of the page.
+     * When this happens, this method should make a request to remove the expense group that is
+     * linked to this activity.
+     * If this request gives an error, a Toast with the error message should be displayed.
+     * If this request is successful, thsi activity should be finish, as well as the
+     * GroupScreenActivity that is still opened.
      * Event handler for removing the group
      * @param view
      */
