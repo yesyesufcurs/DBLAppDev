@@ -33,4 +33,12 @@ public class GroupSettingsActivity extends AppCompatActivity {
         // Redirect to the group screen
         finish();
     }
+
+    /**
+     * Event handler for the leave button
+     * @param view The View instance of the button that was pressed
+     */
+    public void onLeave(View view) {
+
+    }
 }
