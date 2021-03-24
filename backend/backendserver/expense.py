@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify, Response, send_file
 from backendserver import app, db_file, create_connection
 from backendserver.abstractAPI import AbstractAPI
 import backendserver.expense_group
-from backendserver.permissionChecks import isModerator, isMember, isExpenseCreator, getExpenseGroup, owesMoney
+from backendserver.permissionChecks import isModerator, isMember, isExpenseCreator, getExpenseGroup, owesMoney, debitMoney
 from backendserver.googleCloud import detect_text
 
 import werkzeug
@@ -522,7 +522,32 @@ def getUserOwedTotal():
                 return jsonify(error=412, text="Cannot get the owed amounts")
             return self.generateJson(self, result)
     return GetUserOwedTotal.template_method(GetUserOwedTotal, request.headers["api_key"] if "api_key" in request.headers else None)
-            
+
+@app.route("/getUserDebitTotal")
+def getUserDebitTotal():
+    """
+    Returns JSON object containing each person that owes money to the user
+    and the amount the person owes
+    Expects headers:
+    expense_group_id
+    Returns: user_id, amount
+    """            
+    class GetUserDebitTotal(AbstractAPI):
+        def api_operation(self, user_id, conn):
+            expense_group_id = None
+            result = None
+            cursor = conn.cursor()
+            # Get headers
+            try:
+                expense_group_id = request.headers.get('expense_group_id')
+            except Exception as e:
+                return jsonify(error=412, text="Missing expense group id")
+            try:
+                result = debitMoney(user_id, expense_group_id, cursor)
+            except Exception as e:
+                return jsonify(error=412, text="Cannot get the owed amounts")
+            return self.generateJson(self, result)
+    return GetUserDebitTotal.template_method(GetUserDebitTotal, request.headers.get("api_key"))
 
 @app.route("/getExpenseDetails")
 def getExpenseDetails():

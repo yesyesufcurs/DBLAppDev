@@ -24,16 +24,9 @@ public class ExpenseAdapter extends RecyclerView.Adapter<GregViewHolder> {
      * @param listener View.OnClickListener that deals with the on click event
      * TODO: Update this to fit with the loading in of the data (should be added as a parameter)
      */
-    public ExpenseAdapter(View.OnClickListener listener) {
+    public ExpenseAdapter(View.OnClickListener listener, ArrayList<Expense> expenses) {
         onClickListener = listener;
-
-//        // START TEMP CODE
-//        // generate mockup data
-//        localDataSet = new ArrayList<>();
-//        for (int i = 0; i < 20; i++) {
-//            localDataSet.add(new Expense(i, i, null, 0.01f * i, "Expense no. " + i, "Description no. " + i));
-//        }
-//        // END TEMP CODE
+        localDataSet = expenses;
     }
 
     // Create new views (invoked by the layout manager)
@@ -50,8 +43,9 @@ public class ExpenseAdapter extends RecyclerView.Adapter<GregViewHolder> {
     @Override
     public void onBindViewHolder(GregViewHolder viewHolder, final int position) {
         // Get element from the dataset at the given position and replace the contents of the view
-        viewHolder.getTextViewName().setText(localDataSet.get(position).getTitle());
+        viewHolder.getTextViewName().setText(localDataSet.get(position).getDescription());
         viewHolder.getTextViewBalance().setText("€" + localDataSet.get(position).getAmount());
+        viewHolder.getView().setTag(localDataSet.get(position).getId());
     }
 
     // Return the size of your dataset (invoked by the layout manager)

@@ -64,3 +64,16 @@ def owesAnyMoney(expense_group_id, cursor):
     """
     cursor.execute(query, (expense_group_id,))
     return cursor.fetchall()
+
+def debitMoney(user_id, expense_group_id, cursor):
+    """
+    Returns each person that owes the user in the expense group.
+    """
+    query = """
+    SELECT a.user_id, SUM(a.amount) as amount
+    FROM accured_expenses AS a, expense AS e
+    WHERE a.expense_id = e.id AND e.user_id = ? AND e.expense_group_id = ? AND a.paid = 0
+    GROUP BY a.user_id 
+    """
+    cursor.execute(query, (user_id, expense_group_id))
+    return cursor.fetchall()
