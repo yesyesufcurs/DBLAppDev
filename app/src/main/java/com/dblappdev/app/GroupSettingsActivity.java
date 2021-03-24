@@ -55,7 +55,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
         // Get the linked expense group ID and check if it was properly defined
         Bundle bundle = getIntent().getExtras();
         if (!getIntent().hasExtra("EXPENSE_GROUP_ID")) {
-            throw new RuntimeException("runtime exc");
+            throw new RuntimeException("Expense Group Id unknown");
         }
         int expenseGroupID = bundle.getInt("EXPENSE_GROUP_ID");
 
