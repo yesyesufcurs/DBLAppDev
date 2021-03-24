@@ -12,6 +12,7 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,6 +28,24 @@ public class ExpenseDetailsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_expense_details);
+
+        Bundle bundle = getIntent().getExtras();
+        if (!getIntent().hasExtra("MODE")) {
+            throw new RuntimeException("Something went wrong with opening the expense details: no " +
+                    "mode selected.");
+        }
+        if (!getIntent().hasExtra("EXPENSE_GROUP_ID")) {
+            throw new RuntimeException("Something went wrong with opening the expense details: no " +
+                    "expense group selected.");
+        }
+        if (bundle.get("MODE").equals("EDIT")) {
+            if (!getIntent().hasExtra("EXPENSE_ID")) {
+                throw new RuntimeException("Something went wrong with opening the expense details: no " +
+                        "expense selected.");
+            }
+            ((TextView) findViewById(R.id.topBarText)).setText("Edit expense");
+            //TODO implement loading expense data.
+        }
     }
 
     /**
