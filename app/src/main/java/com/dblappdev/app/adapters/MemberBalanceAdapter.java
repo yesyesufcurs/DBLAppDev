@@ -3,6 +3,7 @@ package com.dblappdev.app.adapters;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -19,11 +20,29 @@ public class MemberBalanceAdapter extends RecyclerView.Adapter<GregViewHolder> {
     // This map keeps track of the balance of each user in the group
     private HashMap<User, Float> balanceMap;
 
+    private View.OnClickListener removeListener;
+
+    /**
+     * Extended version of the ViewHolder that adds support for the remove button
+     */
+    public static class ViewHolder extends GregViewHolder {
+        private final ImageButton removeButton;
+
+        public ViewHolder(View view) {
+            super(view);
+
+            removeButton = (ImageButton) view.findViewById(R.id.removeButton);
+        }
+
+        public ImageButton getRemoveButton() { return removeButton; }
+    }
+
     /**
      * Initialize the dataset of the adapter
      * TODO: Add data needed for this as a parameter instead of using mockup data
      */
-    public MemberBalanceAdapter() {
+    public MemberBalanceAdapter(View.OnClickListener removeListener) {
+        this.removeListener = removeListener;
         // START TEMP CODE
         // generate mockup data
         userList = new ArrayList<>();
@@ -42,6 +61,7 @@ public class MemberBalanceAdapter extends RecyclerView.Adapter<GregViewHolder> {
     public GregViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
         // Create a new view, which defines the UI of the list item
         View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.recycler_view_item, viewGroup, false);
+        view.findViewById(R.id.removeButton).setOnClickListener(removeListener);
         return new GregViewHolder(view);
     }
 

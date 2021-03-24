@@ -19,7 +19,8 @@ public class GroupSettingsActivity extends AppCompatActivity {
 
         // Set the recyclerview and its settings
         RecyclerView recView = (RecyclerView) findViewById(R.id.recyclerViewMembersBalance);
-        MemberBalanceAdapter adapter = new MemberBalanceAdapter();
+        View.OnClickListener listener = view -> onRemove(view);
+        MemberBalanceAdapter adapter = new MemberBalanceAdapter(listener);
         recView.setAdapter(adapter);
         recView.setLayoutManager(new LinearLayoutManager(this));
     }
@@ -39,6 +40,14 @@ public class GroupSettingsActivity extends AppCompatActivity {
      * @param view The View instance of the button that was pressed
      */
     public void onLeave(View view) {
+
+    }
+
+    /**
+     * Event handler for
+     * @param view
+     */
+    public void onRemove(View view) {
 
     }
 }
