@@ -325,6 +325,7 @@ def createExpenseIOU(iouJson):
                  isModerator(user_id, getExpenseGroup(expense_id, cursor), cursor)):
                     return jsonify(error=412, text="User must be the creator of the expense to add this."), 412
             except Exception as e:
+                raise e
                 return jsonify(error=412, text="Cannot determine if caller has permissions"), 412
 
             # Iterate through iouJson and add each Accured Expense to db.
