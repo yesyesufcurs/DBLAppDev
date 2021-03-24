@@ -53,7 +53,7 @@ public class HomeScreenActivity extends AppCompatActivity {
 
         // Check if the Singleton class LoggedInUser is initialized
         if (LoggedInUser.getInstance() == null) {
-            throw new RuntimeException("Something went wrong with logging in: no loggged in user" +
+            throw new RuntimeException("Something went wrong with logging in: no logged in user" +
                     " found upon creation of the home screen!");
         }
 
@@ -132,6 +132,12 @@ public class HomeScreenActivity extends AppCompatActivity {
         // Link the ExpenseGroup name
         groupScreenIntent.putExtra("EXPENSE_GROUP_NAME", name);
         startActivity(groupScreenIntent);
+    }
+
+    @Override
+    // logout on back pressed in home screen
+    public void onBackPressed() {
+        onLogout(null);
     }
 
     /**

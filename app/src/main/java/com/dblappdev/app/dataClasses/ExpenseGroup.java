@@ -16,7 +16,8 @@ public class ExpenseGroup {
         this.id = id;
         this.title = title;
         this.moderator = moderator;
-        this.users = new ArrayList<User>();;
+        this.users = new ArrayList<User>();
+        this.balance = new HashMap<User, Float>();
     }
 
     /**
