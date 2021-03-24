@@ -14,11 +14,13 @@ import com.dblappdev.app.R;
 public class GregViewHolder extends RecyclerView.ViewHolder {
     private final TextView textViewName;
     private final TextView textViewBalance;
+    private final View view;
 
     public GregViewHolder(View view) {
         super(view);
         // Define click listener for the ViewHolder's View
 
+        this.view = view;
         textViewName = (TextView) view.findViewById(R.id.item_name);
         textViewBalance = (TextView) view.findViewById(R.id.item_balance);
     }
@@ -30,4 +32,6 @@ public class GregViewHolder extends RecyclerView.ViewHolder {
     public TextView getTextViewBalance() {
         return textViewBalance;
     }
+
+    public View getView() { return view; }
 }

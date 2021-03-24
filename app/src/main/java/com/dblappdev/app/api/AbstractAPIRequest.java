@@ -27,7 +27,7 @@ public abstract class AbstractAPIRequest<T, K> {
     private final static String api_url = "http://94.130.144.25:5000/";
     protected Response.Listener<T> responseListener;
     protected Response.ErrorListener errorListener;
-    protected String errorMessage = "Generic error message.";
+    protected String errorMessage = "Something went wrong.";
 
     /**
      * Primitive method to be overwritten by implementer.
@@ -53,8 +53,8 @@ public abstract class AbstractAPIRequest<T, K> {
      * Converts data from VolleyRequest to data expected by APIResponse
      *
      * @param data data returned by VolleyRequest
-     * @throws IllegalStateException if data cannot be converted
      * @return converted data object in type K
+     * @throws IllegalStateException if data cannot be converted
      */
     protected abstract K convertData(T data);
 
@@ -98,7 +98,6 @@ public abstract class AbstractAPIRequest<T, K> {
                             "utf-8");
                     errorMessage = new JSONObject(responseNetworkData).optString("text");
                 } catch (Exception e) {
-                    errorMessage = error.getMessage();
                 }
                 // Check if error was a TimeoutError
                 if (error.getClass().getSimpleName().equals("TimeoutError")) {
