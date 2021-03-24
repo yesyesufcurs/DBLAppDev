@@ -136,6 +136,7 @@ public class RegisterActivity extends AppCompatActivity {
 
     /**
      * Shows a toast containing the provided error message
+     * TODO: REFACTORED
      * @param errorMessage String to be displayed in the toast message
      */
     private void showErrorToast(String errorMessage) {

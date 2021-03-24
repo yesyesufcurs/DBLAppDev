@@ -70,6 +70,7 @@ public class MemberBalanceAdapter extends RecyclerView.Adapter<GregViewHolder> {
             balanceString = "€--,--";
         }
         viewHolder.getTextViewBalance().setText(balanceString);
+        viewHolder.getView().findViewById(R.id.removeButton).setTag(userList.get(position).getUsername());
     }
 
     // Return the size of your dataset (invoked by the layout manager)

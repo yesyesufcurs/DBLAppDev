@@ -28,6 +28,8 @@ public class GroupSettingsActivity extends AppCompatActivity {
 
     boolean isRequestHappening = false;
     ExpenseGroup expenseGroup;
+    // Some actions on this screen are only allowed to be performed by a moderator
+    User moderator;
 
     /**
      * This method gets invoked by Android upon the creation of a GroupScreenActivity
@@ -74,7 +76,6 @@ public class GroupSettingsActivity extends AppCompatActivity {
      * @param view The View instance of the button that was pressed
      */
     public void onBack(View view) {
-
         // Redirect to the group screen
         finish();
     }
@@ -90,7 +91,9 @@ public class GroupSettingsActivity extends AppCompatActivity {
      * @param view The View instance of the button that was pressed
      */
     public void onLeave(View view) {
-
+        int expenseGroupID = getIntent().getExtras().getInt("EXPENSE_GROUP_ID");
+        isRequestHappening = true;
+        leaveGroup(expenseGroupID, this);
     }
 
     /**
@@ -105,7 +108,16 @@ public class GroupSettingsActivity extends AppCompatActivity {
      * @param view
      */
     public void onRemove(View view) {
-
+        User loggedInUser = LoggedInUser.getInstance().getUser();
+        if (loggedInUser.getUsername().equals(moderator.getUsername())) {
+            // User is the moderator and can thus make the remove request
+            String username = view.getTag().toString();
+            int expenseGroupID = getIntent().getExtras().getInt("EXPENSE_GROUP_ID");
+            isRequestHappening = true;
+            removeFromGroup(username, expenseGroupID, this);
+        } else {
+            GregService.showErrorToast("Only a moderator can perform this action!", this);
+        }
     }
 
     /**
@@ -113,13 +125,22 @@ public class GroupSettingsActivity extends AppCompatActivity {
      * When this happens, this method should make a request to remove the expense group that is
      * linked to this activity.
      * If this request gives an error, a Toast with the error message should be displayed.
-     * If this request is successful, thsi activity should be finish, as well as the
+     * If this request is successful, this activity should be finish, as well as the
      * GroupScreenActivity that is still opened.
      * Event handler for removing the group
      * @param view
      */
     public void onRemoveGroup(View view) {
-
+        User loggedInUser = LoggedInUser.getInstance().getUser();
+        if (loggedInUser.getUsername().equals(moderator.getUsername())) {
+            // User is the moderator and can thus make the remove group request
+            // TODO : Fix expensegroupactivity closure
+            isRequestHappening = true;
+            int expenseGroupID = getIntent().getExtras().getInt("EXPENSE_GROUP_ID");
+            removeGroup(expenseGroupID, this);
+        } else {
+            GregService.showErrorToast("Only a moderator can perform this action!", this);
+        }
     }
 
     /**
@@ -222,6 +243,8 @@ public class GroupSettingsActivity extends AppCompatActivity {
                     public void onResponse(List<Map<String, String>> data) {
                         String name =data.get(0).get("name");
                         String mod = data.get(0).get("moderator_id");
+                        // Set the moderator for later purposes
+                        moderator = new User(mod);
                         expenseGroup = new ExpenseGroup(expenseGroupID, name, new User(mod));
                         // Set the recyclerview and its settings
                         getUsers(context, expenseGroupID);
@@ -230,6 +253,64 @@ public class GroupSettingsActivity extends AppCompatActivity {
                     @Override
                     public void onErrorResponse(VolleyError error, String errorMessage) {
                         // Show error and update semaphore
+                        GregService.showErrorToast(errorMessage, context);
+                        isRequestHappening = false;
+                    }
+                });
+    }
+
+    private void removeGroup(int expenseGroupID, Context context) {
+        APIService.removeExpenseGroup(LoggedInUser.getInstance().getApiKey(),
+                Integer.toString(expenseGroupID), context
+                , new APIResponse<String>() {
+                    @Override
+                    public void onResponse(String data) {
+                        finishActivity(0);
+                        finish();
+                        isRequestHappening = false;
+                    }
+
+                    @Override
+                    public void onErrorResponse(VolleyError error, String errorMessage) {
+                        GregService.showErrorToast(errorMessage, context);
+                        isRequestHappening = false;
+                    }
+                });
+    }
+
+    private void removeFromGroup(String username, int expenseGroupID, Context context) {
+        APIService.removeFromExpenseGroup(LoggedInUser.getInstance().getApiKey(),
+                username, Integer.toString(expenseGroupID), context,
+                new APIResponse<String>() {
+                    @Override
+                    public void onResponse(String data) {
+                        GregService.showErrorToast("User " + username + " has been " +
+                                "removed from the group!", context);
+                        isRequestHappening = false;
+                    }
+
+                    @Override
+                    public void onErrorResponse(VolleyError error, String errorMessage) {
+                        GregService.showErrorToast(errorMessage, context);
+                        isRequestHappening = false;
+                    }
+                });
+    }
+
+    private void leaveGroup(int expenseGroupID, Context context) {
+        APIService.removeFromExpenseGroup(LoggedInUser.getInstance().getApiKey(),
+                LoggedInUser.getInstance().getUser().getUsername(), Integer.toString(expenseGroupID),
+                context,
+                new APIResponse<String>() {
+                    @Override
+                    public void onResponse(String data) {
+                        finishActivity(0);
+                        finish();
+                        isRequestHappening = false;
+                    }
+
+                    @Override
+                    public void onErrorResponse(VolleyError error, String errorMessage) {
                         GregService.showErrorToast(errorMessage, context);
                         isRequestHappening = false;
                     }

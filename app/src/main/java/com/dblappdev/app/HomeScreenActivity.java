@@ -130,6 +130,12 @@ public class HomeScreenActivity extends AppCompatActivity {
         startActivity(groupScreenIntent);
     }
 
+    @Override
+    // logout on back pressed in home screen
+    public void onBackPressed() {
+        onLogout(null);
+    }
+
     /**
      * This method creates a getExpenseGroups API call to retrieve all the expenses the currently
      * logged in user is part of.

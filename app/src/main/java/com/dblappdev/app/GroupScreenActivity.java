@@ -93,7 +93,7 @@ public class GroupScreenActivity extends AppCompatActivity {
         Intent groupSettingsIntent = new Intent(this, GroupSettingsActivity.class);
         // Link the ExpenseGroup by adding the group ID as extra on the intent
         groupSettingsIntent.putExtra("EXPENSE_GROUP_ID", expenseGroupID);
-        startActivity(groupSettingsIntent);
+        startActivityForResult(groupSettingsIntent, 0);
     }
 
     /**
