@@ -123,7 +123,31 @@ public class GroupSettingsActivity extends AppCompatActivity {
     }
 
     private void getUsers(Context context, int expenseGroupID) {
-        GregService.showErrorToast(Integer.toString(expenseGroupID), context);
+        APIService.getExpenseGroupMembers(LoggedInUser.getInstance().getApiKey(),
+                Integer.toString(expenseGroupID), context,
+                new APIResponse<List<Map<String, String>>>() {
+                    @Override
+                    public void onResponse(List<Map<String, String>> data) {
+                        // Parse the data into the expenses ArrayList
+                        for (Map<String, String> group : data) {
+                            String id = group.get("user_id");
+                            User user = new User(id);
+                            expenseGroup.addUser(user);
+                            expenseGroup.setSingleBalance(user, 0f);
+                        }
+                        getBalance(context, expenseGroupID);
+                    }
+
+                    @Override
+                    public void onErrorResponse(VolleyError error, String errorMessage) {
+                        // Show error and update semaphore
+                        GregService.showErrorToast(errorMessage + "in b", context);
+                        isRequestHappening = false;
+                    }
+                });
+    }
+
+    private void getBalance(Context context, int expenseGroupID) {
         APIService.getUserOwedTotal(LoggedInUser.getInstance().getApiKey(),
                 Integer.toString(expenseGroupID), context,
                 new APIResponse<List<Map<String, String>>>() {
@@ -133,9 +157,12 @@ public class GroupSettingsActivity extends AppCompatActivity {
                         for (Map<String, String> group : data) {
                             String id = group.get("user_id");
                             float amount = Float.parseFloat(group.get("amount"));
-                            User user = new User(id);
-                            expenseGroup.addUser(user);
-                            expenseGroup.setSingleBalance(user, amount);
+                            for (User user : expenseGroup.getUsers()) {
+                                if (user.getUsername().equals(id)) {
+                                    expenseGroup.setSingleBalance(user, amount);
+                                    break;
+                                }
+                            }
                         }
                         // Set the recyclerview and its settings
                         RecyclerView recView = (RecyclerView) findViewById(R.id.recyclerViewMembersBalance);
@@ -151,7 +178,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
                     @Override
                     public void onErrorResponse(VolleyError error, String errorMessage) {
                         // Show error and update semaphore
-                        GregService.showErrorToast(errorMessage, context);
+                        GregService.showErrorToast(errorMessage + "in b", context);
                         isRequestHappening = false;
                     }
                 });
