@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.VolleyError;
@@ -127,6 +128,9 @@ public class HomeScreenActivity extends AppCompatActivity {
         Intent groupScreenIntent = new Intent(this, GroupScreenActivity.class);
         // Link the ExpenseGroup by adding the group ID as extra on the intent
         groupScreenIntent.putExtra("EXPENSE_GROUP_ID", (Integer) view.getTag());
+        String name = ((TextView) view.findViewById(R.id.item_name)).getText().toString();
+        // Link the ExpenseGroup name
+        groupScreenIntent.putExtra("EXPENSE_GROUP_NAME", name);
         startActivity(groupScreenIntent);
     }
 
