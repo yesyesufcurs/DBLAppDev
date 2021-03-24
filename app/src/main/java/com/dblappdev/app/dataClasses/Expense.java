@@ -10,17 +10,17 @@ public class Expense {
 
     //Set and Get at any time
     private float amount;
-    private String title;
     private String description;
+    private String content;
     private HashMap<User, Integer> distribution;
 
-    public Expense(int id, int expenseGroupId, User creator, float amount, String title, String description, HashMap<User, Integer> distribution) {
+    public Expense(int id, int expenseGroupId, User creator, float amount, String description, String content, HashMap<User, Integer> distribution) {
         this.id = id;
         this.expenseGroupId = expenseGroupId;
         this.creator = creator;
         this.amount = amount;
-        this.title = title;
         this.description = description;
+        this.content = content;
         this.distribution = distribution;
     }
 
@@ -57,11 +57,11 @@ public class Expense {
     }
 
     /**
-     * gets title of this expense instance
-     * @return {@code this.title}
+     * gets content of this expense instance
+     * @return {@code this.content}
      */
-    public String getTitle() {
-        return title;
+    public String getContent() {
+        return content;
     }
 
     /**
@@ -103,11 +103,11 @@ public class Expense {
     }
 
     /**
-     * sets title of this expense instance
-     * @post {@code this.title == title}
+     * sets content of this expense instance
+     * @post {@code this.content == content}
      */
-    public void setTitle(String title) {
-        this.title = title;
+    public void setContent(String title) {
+        this.content = content;
     }
 
     /**
