@@ -5,6 +5,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.view.View;
 
@@ -44,6 +46,9 @@ public class SelectMembersActivity extends AppCompatActivity {
      * @param view The View instance of the button that was pressed
      */
     public void onCheckmark(View view) {
+        //unpack the bytearray back to the image
+        byte[] byteArray = getIntent().getByteArrayExtra("image");
+        Bitmap bmp = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
 
         // Redirect to the group screen
         finish();

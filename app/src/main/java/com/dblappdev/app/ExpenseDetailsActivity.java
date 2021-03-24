@@ -13,6 +13,7 @@ import android.provider.MediaStore;
 import android.view.View;
 import android.widget.ImageView;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -50,7 +51,14 @@ public class ExpenseDetailsActivity extends AppCompatActivity {
         // Redirect to the select members screen
         Intent selectMembersIntent = new Intent(this, SelectMembersActivity.class);
         Bitmap bitmap = BitmapFactory.decodeFile(currentImagePath);
-        selectMembersIntent.putExtra("BitmapImage", bitmap);
+
+        //Convert to byte array
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+        byte[] byteArray = stream.toByteArray();
+
+        selectMembersIntent.putExtra("image",byteArray);
+
         startActivity(selectMembersIntent);
         finish();
     }
