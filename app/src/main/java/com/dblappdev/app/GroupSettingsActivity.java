@@ -131,9 +131,11 @@ public class GroupSettingsActivity extends AppCompatActivity {
                         // Parse the data into the expenses ArrayList
                         for (Map<String, String> group : data) {
                             String id = group.get("user_id");
-                            User user = new User(id);
-                            expenseGroup.addUser(user);
-                            expenseGroup.setSingleBalance(user, 0f);
+                            if (!id.equals(LoggedInUser.getInstance().getUser().getUsername())) {
+                                User user = new User(id);
+                                expenseGroup.addUser(user);
+                                expenseGroup.setSingleBalance(user, 0.0f);
+                            }
                         }
                         getBalance(context, expenseGroupID);
                     }
@@ -178,7 +180,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
                     @Override
                     public void onErrorResponse(VolleyError error, String errorMessage) {
                         // Show error and update semaphore
-                        GregService.showErrorToast(errorMessage + "in b", context);
+                        GregService.showErrorToast(errorMessage, context);
                         isRequestHappening = false;
                     }
                 });
@@ -201,7 +203,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
                     @Override
                     public void onErrorResponse(VolleyError error, String errorMessage) {
                         // Show error and update semaphore
-                        GregService.showErrorToast(errorMessage + " in a", context);
+                        GregService.showErrorToast(errorMessage, context);
                         isRequestHappening = false;
                     }
                 });
