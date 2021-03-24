@@ -44,7 +44,7 @@ public class SelectMembersActivity extends AppCompatActivity {
     int EXPENSE_ID;
     String MODE;
     private ArrayList<User> users;
-    private HashMap<User, Integer> amountMap;
+    private HashMap<User, Integer> amountMap = new HashMap<User, Integer>();
     Context currentContext;
 
     @Override
@@ -113,7 +113,6 @@ public class SelectMembersActivity extends AppCompatActivity {
         }
         if (MODE.equals("EDIT")) {
             EXPENSE_ID = bundle.getInt("EXPENSE_ID");
-            loadExpenseMembersActivity();
         }
 
         if (!isRequestHappening) {
@@ -148,7 +147,7 @@ public class SelectMembersActivity extends AppCompatActivity {
         if (totalAmount != 0) {
             try {
                 for (User user : amountMap.keySet()) {
-                    expenseIOU.put(user.getUsername(), amount * amountMap.get(user) / totalAmount);
+                    expenseIOU.put(user.getUsername(), Float.toString((Math.round(amount * amountMap.get(user) / totalAmount) * 100.0f) / 100.0f));
                 }
             } catch (JSONException e) {
                 throw new IllegalStateException("Cannot set expenseIOUJSON");
@@ -198,8 +197,16 @@ public class SelectMembersActivity extends AppCompatActivity {
                     public void onResponse(List<Map<String, String>> data) {
                         float min = minimumAmount(data);
                         for (Map<String, String> entry : data) {
-                            amountMap.put(new User(entry.get("user_id")), Math.round(Float.parseFloat(entry.get("amount")) / min));
+                            for (User user : users){
+                                if (user.getUsername().equals(entry.get("user_id"))){
+                                    amountMap.put(user, Math.round(Float.parseFloat(entry.get("amount")) / min));
+                                    break;
+                                }
+                            }
+
                         }
+                        createRecyclerView(currentContext);
+                        isRequestHappening = false;
 
                     }
 
@@ -211,7 +218,7 @@ public class SelectMembersActivity extends AppCompatActivity {
     }
 
     private float minimumAmount(List<Map<String, String>> data) {
-        float min = (float) Integer.MAX_VALUE;
+        float min = (float) 100001;
         for (Map<String, String> entry : data) {
             if (Float.parseFloat(entry.get("amount")) < min && Float.parseFloat(entry.get("amount")) > 0.001) {
                 min = Float.parseFloat(entry.get("amount"));
@@ -308,16 +315,17 @@ public class SelectMembersActivity extends AppCompatActivity {
                                 amountMap.put(user, 1);
                             }
                         }
-                        // Set the recyclerview and its settings
-                        RecyclerView recView = (RecyclerView) findViewById(R.id.recyclerViewMembers);
-                        View.OnClickListener plusListener = view -> onPlusClick(view);
-                        View.OnClickListener minusListener = view -> onMinusClick(view);
-                        MemberWeightAdapter adapter = new MemberWeightAdapter(plusListener, minusListener,
-                                users, amountMap);
-                        recView.setAdapter(adapter);
-                        recView.setLayoutManager(new LinearLayoutManager(context));
-                        // Update semaphore
-                        isRequestHappening = false;
+                        if (MODE.equals("EDIT")) {
+                            loadExpenseMembersActivity();
+                        }
+                        else {
+                            createRecyclerView(context);
+                            // Update semaphore
+                            isRequestHappening = false;
+                        }
+
+
+
                     }
 
                     @Override
@@ -327,5 +335,17 @@ public class SelectMembersActivity extends AppCompatActivity {
                         isRequestHappening = false;
                     }
                 });
+    }
+
+    private void createRecyclerView(Context context) {
+        // Set the recyclerview and its settings
+        RecyclerView recView = (RecyclerView) findViewById(R.id.recyclerViewMembers);
+        View.OnClickListener plusListener = view -> onPlusClick(view);
+        View.OnClickListener minusListener = view -> onMinusClick(view);
+        MemberWeightAdapter adapter = new MemberWeightAdapter(plusListener, minusListener,
+                users, amountMap);
+        recView.setAdapter(adapter);
+        recView.setLayoutManager(new LinearLayoutManager(context));
+
     }
 }
