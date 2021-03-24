@@ -91,14 +91,27 @@ public class SelectMembersActivity extends AppCompatActivity {
                         "EXPENSE_ID.");
             }
         }
-
-        title = bundle.getString("title");
-        expenseGroupId = bundle.getInt("expenseGroupId");
-        String priceString = bundle.getString("price");
-        amount = Float.parseFloat(priceString);
-        imagePath = bundle.getString("imagePath");
+        try {
+            title = bundle.getString("title");
+            if (title.equals("")) {
+                GregService.showErrorToast("Title should not be empty.", currentContext);
+                finish();
+            }
+            expenseGroupId = bundle.getInt("expenseGroupId");
+            String priceString = bundle.getString("price");
+            amount = Float.parseFloat(priceString);
+            if (amount >= 100000f) {
+                GregService.showErrorToast("Amount should not be higher than 100000", currentContext);
+                finish();
+            }
+            imagePath = bundle.getString("imagePath");
+        } catch (Exception e) {
+            GregService.showErrorToast("Input values not valid", currentContext);
+            finish();
+        }
         if (MODE.equals("EDIT")) {
             EXPENSE_ID = bundle.getInt("EXPENSE_ID");
+            loadExpenseMembersActivity();
         }
 
         if (!isRequestHappening) {
@@ -146,10 +159,7 @@ public class SelectMembersActivity extends AppCompatActivity {
                     new APIResponse<String>() {
                         @Override
                         public void onResponse(String data) {
-                            System.out.println(data);
-                            ExpenseDetailsActivity.currentContext.finish();
-                            // Redirect to the group screen
-                            finish();
+                            addExpenseIOU(expenseIOU);
                         }
 
                         @Override
@@ -158,14 +168,11 @@ public class SelectMembersActivity extends AppCompatActivity {
                         }
                     });
         } else {
-            APIService.modifyExpense(LoggedInUser.getInstance().getApiKey(), title, "" + (Math.round(amount * 100.0f) / 100.0f), bmp, "Description", "" + expenseGroupId, ""+EXPENSE_ID,this,
+            APIService.modifyExpense(LoggedInUser.getInstance().getApiKey(), title, "" + (Math.round(amount * 100.0f) / 100.0f), bmp, "Description", "" + expenseGroupId, "" + EXPENSE_ID, this,
                     new APIResponse<String>() {
                         @Override
                         public void onResponse(String data) {
-                            System.out.println(data);
-                            ExpenseDetailsActivity.currentContext.finish();
-                            // Redirect to the group screen
-                            finish();
+                            addExpenseIOU(expenseIOU);
                         }
 
                         @Override
@@ -175,6 +182,61 @@ public class SelectMembersActivity extends AppCompatActivity {
                     });
         }
 
+
+    }
+
+    /**
+     * Load expense members activity data from backend when MODE == "EDIT"
+     */
+    private void loadExpenseMembersActivity() {
+        APIService.getExpenseIOU(LoggedInUser.getInstance().getApiKey(),
+                "" + EXPENSE_ID,
+                this, new APIResponse<List<Map<String, String>>>() {
+                    @Override
+                    public void onResponse(List<Map<String, String>> data) {
+                        float min = minimumAmount(data);
+                        for (Map<String, String> entry : data) {
+                            amountMap.put(new User(entry.get("user_id")), Math.round(Float.parseFloat(entry.get("amount")) / min));
+                        }
+
+                    }
+
+                    @Override
+                    public void onErrorResponse(VolleyError error, String errorMessage) {
+
+                    }
+                });
+    }
+
+    private float minimumAmount(List<Map<String, String>> data) {
+        float min = (float) Integer.MAX_VALUE;
+        for (Map<String, String> entry : data) {
+            if (Float.parseFloat(entry.get("amount")) < min && Float.parseFloat(entry.get("amount")) > 0.001) {
+                min = Float.parseFloat(entry.get("amount"));
+            }
+        }
+        return min;
+    }
+
+    /**
+     * Request handler that adds the expenseIOU to the backend
+     *
+     * @param expenseIOU expenseIOU to be added
+     */
+    private void addExpenseIOU(JSONObject expenseIOU) {
+        APIService.createExpenseIOU(LoggedInUser.getInstance().getApiKey(), "" + EXPENSE_ID, expenseIOU, this, new APIResponse<String>() {
+            @Override
+            public void onResponse(String data) {
+                ExpenseDetailsActivity.currentContext.finish();
+                // Redirect to the group screen
+                finish();
+            }
+
+            @Override
+            public void onErrorResponse(VolleyError error, String errorMessage) {
+                GregService.showErrorToast(errorMessage, currentContext);
+            }
+        });
 
     }
 

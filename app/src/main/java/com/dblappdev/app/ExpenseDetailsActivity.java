@@ -73,7 +73,6 @@ public class ExpenseDetailsActivity extends AppCompatActivity {
             }
             EXPENSE_ID = bundle.getInt("EXPENSE_ID");
             ((TextView) findViewById(R.id.topBarText)).setText("Edit expense");
-            //TODO implement loading expense data.
             APIService.getExpenseDetails(LoggedInUser.getInstance().getApiKey(), "" + bundle.getInt("EXPENSE_ID"), this, new APIResponse<List<Map<String, String>>>() {
                 @Override
                 public void onResponse(List<Map<String, String>> data) {
