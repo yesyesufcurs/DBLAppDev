@@ -22,12 +22,11 @@ public class GroupSettingsActivity extends AppCompatActivity {
         // Get the linked expense group ID and check if it was properly defined
         Bundle bundle = getIntent().getExtras();
         if (!getIntent().hasExtra("EXPENSE_GROUP_ID")) {
-            throw new RuntimeException("Something went wrong with opening the expense group: no " +
-                    "expense group selected.");
+            throw new RuntimeException("runtime exc");
         }
         expenseGroupID = bundle.getInt("EXPENSE_GROUP_ID");
 
-        ((TextView) findViewById(R.id.groupNameText)).setText(expenseGroupID);
+        ((TextView) findViewById(R.id.groupNameText)).setText(Integer.toString(expenseGroupID));
 
         // Set the recyclerview and its settings
         RecyclerView recView = (RecyclerView) findViewById(R.id.recyclerViewMembersBalance);

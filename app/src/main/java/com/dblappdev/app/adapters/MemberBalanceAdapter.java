@@ -60,7 +60,7 @@ public class MemberBalanceAdapter extends RecyclerView.Adapter<GregViewHolder> {
     @Override
     public GregViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
         // Create a new view, which defines the UI of the list item
-        View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.recycler_view_item, viewGroup, false);
+        View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.recycler_view_item_memberlist, viewGroup, false);
         view.findViewById(R.id.removeButton).setOnClickListener(removeListener);
         return new GregViewHolder(view);
     }
