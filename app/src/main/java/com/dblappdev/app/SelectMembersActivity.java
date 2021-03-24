@@ -11,6 +11,8 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.VolleyError;
@@ -186,7 +188,15 @@ public class SelectMembersActivity extends AppCompatActivity {
     public void onPlusClick(View view) {
         for (User user : users) {
             if (user.getUsername().equals(view.getTag())) {
-                //amountMap.put(user, amountMap.get(user) + 1);
+                amountMap.put(user, amountMap.get(user) + 1);
+
+                ViewGroup vg = (ViewGroup) view.getParent().getParent().getParent();
+                for (int i = 0; i < vg.getChildCount(); i++) {
+                    View v = vg.getChildAt(i);
+                    if (v.getId() == R.id.item_balance) {
+                        ((TextView) v).setText(Integer.toString(amountMap.get(user)));
+                    }
+                }
                 break;
             }
         }
@@ -200,7 +210,17 @@ public class SelectMembersActivity extends AppCompatActivity {
     public void onMinusClick(View view) {
         for (User user : users) {
             if (user.getUsername().equals(view.getTag())) {
-                //amountMap.put(user, amountMap.get(user) - 1);
+                if (amountMap.get(user) > 0) {
+                    amountMap.put(user, amountMap.get(user) - 1);
+
+                    ViewGroup vg = (ViewGroup) view.getParent().getParent().getParent();
+                    for (int i = 0; i < vg.getChildCount(); i++) {
+                        View v = vg.getChildAt(i);
+                        if (v.getId() == R.id.item_balance) {
+                            ((TextView) v).setText(Integer.toString(amountMap.get(user)));
+                        }
+                    }
+                }
                 break;
             }
         }

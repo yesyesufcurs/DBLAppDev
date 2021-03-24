@@ -14,7 +14,7 @@ import com.dblappdev.app.dataClasses.User;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class MemberWeightAdapter extends RecyclerView.Adapter<GregViewHolder> {
+public class MemberWeightAdapter extends RecyclerView.Adapter<MemberWeightAdapter.ViewHolder> {
 
     // List of the users of the group
     private ArrayList<User> userList;
@@ -61,19 +61,19 @@ public class MemberWeightAdapter extends RecyclerView.Adapter<GregViewHolder> {
 
     // Create new views (invoked by the layout manager)
     @Override
-    public GregViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
+    public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
         // Create a new view, which defines the UI of the list item
         View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.recycler_view_item_members, viewGroup, false);
         // Bind the on click listeners for the plus and minus buttons
         view.findViewById(R.id.plus_button).setOnClickListener(plusListener);
         view.findViewById(R.id.minus_button).setOnClickListener(minusListener);
 
-        return new GregViewHolder(view);
+        return new ViewHolder(view);
     }
 
     // Create new views (invoked by the layout manager)
     @Override
-    public void onBindViewHolder(GregViewHolder viewHolder, final int position) {
+    public void onBindViewHolder(ViewHolder viewHolder, final int position) {
         // Get element from the dataset at the given position and replace the contents of the view
         viewHolder.getTextViewName().setText(userList.get(position).getUsername());
         int amount;
@@ -83,6 +83,8 @@ public class MemberWeightAdapter extends RecyclerView.Adapter<GregViewHolder> {
             amount = 0;
         }
         viewHolder.getTextViewBalance().setText(Integer.toString(amount));
+        viewHolder.getPlusButton().setTag(userList.get(position).getUsername());
+        viewHolder.getMinusButton().setTag(userList.get(position).getUsername());
     }
 
     // Return the size of your dataset (invoked by the layout manager)
