@@ -160,7 +160,7 @@ public class GroupScreenActivity extends AppCompatActivity {
                         // Parse the data into the expenses ArrayList
                         for (Map<String, String> group : data) {
                             int id = Integer.parseInt(group.get("id"));
-                            String title = group.get("name");
+                            String title = group.get("title");
                             float amount = Float.parseFloat(group.get("amount"));
                             String content = group.get("content");
                             int expense_group_id = Integer.parseInt(group.get("expense_group_id"));
@@ -173,7 +173,7 @@ public class GroupScreenActivity extends AppCompatActivity {
                         // Set the recyclerview and its settings
                         RecyclerView recView = (RecyclerView) findViewById(R.id.recyclerViewExpense);
                         View.OnClickListener listener = view -> onItemClick(view);
-                        ExpenseAdapter adapter = new ExpenseAdapter(listener);
+                        ExpenseAdapter adapter = new ExpenseAdapter(listener, expenses);
                         recView.setAdapter(adapter);
                         recView.setLayoutManager(new LinearLayoutManager(context));
                         // Update semaphore
