@@ -10,8 +10,12 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.view.View;
 
+import com.android.volley.VolleyError;
 import com.dblappdev.app.adapters.ExpenseGroupAdapter;
 import com.dblappdev.app.adapters.MemberWeightAdapter;
+import com.dblappdev.app.api.APIResponse;
+import com.dblappdev.app.api.APIService;
+import com.dblappdev.app.dataClasses.LoggedInUser;
 
 public class SelectMembersActivity extends AppCompatActivity {
 
@@ -49,6 +53,30 @@ public class SelectMembersActivity extends AppCompatActivity {
         //unpack the bytearray back to the image
         byte[] byteArray = getIntent().getByteArrayExtra("image");
         Bitmap bmp = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
+        //upload picture
+        // FIXME hardcoded test
+//        APIService.createExpense(
+//                LoggedInUser.getInstance().getApiKey(),
+//                LoggedInUser.getInstance().getUser().getUsername(),
+//                "hond",
+//                "5",
+//                bmp,
+//                "there is a dog",
+//                "178371",
+//                this,
+//                new APIResponse<String>() {
+//                    @Override
+//                    public void onResponse(String data) {
+//                        System.out.println("picture has been uploaded, data: " + data);
+//                    }
+//
+//                    @Override
+//                    public void onErrorResponse(VolleyError error, String errorMessage) {
+//                        System.out.println("error message: " + errorMessage);
+//                    }
+//                }
+
+        );
 
         // Redirect to the group screen
         finish();
