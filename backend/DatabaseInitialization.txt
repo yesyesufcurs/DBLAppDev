@@ -1,0 +1,6 @@
+1. Make sure all requirements from requirements.txt are installed.
+2. cd to backendserver folder
+3. Run `python3 db.py db init`
+4. Run `python3 db.py db migrate`
+5. Run `python3 db.py db upgrade`
+6. If a new file "app.db" is created in the backendserver folder you are done.

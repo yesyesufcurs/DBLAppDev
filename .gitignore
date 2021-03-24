@@ -13,3 +13,9 @@
 .externalNativeBuild
 .cxx
 local.properties
+backend/backendserver/app.db
+backend/backendserver/migrations
+backend/backendserver/__pycache__
+.vscode
+.settings/org.eclipse.buildship.core.prefs
+.project

@@ -1,14 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.dblappdev.app">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-feature
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="18"
+        tools:ignore="ScopedStorage" />
+    <uses-feature
+        android:name="android.permission.CAMERA"
+        android:required="true" />
+
+    <uses-feature
+        android:name="android.hardware.camera2"
+        android:required="true" />
 
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
+        android:label="Greg"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.App">
+        android:theme="@style/Theme.App"
+        android:usesCleartextTraffic="true">
+        <activity android:name=".AddJoinGroupActivity" />
+        <activity android:name=".SelectMembersActivity" />
+        <activity android:name=".ExpenseDetailsActivity" />
+        <activity android:name=".DisplayImageActivity"/>
+        <activity android:name=".GroupSettingsActivity" />
+        <activity android:name=".GroupScreenActivity" />
+        <activity android:name=".EditProfileActivity" />
+        <activity android:name=".HomeScreenActivity" />
+        <activity android:name=".CreateProfileActivity" />
+        <activity android:name=".RegisterActivity" />
+        <activity android:name=".LoginActivity" />
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -16,6 +43,16 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.example.android.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_path" />
+        </provider>
     </application>
 
 </manifest>
