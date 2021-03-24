@@ -139,19 +139,19 @@ public abstract class APIService {
     /**
      * Returns List<Map<String, String>>
      * Each entry contains name, moderator_id.
-     * 
-     * @param apiKey   apiKey of the user calling this method
+     *
+     * @param apiKey         apiKey of the user calling this method
      * @param expenseGroupId id of the expense group
-     * @param context  context of request, often AppActivity (instance of calling object)
-     * @param response contains a callback method that is called on (un)successful request.
+     * @param context        context of request, often AppActivity (instance of calling object)
+     * @param response       contains a callback method that is called on (un)successful request.
      * @throws IllegalArgumentException if {@code apiKey == null || context == null ||
      *                                  || expenseGroupId == null || response == null}}
-     * @pre {@code apiKey != null && expenseGroupId != null && context != null 
-     *      && response != null}
+     * @pre {@code apiKey != null && expenseGroupId != null && context != null
+     * && response != null}
      * @post {@code APIResponse.data == expenseGroups}
      */
     public static void getExpenseGroup(String apiKey, String expenseGroupId, Context context,
-                                           APIResponse<List<Map<String, String>>> response) {
+                                       APIResponse<List<Map<String, String>>> response) {
         // Check preconditions
         if (apiKey == null || expenseGroupId == null) {
             throw new IllegalArgumentException("APIService.getExpenseGroup.pre: apiKey or" +
@@ -888,8 +888,8 @@ public abstract class APIService {
 
     /**
      * Returns List<Map<String, String>> containing each person the user owes money to
-     * and the amount the user owes
-     * Each entry contains: id, title, amount, content, expense_group_id, user_id.
+     * and the amount the user owes, so the user (caller) is in debt.
+     * Each entry contains: user_id, amount.
      *
      * @param apiKey         apiKey of the user calling this method
      * @param expenseGroupId expense group id of which expenses should be considered
@@ -915,6 +915,39 @@ public abstract class APIService {
 
         // Do API Request
         new JSONAPIRequest(AbstractAPIRequest.getAPIUrl() + "getUserOwedTotal",
+                Request.Method.GET, params, null).run(context, response);
+
+    }
+
+    /**
+     * Returns List<Map<String, String>> containing each person that owes money to the user (caller)
+     * and the amount the person owes, so the user (caller) should get money.
+     * Each entry contains: user_id, amount.
+     *
+     *  @param apiKey         apiKey of the user calling this method
+     *  @param expenseGroupId expense group id of which expenses should be considered
+     *  @param context        context of request, often AppActivity (instance of calling object)
+     *  @param response       contains a callback method that is called on (un)successful request.
+     *  @throws IllegalArgumentException if {@code apiKey == null || expenseGroupId == null
+     *                                  context == null || response == null}}
+     * @pre {@code apiKey != null && expenseGroupId != null && context != null && response != null}
+     * @post {@code APIResponse.data == sum(userDebitedExpenses.amount) grouped by user }
+     */
+    public static void getUserDebitTotal(String apiKey, String expenseGroupId, Context context,
+                                         APIResponse<List<Map<String, String>>> response) {
+        // Check preconditions
+        if (apiKey == null || expenseGroupId == null) {
+            throw new IllegalArgumentException("APIService.getUserDebitTotal.pre: apiKey" +
+                    " or expenseGroupId is null");
+        }
+
+        // Set headers
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("api_key", apiKey);
+        params.put("expense_group_id", expenseGroupId);
+
+        // Do API Request
+        new JSONAPIRequest(AbstractAPIRequest.getAPIUrl() + "getUserDebitTotal",
                 Request.Method.GET, params, null).run(context, response);
 
     }
