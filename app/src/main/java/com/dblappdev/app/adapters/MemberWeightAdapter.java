@@ -47,20 +47,12 @@ public class MemberWeightAdapter extends RecyclerView.Adapter<GregViewHolder> {
 
     /**
      * Initialize the dataset of the adapter
-     * TODO: Update this to fit the loading in of the data, which should be added as a parameter
      */
-    public MemberWeightAdapter(View.OnClickListener plusListener, View.OnClickListener minusListener) {
-        // START TEMP CODE
-        // generate mockup data
-        userList = new ArrayList<>();
-        for (int i = 0; i < 5; i++) {
-            userList.add(new User("User no. " + i, i + "@" + i + ".com"));
-        }
-        amountMap = new HashMap<>();
-        for (User user : userList) {
-            amountMap.put(user, 1);
-        }
-        // END TEMP CODE
+    public MemberWeightAdapter(View.OnClickListener plusListener, View.OnClickListener minusListener,
+                               ArrayList<User> users, HashMap<User, Integer> amountMap) {
+
+        this.userList = users;
+        this.amountMap = amountMap;
 
         // Set the listeners
         this.plusListener = plusListener;

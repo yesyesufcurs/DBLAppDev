@@ -3,6 +3,8 @@ package com.dblappdev.app;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -14,6 +16,8 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.dblappdev.app.dataClasses.LoggedInUser;
+
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -22,14 +26,24 @@ import java.util.Date;
 public class ExpenseDetailsActivity extends AppCompatActivity {
 
     String currentImagePath = null;
+    int expenseGroupId;
     private static final int IMAGE_REQUEST = 1;
+    public static Activity currentContext;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_expense_details);
 
+        currentContext = this;
+
+        if (LoggedInUser.getInstance() == null) {
+            throw new RuntimeException("Something went wrong with logging in: no loggged in user" +
+                    " found upon creation of the home screen!");
+        }
+
         Bundle bundle = getIntent().getExtras();
+
         if (!getIntent().hasExtra("MODE")) {
             throw new RuntimeException("Something went wrong with opening the expense details: no " +
                     "mode selected.");
@@ -38,6 +52,7 @@ public class ExpenseDetailsActivity extends AppCompatActivity {
             throw new RuntimeException("Something went wrong with opening the expense details: no " +
                     "expense group selected.");
         }
+        expenseGroupId = bundle.getInt("EXPENSE_GROUP_ID");
         if (bundle.get("MODE").equals("EDIT")) {
             if (!getIntent().hasExtra("EXPENSE_ID")) {
                 throw new RuntimeException("Something went wrong with opening the expense details: no " +
@@ -68,8 +83,11 @@ public class ExpenseDetailsActivity extends AppCompatActivity {
 
         // Redirect to the select members screen
         Intent selectMembersIntent = new Intent(this, SelectMembersActivity.class);
+        selectMembersIntent.putExtra("title",((TextView) findViewById(R.id.expense_name_input_text)).getText());
+        selectMembersIntent.putExtra("price", ((TextView) findViewById(R.id.expense_price_input_text)).getText());
+        selectMembersIntent.putExtra("imagePath", currentImagePath);
+        selectMembersIntent.putExtra("expenseGroupId", expenseGroupId);
         startActivity(selectMembersIntent);
-        finish();
     }
 
     /**
