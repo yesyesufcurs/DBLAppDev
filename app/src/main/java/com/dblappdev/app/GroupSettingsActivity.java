@@ -72,10 +72,18 @@ public class GroupSettingsActivity extends AppCompatActivity {
     }
 
     /**
-     * Event handler for
+     * Event handler for removing a user
      * @param view
      */
     public void onRemove(View view) {
+
+    }
+
+    /**
+     * Event handler for removing the group
+     * @param view
+     */
+    public void onRemoveGroup(View view) {
 
     }
 }
