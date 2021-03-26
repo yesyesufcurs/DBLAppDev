@@ -197,8 +197,8 @@ public class SelectMembersActivity extends AppCompatActivity {
                     public void onResponse(List<Map<String, String>> data) {
                         float min = minimumAmount(data);
                         for (Map<String, String> entry : data) {
-                            for (User user : users){
-                                if (user.getUsername().equals(entry.get("user_id"))){
+                            for (User user : users) {
+                                if (user.getUsername().equals(entry.get("user_id"))) {
                                     amountMap.put(user, Math.round(Float.parseFloat(entry.get("amount")) / min));
                                     break;
                                 }
@@ -236,9 +236,30 @@ public class SelectMembersActivity extends AppCompatActivity {
         APIService.createExpenseIOU(LoggedInUser.getInstance().getApiKey(), "" + EXPENSE_ID, expenseIOU, this, new APIResponse<String>() {
             @Override
             public void onResponse(String data) {
-                ExpenseDetailsActivity.currentContext.finish();
-                // Redirect to the group screen
-                finish();
+                // Get ExpenseGroupName
+                APIService.getExpenseGroup(LoggedInUser.getInstance().getApiKey(), "" + expenseGroupId, currentContext, new APIResponse<List<Map<String, String>>>() {
+                    @Override
+                    public void onResponse(List<Map<String, String>> data) {
+                        ExpenseDetailsActivity.currentContext.finish();
+                        // Finish group screen
+                        GroupScreenActivity.instance.finish();
+                        // Redirect to group screen
+                        Intent groupScreenIntent = new Intent(currentContext, GroupScreenActivity.class);
+                        // Link the ExpenseGroup by adding the group ID as extra on the intent
+                        groupScreenIntent.putExtra("EXPENSE_GROUP_ID", expenseGroupId);
+                        String name = data.get(0).get("name");
+                        // Link the ExpenseGroup name
+                        groupScreenIntent.putExtra("EXPENSE_GROUP_NAME", name);
+                        startActivity(groupScreenIntent);
+                        // Redirect to the group screen
+                        finish();
+                    }
+
+                    @Override
+                    public void onErrorResponse(VolleyError error, String errorMessage) {
+
+                    }
+                });
             }
 
             @Override
@@ -317,13 +338,11 @@ public class SelectMembersActivity extends AppCompatActivity {
                         }
                         if (MODE.equals("EDIT")) {
                             loadExpenseMembersActivity();
-                        }
-                        else {
+                        } else {
                             createRecyclerView(context);
                             // Update semaphore
                             isRequestHappening = false;
                         }
-
 
 
                     }
