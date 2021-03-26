@@ -134,7 +134,6 @@ public class GroupSettingsActivity extends AppCompatActivity {
         User loggedInUser = LoggedInUser.getInstance().getUser();
         if (loggedInUser.getUsername().equals(moderator.getUsername())) {
             // User is the moderator and can thus make the remove group request
-            // TODO : Fix expensegroupactivity closure
             isRequestHappening = true;
             int expenseGroupID = getIntent().getExtras().getInt("EXPENSE_GROUP_ID");
             removeGroup(expenseGroupID, this);
@@ -265,7 +264,10 @@ public class GroupSettingsActivity extends AppCompatActivity {
                 , new APIResponse<String>() {
                     @Override
                     public void onResponse(String data) {
-                        finishActivity(0);
+                        // Clsoe the group screen activity, since the group is removed
+                        GroupScreenActivity.instance.finish();
+                        // Update the homepage to portray the deletion of the group
+                        refreshHomepage();
                         finish();
                         isRequestHappening = false;
                     }
@@ -304,7 +306,10 @@ public class GroupSettingsActivity extends AppCompatActivity {
                 new APIResponse<String>() {
                     @Override
                     public void onResponse(String data) {
-                        finishActivity(0);
+                        // Close the group screen activity, since the group has been left
+                        GroupScreenActivity.instance.finish();
+                        // Update the home page to portray the leaving of the group
+                        refreshHomepage();
                         finish();
                         isRequestHappening = false;
                     }
@@ -315,5 +320,12 @@ public class GroupSettingsActivity extends AppCompatActivity {
                         isRequestHappening = false;
                     }
                 });
+    }
+
+    private void refreshHomepage() {
+        HomeScreenActivity.instance.finish();
+        // Open new HomeScreenActivity
+        Intent homeScreenIntent = new Intent(this, HomeScreenActivity.class);
+        startActivity(homeScreenIntent);
     }
 }
