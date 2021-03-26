@@ -30,6 +30,8 @@ public class HomeScreenActivity extends AppCompatActivity {
     // interfering with each other
     boolean isRequestHappening = false;
 
+    //  Publicly accessible variable for this HomeScreenActivity.
+    public static HomeScreenActivity instance;
     // List containing the expense groups to be shown
     private ArrayList<ExpenseGroup> expenseGroups = new ArrayList<>();
 
@@ -57,6 +59,9 @@ public class HomeScreenActivity extends AppCompatActivity {
                     " found upon creation of the home screen!");
         }
 
+        // Set instance variable
+        instance = this;
+
         // Get all the expense groups the logged in user is part of
         if (!isRequestHappening) {
             // Update semaphore
@@ -64,6 +69,7 @@ public class HomeScreenActivity extends AppCompatActivity {
             // This method will also deal with the instantiating of the recycler view
             getExpenseGroups(this);
         }
+
     }
 
     /**

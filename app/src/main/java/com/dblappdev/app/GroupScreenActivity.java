@@ -156,7 +156,11 @@ public class GroupScreenActivity extends AppCompatActivity {
      * @param view The View instance of the button that was pressed
      */
     public void onBack(View view) {
-
+        // Close old HomeScreenActivity
+        HomeScreenActivity.instance.finish();
+        // Open new HomeScreenActivity
+        Intent homeScreenIntent = new Intent(this, HomeScreenActivity.class);
+        startActivity(homeScreenIntent);
         // Redirect to the home screen
         finish();
     }
