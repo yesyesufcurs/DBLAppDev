@@ -155,6 +155,7 @@ public class SelectMembersActivity extends AppCompatActivity {
         }
 
         Bitmap bmp = imagePath == null ? null : BitmapFactory.decodeFile(imagePath);
+        isRequestHappening = true;
         if (MODE.equals("ADD")) {
             APIService.createExpense(LoggedInUser.getInstance().getApiKey(), LoggedInUser.getInstance().getUser().getUsername(), title, "" + (Math.round(amount * 100.0f) / 100.0f), bmp, "Description", "" + expenseGroupId, this,
                     new APIResponse<String>() {
@@ -251,13 +252,15 @@ public class SelectMembersActivity extends AppCompatActivity {
                         // Link the ExpenseGroup name
                         groupScreenIntent.putExtra("EXPENSE_GROUP_NAME", name);
                         startActivity(groupScreenIntent);
+                        isRequestHappening = false;
                         // Redirect to the group screen
                         finish();
                     }
 
                     @Override
                     public void onErrorResponse(VolleyError error, String errorMessage) {
-
+                        GregService.showErrorToast(errorMessage, currentContext);
+                        isRequestHappening = false;
                     }
                 });
             }
@@ -265,6 +268,7 @@ public class SelectMembersActivity extends AppCompatActivity {
             @Override
             public void onErrorResponse(VolleyError error, String errorMessage) {
                 GregService.showErrorToast(errorMessage, currentContext);
+                isRequestHappening = false;
             }
         });
 
