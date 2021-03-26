@@ -32,6 +32,7 @@ public class GroupScreenActivity extends AppCompatActivity {
     boolean isRequestHappening = false;
     int expenseGroupID;
 
+
     // Instance variable of GroupScreenActivity
     public static GroupScreenActivity instance;
 
@@ -79,6 +80,8 @@ public class GroupScreenActivity extends AppCompatActivity {
         // Set the group name in the UI
         String name = bundle.getString("EXPENSE_GROUP_NAME");
         ((TextView) findViewById(R.id.usernameText)).setText(name);
+
+        instance = this;
 
         // Get all the expense groups the logged in user is part of
         if (!isRequestHappening) {
