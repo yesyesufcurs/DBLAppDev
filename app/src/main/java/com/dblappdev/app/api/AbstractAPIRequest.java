@@ -25,9 +25,13 @@ public abstract class AbstractAPIRequest<T, K> {
 //    private final static String api_url = "http://10.0.2.2:5000/";
     // For deployment
     private final static String api_url = "http://94.130.144.25:5000/";
-    protected Response.Listener<T> responseListener;
-    protected Response.ErrorListener errorListener;
-    protected String errorMessage = "Something went wrong.";
+    private Response.Listener<T> responseListener;
+    private Response.ErrorListener errorListener;
+    private String errorMessage = "Something went wrong.";
+    // Semaphore preventing multiple requests to API.
+    private static boolean isRequestHappening = false;
+    // Counter, counting retries of a request
+    static int retryCount = 0;
 
     /**
      * Primitive method to be overwritten by implementer.
@@ -74,10 +78,20 @@ public abstract class AbstractAPIRequest<T, K> {
         if (apiResponse == null) {
             throw new IllegalArgumentException("AbstractAPIRequest.run.pre: apiResponse is null.");
         }
+        if (isRequestHappening) {
+            // Do not do anything.
+            return;
+        }
+        // Set semaphore
+        isRequestHappening = true;
 
         responseListener = new Response.Listener<T>() {
             @Override
             public void onResponse(T response) {
+                // Update semaphore
+                isRequestHappening = false;
+                // Successful request, so reset retry counter
+                retryCount = 0;
                 K convertedData;
                 try {
                     convertedData = convertData(response);
@@ -92,12 +106,20 @@ public abstract class AbstractAPIRequest<T, K> {
         errorListener = new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
+                // Update semaphore
+                isRequestHappening = false;
                 // Try to retrieve server error response.
                 try {
                     String responseNetworkData = new String(error.networkResponse.data,
                             "utf-8");
                     errorMessage = new JSONObject(responseNetworkData).optString("text");
                 } catch (Exception e) {
+                    // Not caused by a backend error, retry request if retryCount is under 10 times
+                    if (retryCount < 10) {
+                        retryCount++;
+                        run(context, apiResponse);
+                        return;
+                    }
                 }
                 // Check if error was a TimeoutError
                 if (error.getClass().getSimpleName().equals("TimeoutError")) {
