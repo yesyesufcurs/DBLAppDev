@@ -112,7 +112,10 @@ public class SelectMembersActivity extends AppCompatActivity {
             finish();
         }
         if (MODE.equals("EDIT")) {
-            EXPENSE_ID = bundle.getInt("EXPENSE_ID");
+//            // This should work but does not work.
+//            EXPENSE_ID = bundle.getInt("EXPENSE_ID");
+            // Temporary fix.
+            EXPENSE_ID = GroupScreenActivity.instance.expenseID;
         }
 
         if (!isRequestHappening) {
