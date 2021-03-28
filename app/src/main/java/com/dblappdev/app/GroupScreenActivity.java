@@ -31,6 +31,7 @@ public class GroupScreenActivity extends AppCompatActivity {
     // interfering with each other
     boolean isRequestHappening = false;
     int expenseGroupID;
+    public int expenseID;
 
 
     // Instance variable of GroupScreenActivity
@@ -149,6 +150,7 @@ public class GroupScreenActivity extends AppCompatActivity {
         expenseDetailsIntent.putExtra("MODE", "EDIT");
         // Link the expense ID
         expenseDetailsIntent.putExtra("EXPENSE_ID", (Integer) view.getTag());
+        expenseID = (Integer) view.getTag();
         startActivity(expenseDetailsIntent);
     }
 
