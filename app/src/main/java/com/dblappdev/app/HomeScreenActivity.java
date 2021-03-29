@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.VolleyError;
@@ -29,6 +30,8 @@ public class HomeScreenActivity extends AppCompatActivity {
     // interfering with each other
     boolean isRequestHappening = false;
 
+    //  Publicly accessible variable for this HomeScreenActivity.
+    public static HomeScreenActivity instance;
     // List containing the expense groups to be shown
     private ArrayList<ExpenseGroup> expenseGroups = new ArrayList<>();
 
@@ -52,9 +55,12 @@ public class HomeScreenActivity extends AppCompatActivity {
 
         // Check if the Singleton class LoggedInUser is initialized
         if (LoggedInUser.getInstance() == null) {
-            throw new RuntimeException("Something went wrong with logging in: no loggged in user" +
+            throw new RuntimeException("Something went wrong with logging in: no logged in user" +
                     " found upon creation of the home screen!");
         }
+
+        // Set instance variable
+        instance = this;
 
         // Get all the expense groups the logged in user is part of
         if (!isRequestHappening) {
@@ -63,6 +69,7 @@ public class HomeScreenActivity extends AppCompatActivity {
             // This method will also deal with the instantiating of the recycler view
             getExpenseGroups(this);
         }
+
     }
 
     /**
@@ -127,7 +134,16 @@ public class HomeScreenActivity extends AppCompatActivity {
         Intent groupScreenIntent = new Intent(this, GroupScreenActivity.class);
         // Link the ExpenseGroup by adding the group ID as extra on the intent
         groupScreenIntent.putExtra("EXPENSE_GROUP_ID", (Integer) view.getTag());
+        String name = ((TextView) view.findViewById(R.id.item_name)).getText().toString();
+        // Link the ExpenseGroup name
+        groupScreenIntent.putExtra("EXPENSE_GROUP_NAME", name);
         startActivity(groupScreenIntent);
+    }
+
+    @Override
+    // logout on back pressed in home screen
+    public void onBackPressed() {
+        onLogout(null);
     }
 
     /**
