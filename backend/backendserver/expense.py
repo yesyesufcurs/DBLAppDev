@@ -333,7 +333,7 @@ def createExpenseIOU(iouJson):
                     # Make sure that this iou does not exist.
                     cursor.execute(queryRemove, (expense_id, key))
                     # Add a new iou.
-                    cursor.execute(query, (expense_id, key, iou[key], False))
+                    cursor.execute(query, (expense_id, key, iou[key], -0.01 < float(iou[key]) < 0.01))
                 except Exception as e:
                     return jsonify(error=412, text="Cannot add transaction"), 412
             conn.commit()
