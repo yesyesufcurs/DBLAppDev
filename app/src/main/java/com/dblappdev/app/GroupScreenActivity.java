@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.TextView;
 
 import com.android.volley.VolleyError;
 import com.dblappdev.app.adapters.ExpenseAdapter;
@@ -30,6 +31,12 @@ public class GroupScreenActivity extends AppCompatActivity {
     // interfering with each other
     boolean isRequestHappening = false;
     int expenseGroupID;
+    public int expenseID;
+
+
+    // Instance variable of GroupScreenActivity
+    public static GroupScreenActivity instance;
+
 
     // List containing the expenses to be shown
     private ArrayList<Expense> expenses = new ArrayList<>();
@@ -68,7 +75,18 @@ public class GroupScreenActivity extends AppCompatActivity {
             throw new RuntimeException("Something went wrong with opening the expense group: no " +
                     "expense group selected.");
         }
+        // Set instance variable
+        instance = this;
         expenseGroupID = bundle.getInt("EXPENSE_GROUP_ID");
+        // Set the group name in the UI
+        // If this page is reached via the AddJoinGroupActivity, the name is not linked
+        if (!getIntent().hasExtra("EXPENSE_GROUP_NAME")) {
+            isRequestHappening = true;
+            getExpenseGroupName(this);
+        } else {
+            String name = bundle.getString("EXPENSE_GROUP_NAME");
+            ((TextView) findViewById(R.id.usernameText)).setText(name);
+        }
 
         // Get all the expense groups the logged in user is part of
         if (!isRequestHappening) {
@@ -92,7 +110,7 @@ public class GroupScreenActivity extends AppCompatActivity {
         Intent groupSettingsIntent = new Intent(this, GroupSettingsActivity.class);
         // Link the ExpenseGroup by adding the group ID as extra on the intent
         groupSettingsIntent.putExtra("EXPENSE_GROUP_ID", expenseGroupID);
-        startActivity(groupSettingsIntent);
+        startActivityForResult(groupSettingsIntent, 0);
     }
 
     /**
@@ -132,6 +150,7 @@ public class GroupScreenActivity extends AppCompatActivity {
         expenseDetailsIntent.putExtra("MODE", "EDIT");
         // Link the expense ID
         expenseDetailsIntent.putExtra("EXPENSE_ID", (Integer) view.getTag());
+        expenseID = (Integer) view.getTag();
         startActivity(expenseDetailsIntent);
     }
 
@@ -151,7 +170,11 @@ public class GroupScreenActivity extends AppCompatActivity {
      * @param view The View instance of the button that was pressed
      */
     public void onBack(View view) {
-
+        // Close old HomeScreenActivity
+        HomeScreenActivity.instance.finish();
+        // Open new HomeScreenActivity
+        Intent homeScreenIntent = new Intent(this, HomeScreenActivity.class);
+        startActivity(homeScreenIntent);
         // Redirect to the home screen
         finish();
     }
@@ -196,6 +219,25 @@ public class GroupScreenActivity extends AppCompatActivity {
                     @Override
                     public void onErrorResponse(VolleyError error, String errorMessage) {
                         // Show error and update semaphore
+                        GregService.showErrorToast(errorMessage, context);
+                        isRequestHappening = false;
+                    }
+                });
+    }
+
+    private void getExpenseGroupName(Context context) {
+        APIService.getExpenseGroup(LoggedInUser.getInstance().getApiKey(), Integer.toString(expenseGroupID),
+                context,
+                new APIResponse<List<Map<String, String>>>() {
+                    @Override
+                    public void onResponse(List<Map<String, String>> data) {
+                        String name = data.get(0).get("name");
+                        ((TextView) findViewById(R.id.usernameText)).setText(name);
+                        isRequestHappening = false;
+                    }
+
+                    @Override
+                    public void onErrorResponse(VolleyError error, String errorMessage) {
                         GregService.showErrorToast(errorMessage, context);
                         isRequestHappening = false;
                     }
