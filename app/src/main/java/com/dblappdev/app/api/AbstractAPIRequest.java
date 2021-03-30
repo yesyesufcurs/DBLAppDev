@@ -134,6 +134,7 @@ public abstract class AbstractAPIRequest<T, K> {
                         return;
                     } else {
                         onEmulatorBugResponse.onResponse(null);
+                        return;
                     }
                 }
                 // Check if error was a TimeoutError
