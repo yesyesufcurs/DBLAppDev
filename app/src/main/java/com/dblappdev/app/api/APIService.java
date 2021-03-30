@@ -96,7 +96,23 @@ public abstract class APIService {
 
         // Invoke Request
         new StringAPIRequest(AbstractAPIRequest.getAPIUrl() + "register", Request.Method.GET,
-                headers, null).run(context, response);
+                headers, null) {
+            @Override
+            public void run(Context context, APIResponse<String> apiResponse) {
+                run(context, apiResponse, new APIResponse<String>() {
+
+                    @Override
+                    public void onResponse(String data) {
+                        APIService.login(username, password, context, apiResponse);
+                    }
+
+                    @Override
+                    public void onErrorResponse(VolleyError error, String errorMessage) {
+
+                    }
+                });
+            }
+        }.run(context, response);
     }
 
     /**
@@ -924,11 +940,11 @@ public abstract class APIService {
      * and the amount the person owes, so the user (caller) should get money.
      * Each entry contains: user_id, amount.
      *
-     *  @param apiKey         apiKey of the user calling this method
-     *  @param expenseGroupId expense group id of which expenses should be considered
-     *  @param context        context of request, often AppActivity (instance of calling object)
-     *  @param response       contains a callback method that is called on (un)successful request.
-     *  @throws IllegalArgumentException if {@code apiKey == null || expenseGroupId == null
+     * @param apiKey         apiKey of the user calling this method
+     * @param expenseGroupId expense group id of which expenses should be considered
+     * @param context        context of request, often AppActivity (instance of calling object)
+     * @param response       contains a callback method that is called on (un)successful request.
+     * @throws IllegalArgumentException if {@code apiKey == null || expenseGroupId == null
      *                                  context == null || response == null}}
      * @pre {@code apiKey != null && expenseGroupId != null && context != null && response != null}
      * @post {@code APIResponse.data == sum(userDebitedExpenses.amount) grouped by user }
