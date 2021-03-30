@@ -132,7 +132,7 @@ public abstract class AbstractAPIRequest<T, K> {
                         retryCount++;
                         run(context, apiResponse, null);
                         return;
-                    } else {
+                    } else if (onEmulatorBugResponse != null) {
                         onEmulatorBugResponse.onResponse(null);
                         return;
                     }
