@@ -11,6 +11,8 @@ import time
 
 # Variable needed to deal with Volley Emulator Bug.
 lastCreatedExpenseGroupId = None
+lastCreatedExpenseGroupUserID = None
+lastCreatedExpenseGroupTime = None
 
 @app.route("/getExpenseGroups")
 def getExpenseGroups():
@@ -98,6 +100,9 @@ def createExpenseGroup():
             cursor = conn.cursor()
             expense_group_name = ""
             expense_group_id = 0
+            # Check for emulator bug and return last created id.
+            if user_id == lastCreatedExpenseGroupUserID and time.time() - lastCreatedExpenseGroupUserID < 10:
+                return jsonify(lastCreatedExpenseGroupId)
             # Get headers
             try:
                 expense_group_name = request.headers.get('expense_group_name')
@@ -118,7 +123,9 @@ def createExpenseGroup():
             except Exception as e:
                 return jsonify(error=412, text="Cannot add moderator to expense group"), 412
             conn.commit()
-            lastCreatedExpenseGroup = expense_group_id
+            lastCreatedExpenseGroupId = expense_group_id
+            lastCreatedExpenseGroupTime = time.time()
+            lastCreatedExpenseGroupUserID = user_id
             return jsonify(expense_group_id)
 
     return CreateExpenseGroup.template_method(CreateExpenseGroup, 
@@ -136,7 +143,7 @@ def getLastCreatedExpenseGroupId():
             cursor = conn.cursor()
             # Check that caller is member of expense groups
             try:
-                if not isMember(user_id, expense_group_id, cursor) or lastCreatedExpenseGroup == None:
+                if (not (isMember(user_id, lastCreatedExpenseGroupId, cursor))) or lastCreatedExpenseGroupId == None:
                     raise Exception("")
             except Exception as e:
                 return jsonify(error=412, text="Something went wrong while retrieving expense group."), 412
