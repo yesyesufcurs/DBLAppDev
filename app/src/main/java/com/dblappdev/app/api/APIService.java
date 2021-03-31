@@ -96,23 +96,18 @@ public abstract class APIService {
 
         // Invoke Request
         new StringAPIRequest(AbstractAPIRequest.getAPIUrl() + "register", Request.Method.GET,
-                headers, null) {
+                headers, null).run(context, response, new APIResponse<String>() {
+
             @Override
-            public void run(Context context, APIResponse<String> apiResponse) {
-                run(context, apiResponse, new APIResponse<String>() {
-
-                    @Override
-                    public void onResponse(String data) {
-                        APIService.login(username, password, context, apiResponse);
-                    }
-
-                    @Override
-                    public void onErrorResponse(VolleyError error, String errorMessage) {
-
-                    }
-                });
+            public void onResponse(String data) {
+                APIService.login(username, password, context, response);
             }
-        }.run(context, response);
+
+            @Override
+            public void onErrorResponse(VolleyError error, String errorMessage) {
+                response.onErrorResponse(new VolleyError(errorMessage), errorMessage);
+            }
+        });
     }
 
     /**
