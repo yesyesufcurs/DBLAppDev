@@ -96,24 +96,7 @@ public abstract class APIService {
 
         // Invoke Request
         new StringAPIRequest(AbstractAPIRequest.getAPIUrl() + "register", Request.Method.GET,
-                headers, null) {
-            // Add custom Emulator Bug Response.
-            @Override
-            public void run(Context context, APIResponse<String> apiResponse) {
-                run(context, apiResponse, new APIResponse<String>() {
-
-                    @Override
-                    public void onResponse(String data) {
-                        APIService.login(username, password, context, apiResponse);
-                    }
-
-                    @Override
-                    public void onErrorResponse(VolleyError error, String errorMessage) {
-                        response.onErrorResponse(new VolleyError(errorMessage), errorMessage);
-                    }
-                });
-            }
-        }.run(context, response);
+                headers, null).run(context, response);
     }
 
     /**
@@ -273,21 +256,7 @@ public abstract class APIService {
 
         // Do request
         new StringAPIRequest(AbstractAPIRequest.getAPIUrl() + "createExpenseGroup",
-                Request.Method.GET, params, null).run(context, response,
-                new APIResponse<String>() {
-                    @Override
-                    public void onResponse(String data) {
-                        new StringAPIRequest(
-                                AbstractAPIRequest.getAPIUrl() + "getLastCreatedExpenseGroupId",
-                                Request.Method.GET,
-                                params, null).run(context, response);
-                    }
-
-                    @Override
-                    public void onErrorResponse(VolleyError error, String errorMessage) {
-                        response.onErrorResponse(new VolleyError(errorMessage), errorMessage);
-                    }
-                });
+                Request.Method.GET, params, null).run(context, response);
 
     }
 

@@ -131,26 +131,6 @@ def createExpenseGroup():
 
     return CreateExpenseGroup.template_method(CreateExpenseGroup, request.headers)
 
-@app.route("/getLastCreatedExpenseGroupId")
-def getLastCreatedExpenseGroupId():
-    '''
-    Gets last created expense group id and returns it to caller.
-    Return:
-    expense_group_id
-    '''
-    class GetLastCreatedExpenseGroupId(AbstractAPI):
-        def api_operation(self, user_id, conn):
-            global lastCreatedExpenseGroupId
-            cursor = conn.cursor()
-            # Check that caller is member of expense groups
-            try:
-                if (not (isMember(user_id, lastCreatedExpenseGroupId, cursor))) or lastCreatedExpenseGroupId == None:
-                    raise Exception("")
-            except Exception as e:
-                return jsonify(error=412, text="Something went wrong while retrieving expense group."), 412
-            return jsonify(lastCreatedExpenseGroupId)
-    return GetLastCreatedExpenseGroupId.template_method(GetLastCreatedExpenseGroupId, request.headers)
-
 @app.route("/removeExpenseGroup")
 def removeExpenseGroup():
     """
