@@ -79,7 +79,8 @@ public abstract class AbstractAPIRequest<T, K> {
      *
      * @param context     Context of caller
      * @param apiResponse APIResponse of caller
-     * @param onEmulatorBugResponse responseCode when there is an emulator bug.
+     * @param onEmulatorBugResponse responseCode when there is an emulator bug as explained here
+     *                              https://github.com/google/volley/issues/92
      * @throws IllegalArgumentException if {@code context == null || apiResponse == null}
      * @pre {@code context != null && apiResponse != null}
      */
