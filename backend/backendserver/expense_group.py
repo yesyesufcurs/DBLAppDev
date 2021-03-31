@@ -102,7 +102,7 @@ def createExpenseGroup():
             expense_group_name = ""
             expense_group_id = 0
             # Check for emulator bug and return last created id.
-            if user_id == lastCreatedExpenseGroupUserID and time.time() - lastCreatedExpenseGroupUserID < 10:
+            if user_id == lastCreatedExpenseGroupUserID and time.time() - lastCreatedExpenseGroupTime < 10:
                 return jsonify(lastCreatedExpenseGroupId)
             # Get headers
             try:
