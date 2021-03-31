@@ -36,7 +36,7 @@ def getExpenseGroups():
             result = cursor.fetchall()
             return self.generateJson(self, result)
 
-    return GetExpenseGroups.template_method(GetExpenseGroups, request.headers["api_key"] if "api_key" in request.headers else None)
+    return GetExpenseGroups.template_method(GetExpenseGroups, request.headers)
 
 @app.route("/getExpenseGroup")
 def getExpenseGroup():
@@ -63,7 +63,7 @@ def getExpenseGroup():
             result = cursor.fetchall()
             return self.generateJson(self, result)
 
-    return GetExpenseGroup.template_method(GetExpenseGroup, request.headers["api_key"] if "api_key" in request.headers else None)
+    return GetExpenseGroup.template_method(GetExpenseGroup, request.headers)
 
 
 @app.route("/getAllExpenseGroups")
@@ -83,7 +83,7 @@ def getAllExpenseGroups():
                 return jsonify(error=412, text="Cannot retrieve expense groups"), 412
             result = cursor.fetchall()
             return self.generateJson(self, result)
-    return GetAllExpenseGroups.template_method(GetAllExpenseGroups, request.headers["api_key"] if "api_key" in request.headers else None)
+    return GetAllExpenseGroups.template_method(GetAllExpenseGroups, request.headers)
 
 
 @app.route("/createExpenseGroup")
@@ -129,8 +129,7 @@ def createExpenseGroup():
             lastCreatedExpenseGroupUserID = user_id
             return jsonify(expense_group_id)
 
-    return CreateExpenseGroup.template_method(CreateExpenseGroup, 
-    request.headers["api_key"] if "api_key" in request.headers else None)
+    return CreateExpenseGroup.template_method(CreateExpenseGroup, request.headers)
 
 @app.route("/getLastCreatedExpenseGroupId")
 def getLastCreatedExpenseGroupId():
@@ -150,8 +149,7 @@ def getLastCreatedExpenseGroupId():
             except Exception as e:
                 return jsonify(error=412, text="Something went wrong while retrieving expense group."), 412
             return jsonify(lastCreatedExpenseGroupId)
-    return GetLastCreatedExpenseGroupId.template_method(GetLastCreatedExpenseGroupId,
-    request.headers["api_key"] if "api_key" in request.headers else None)
+    return GetLastCreatedExpenseGroupId.template_method(GetLastCreatedExpenseGroupId, request.headers)
 
 @app.route("/removeExpenseGroup")
 def removeExpenseGroup():
@@ -218,7 +216,7 @@ def removeExpenseGroup():
                 return jsonify(error=412, text="Cannot remove expense group"), 412
             conn.commit()
             return jsonify("Removed successfully.")
-    return RemoveExpenseGroup.template_method(RemoveExpenseGroup, request.headers["api_key"] if "api_key" in request.headers else None)
+    return RemoveExpenseGroup.template_method(RemoveExpenseGroup, request.headers)
 
 @app.route("/getExpenseGroupMembers")
 def getExpenseGroupMembers():
@@ -252,7 +250,7 @@ def getExpenseGroupMembers():
                 return jsonify(error=412, text="Cannot retrieve expense group members"), 412
             result = cursor.fetchall()
             return self.generateJson(self, result)
-    return GetExpenseGroupMembers.template_method(GetExpenseGroupMembers, request.headers["api_key"] if "api_key" in request.headers else None)
+    return GetExpenseGroupMembers.template_method(GetExpenseGroupMembers, request.headers)
 
 
 @app.route("/addToExpenseGroup")
@@ -308,7 +306,7 @@ def addToExpenseGroup():
                 return jsonify(error=412, text="Cannot add user to expense group"), 412
             conn.commit()
             return jsonify("Added successfully")
-    return AddToExpenseGroup.template_method(AddToExpenseGroup, request.headers["api_key"] if "api_key" in request.headers else None)
+    return AddToExpenseGroup.template_method(AddToExpenseGroup, request.headers)
 
 @app.route("/removeFromExpenseGroup")
 def removeFromExpenseGroup():
@@ -369,7 +367,7 @@ def removeFromExpenseGroup():
                 return jsonify(error=412, text="Cannot delete user from expense group"), 412
             conn.commit()
             return jsonify("Removed successfully.")
-    return RemoveFromExpenseGroup.template_method(RemoveFromExpenseGroup, request.headers["api_key"] if "api_key" in request.headers else None)
+    return RemoveFromExpenseGroup.template_method(RemoveFromExpenseGroup, request.headers)
 
 def generate_expense_group_id(cursor):
     '''

@@ -18,15 +18,15 @@ class AbstractAPI():
     user_id = ""
     cursor, conn = None, None
 
-    def template_method(self, api_key):
+    def template_method(self, headers):
         # Get API key from headers
-        if api_key == None:
+        if not ("api_key" in headers):
             return jsonify(error=412, text="API key missing"), 412
 
         # Check API key for validity and user
 
         try:
-            user_id = self.verify_api_key(self, api_key)
+            user_id = self.verify_api_key(self, headers['api_key'])
         except Exception as e:
             return jsonify(error=412, text="API key invalid"), 412
 
