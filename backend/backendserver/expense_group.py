@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify, Response
 from backendserver import app, db_file, create_connection
 from backendserver.abstractAPI import AbstractAPI
-from backendserver.permissionChecks import number_expense_group_members, isModerator, isMember, owesMoney, owesAnyMoney
+from backendserver.permissionChecks import number_expense_group_members, isModerator, isMember, owesMoney, owesAnyMoney, isValidGroup
 import sqlite3
 import json
 import hashlib
@@ -251,6 +251,12 @@ def addToExpenseGroup():
                 return jsonify(error=412, text="Cannot determine if caller has permissions."), 412
             if not(hasPermission):
                 return jsonify(error=412, text="Only the moderator can add other people to an expense group."), 412
+            # Check if expense group exists
+            try:
+                if not isValidGroup(expense_group_id, cursor):
+                    raise Exception("")
+            except Exception as e:
+                return jsonify(error=412, text="This expense group does not exist."), 412
             # Add person to expense group.
             try:
                 number_of_members = number_expense_group_members(
