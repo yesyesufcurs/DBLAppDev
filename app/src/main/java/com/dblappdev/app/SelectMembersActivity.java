@@ -155,6 +155,14 @@ public class SelectMembersActivity extends AppCompatActivity {
             } catch (JSONException e) {
                 throw new IllegalStateException("Cannot set expenseIOUJSON");
             }
+        } else{
+            try {
+                for (User user : amountMap.keySet()) {
+                    expenseIOU.put(user.getUsername(), 0f);
+                }
+            } catch (JSONException e) {
+                throw new IllegalStateException("Cannot set expenseIOUJSON");
+            }
         }
 
         Bitmap bmp = imagePath == null ? null : BitmapFactory.decodeFile(imagePath);

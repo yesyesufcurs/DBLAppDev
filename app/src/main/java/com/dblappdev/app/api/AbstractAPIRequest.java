@@ -62,9 +62,8 @@ public abstract class AbstractAPIRequest<T, K> {
      */
     protected abstract K convertData(T data);
 
-
     /**
-     * Template method to be executed to run the API request.
+     * Template method to be executed to run the API request, with default behaviour.
      *
      * @param context     Context of caller
      * @param apiResponse APIResponse of caller
@@ -72,6 +71,20 @@ public abstract class AbstractAPIRequest<T, K> {
      * @pre {@code context != null && apiResponse != null}
      */
     public void run(Context context, APIResponse<K> apiResponse) {
+        run(context, apiResponse, null);
+    }
+
+    /**
+     * Template method to be executed to run the API request.
+     *
+     * @param context     Context of caller
+     * @param apiResponse APIResponse of caller
+     * @param onEmulatorBugResponse responseCode when there is an emulator bug.
+     * @throws IllegalArgumentException if {@code context == null || apiResponse == null}
+     * @pre {@code context != null && apiResponse != null}
+     */
+    public void run(Context context, APIResponse<K> apiResponse,
+                    APIResponse<K> onEmulatorBugResponse) {
         if (context == null) {
             throw new IllegalArgumentException("AbstractAPIRequest.run.pre: context is null.");
         }
@@ -115,9 +128,12 @@ public abstract class AbstractAPIRequest<T, K> {
                     errorMessage = new JSONObject(responseNetworkData).optString("text");
                 } catch (Exception e) {
                     // Not caused by a backend error, retry request if retryCount is under 10 times
-                    if (retryCount < 10) {
+                    if (retryCount < 10 && onEmulatorBugResponse == null) {
                         retryCount++;
-                        run(context, apiResponse);
+                        run(context, apiResponse, null);
+                        return;
+                    } else if (onEmulatorBugResponse != null) {
+                        onEmulatorBugResponse.onResponse(null);
                         return;
                     }
                 }

@@ -289,6 +289,8 @@ public class GroupSettingsActivity extends AppCompatActivity {
                         GregService.showErrorToast("User " + username + " has been " +
                                 "removed from the group!", context);
                         isRequestHappening = false;
+                        // As group settings screen must be updated close it
+                        finish();
                     }
 
                     @Override

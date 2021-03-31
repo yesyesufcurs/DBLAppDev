@@ -77,3 +77,13 @@ def debitMoney(user_id, expense_group_id, cursor):
     """
     cursor.execute(query, (user_id, expense_group_id))
     return cursor.fetchall()
+
+def isValidGroup(expense_group_id, cursor):
+    """
+    Returns if expense group exists
+    """
+    query = """
+    SELECT * FROM expense_group WHERE id = ?
+    """
+    cursor.execute(query, (expense_group_id,))
+    return len(cursor.fetchall()) == 1
