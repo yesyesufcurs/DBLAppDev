@@ -79,31 +79,7 @@ public class ExpenseDetailsActivity extends AppCompatActivity {
                     Map<String, String> ourData = data.get(0);
                     ((EditText) findViewById(R.id.expense_name_input_text)).setText(ourData.get("title"));
                     ((EditText) findViewById(R.id.expense_price_input_text)).setText(ourData.get("amount"));
-                    Bitmap picture = weblinkToBitmap(
-                            "http://94.130.144.25:5000/getExpensePicture/" + ourData.get("id") + "/" + LoggedInUser.getInstance().getApiKey()
-                    );
-                    //create a file to write bitmap data
-                    if (picture != null) {
-                        try {
-                            File f = new File(currentContext.getCacheDir(), "tempicture");
-                            f.createNewFile();
-
-                            //Convert bitmap to byte array
-
-                            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                            picture.compress(Bitmap.CompressFormat.PNG, 0 /*ignored for PNG*/, bos);
-                            byte[] bitmapdata = bos.toByteArray();
-
-                            //write the bytes in file
-                            FileOutputStream fos = new FileOutputStream(f);
-                            fos.write(bitmapdata);
-                            fos.flush();
-                            fos.close();
-                            currentImagePath = f.getAbsolutePath();
-                        } catch (Exception e) {
-                            throw new IllegalStateException("Cannot save picture");
-                        }
-                    }
+                    ((EditText) findViewById(R.id.creator_input_text)).setText(ourData.get("user_id"));
                 }
 
                 @Override
@@ -154,6 +130,7 @@ public class ExpenseDetailsActivity extends AppCompatActivity {
         Intent selectMembersIntent = new Intent(this, SelectMembersActivity.class);
         selectMembersIntent.putExtra("title", ((TextView) findViewById(R.id.expense_name_input_text)).getText().toString());
         selectMembersIntent.putExtra("price", ((TextView) findViewById(R.id.expense_price_input_text)).getText().toString());
+        selectMembersIntent.putExtra("creator", ((TextView) findViewById(R.id.creator_input_text)).getText().toString());
         selectMembersIntent.putExtra("imagePath", currentImagePath);
         selectMembersIntent.putExtra("expenseGroupId", expenseGroupId);
         selectMembersIntent.putExtra("MODE", MODE);
@@ -194,6 +171,31 @@ public class ExpenseDetailsActivity extends AppCompatActivity {
      * @param view The View instance of the button that was pressed
      */
     public void onDisplayImage(View view) {
+        Bitmap picture = weblinkToBitmap(
+                "http://94.130.144.25:5000/getExpensePicture/" + EXPENSE_ID + "/" + LoggedInUser.getInstance().getApiKey()
+        );
+        //create a file to write bitmap data
+        if (picture != null) {
+            try {
+                File f = new File(currentContext.getCacheDir(), "tempicture");
+                f.createNewFile();
+
+                //Convert bitmap to byte array
+
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                picture.compress(Bitmap.CompressFormat.PNG, 0 /*ignored for PNG*/, bos);
+                byte[] bitmapdata = bos.toByteArray();
+
+                //write the bytes in file
+                FileOutputStream fos = new FileOutputStream(f);
+                fos.write(bitmapdata);
+                fos.flush();
+                fos.close();
+                currentImagePath = f.getAbsolutePath();
+            } catch (Exception e) {
+                throw new IllegalStateException("Cannot save picture");
+            }
+        }
         Intent intent = new Intent(this, DisplayImageActivity.class);
         intent.putExtra("image_path", currentImagePath);
         startActivity(intent);
