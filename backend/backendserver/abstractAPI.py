@@ -6,9 +6,17 @@ import sqlite3
 import json
 import hashlib
 import os
+import time
+import inspect
 
+# Last API Request
+lastAPIRequestName = None
+lastAPIRequestTime = 0.0
+# Last API Request response
+lastAPIRequestResponse = None
+lastAPIRequestUserID = None
 
-class AbstractAPI():
+class AbstractAPI(object):
     '''
     AbstractAPI class using template method design pattern.
     Contains the general structure of an api key using base_methods
@@ -18,20 +26,27 @@ class AbstractAPI():
     user_id = ""
     cursor, conn = None, None
 
-    def template_method(self, api_key):
+    def template_method(self, headers):
+        # Get global variables
+        global lastAPIRequestName, lastAPIRequestTime, lastAPIRequestResponse, lastAPIRequestUserID
+        # Get apiRequestName
+        apiRequestName = inspect.stack()[1][3]
         # Get API key from headers
-        if api_key == None:
+        if not ("api_key" in headers):
             return jsonify(error=412, text="API key missing"), 412
 
-        # Check API key for validity and user
 
+        # Check API key for validity and user
         try:
-            user_id = self.verify_api_key(self, api_key)
+            user_id = self.verify_api_key(self, headers['api_key'])
         except Exception as e:
             return jsonify(error=412, text="API key invalid"), 412
 
-        # Establish general database connection
+        # Check for Android Voley bug
+        if (user_id == lastAPIRequestUserID and time.time() - lastAPIRequestTime < 2 and apiRequestName == lastAPIRequestName):
+            return lastAPIRequestResponse
 
+        # Establish general database connection
         try:
             conn = create_connection(db_file)
             cursor = conn.cursor()
@@ -39,8 +54,12 @@ class AbstractAPI():
             return jsonify(error=500, text="could not connect to database"), 500
 
         # do operation
-
-        return self.api_operation(self, user_id, conn)
+        lastAPIRequestResponse = self.api_operation(self, user_id, conn)
+        # Set other values
+        lastAPIRequestUserID = user_id
+        lastAPIRequestName = apiRequestName
+        lastAPIRequestTime = time.time()
+        return lastAPIRequestResponse
 
     def verify_api_key(self, api_key):
         cursor, connection = None, None
