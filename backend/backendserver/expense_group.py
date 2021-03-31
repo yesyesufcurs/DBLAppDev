@@ -9,6 +9,9 @@ import os
 import random
 import time
 
+# Variable needed to deal with Volley Emulator Bug.
+lastCreatedExpenseGroupId = None
+
 @app.route("/getExpenseGroups")
 def getExpenseGroups():
     '''
@@ -115,9 +118,31 @@ def createExpenseGroup():
             except Exception as e:
                 return jsonify(error=412, text="Cannot add moderator to expense group"), 412
             conn.commit()
+            lastCreatedExpenseGroup = expense_group_id
             return jsonify(expense_group_id)
 
-    return CreateExpenseGroup.template_method(CreateExpenseGroup, request.headers["api_key"] if "api_key" in request.headers else None)
+    return CreateExpenseGroup.template_method(CreateExpenseGroup, 
+    request.headers["api_key"] if "api_key" in request.headers else None)
+
+@app.route("/getLastCreatedExpenseGroupId")
+def getLastCreatedExpenseGroupId():
+    '''
+    Gets last created expense group id and returns it to caller.
+    Return:
+    expense_group_id
+    '''
+    class GetLastCreatedExpenseGroupId(AbstractAPI):
+        def api_operation(self, user_id, conn):
+            cursor = conn.cursor()
+            # Check that caller is member of expense groups
+            try:
+                if not isMember(user_id, expense_group_id, cursor) or lastCreatedExpenseGroup == None:
+                    raise Exception("")
+            except Exception as e:
+                return jsonify(error=412, text="Something went wrong while retrieving expense group."), 412
+            return jsonify(lastCreatedExpenseGroupId)
+    return GetLastCreatedExpenseGroupId.template_method(GetLastCreatedExpenseGroupId,
+    request.headers["api_key"] if "api_key" in request.headers else None)
 
 @app.route("/removeExpenseGroup")
 def removeExpenseGroup():
