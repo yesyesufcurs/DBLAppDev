@@ -97,6 +97,7 @@ def createExpenseGroup():
     '''
     class CreateExpenseGroup(AbstractAPI):
         def api_operation(self, user_id, conn):
+            global lastCreatedExpenseGroupId, lastCreatedExpenseGroupTime, lastCreatedExpenseGroupUserID
             cursor = conn.cursor()
             expense_group_name = ""
             expense_group_id = 0
@@ -140,6 +141,7 @@ def getLastCreatedExpenseGroupId():
     '''
     class GetLastCreatedExpenseGroupId(AbstractAPI):
         def api_operation(self, user_id, conn):
+            global lastCreatedExpenseGroupId
             cursor = conn.cursor()
             # Check that caller is member of expense groups
             try:
