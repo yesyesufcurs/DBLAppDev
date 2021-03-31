@@ -41,6 +41,7 @@ public class ExpenseDetailsActivity extends AppCompatActivity {
     int EXPENSE_ID;
     private static final int IMAGE_REQUEST = 1;
     public static Activity currentContext;
+    boolean newImage = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -162,6 +163,7 @@ public class ExpenseDetailsActivity extends AppCompatActivity {
             cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
             startActivityForResult(cameraIntent, IMAGE_REQUEST);
         }
+        newImage = true;
     }
 
     /**
@@ -175,7 +177,7 @@ public class ExpenseDetailsActivity extends AppCompatActivity {
                 "http://94.130.144.25:5000/getExpensePicture/" + EXPENSE_ID + "/" + LoggedInUser.getInstance().getApiKey()
         );
         //create a file to write bitmap data
-        if (picture != null) {
+        if (!newImage && picture != null) {
             try {
                 File f = new File(currentContext.getCacheDir(), "tempicture");
                 f.createNewFile();
@@ -192,6 +194,7 @@ public class ExpenseDetailsActivity extends AppCompatActivity {
                 fos.flush();
                 fos.close();
                 currentImagePath = f.getAbsolutePath();
+                newImage = true;
             } catch (Exception e) {
                 throw new IllegalStateException("Cannot save picture");
             }
