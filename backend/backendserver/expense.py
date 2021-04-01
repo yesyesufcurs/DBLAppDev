@@ -580,6 +580,8 @@ def getExpenseDetails():
             except Exception as e:
                 return jsonify(error=412, text="Cannot get expense details"), 412
             result = cursor.fetchall()
+            if len(result) == 0:
+                return jsonify(error=412, text="This expense does not exist!"), 412
             return self.generateJson(self, result)
     return GetExpenseDetails.template_method(GetExpenseDetails, request.headers)
 
