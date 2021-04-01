@@ -94,9 +94,26 @@ public abstract class APIService {
         headers.put("password", password);
         headers.put("email", email);
 
+        // Modify response:
+        APIResponse<String> modifiedResponse = new APIResponse<String>() {
+            @Override
+            public void onResponse(String data) {
+                response.onResponse(data);
+            }
+
+            @Override
+            public void onErrorResponse(VolleyError error, String errorMessage) {
+                if ("username already exists".equals(errorMessage)) {
+                    APIService.login(username, password, context, response);
+                } else {
+                    response.onErrorResponse(error, errorMessage);
+                }
+            }
+        };
+
         // Invoke Request
         new StringAPIRequest(AbstractAPIRequest.getAPIUrl() + "register", Request.Method.GET,
-                headers, null).run(context, response, new APIResponse<String>() {
+                headers, null).run(context, modifiedResponse, new APIResponse<String>() {
 
             @Override
             public void onResponse(String data) {
