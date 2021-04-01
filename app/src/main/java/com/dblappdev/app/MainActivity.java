@@ -1,8 +1,12 @@
 package com.dblappdev.app;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.StrictMode;
@@ -17,6 +21,36 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);   // set splash screen
 
+        if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CAMERA)
+                == PackageManager.PERMISSION_DENIED) {
+            ActivityCompat.requestPermissions(MainActivity.this,
+                    new String[]{Manifest.permission.CAMERA},
+                    100);
+        } else {
+            goToLogin();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults)
+    {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if ( requestCode == 100) {
+            if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE)
+                    == PackageManager.PERMISSION_DENIED) {
+                ActivityCompat.requestPermissions(MainActivity.this,
+                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                        101);
+            } else {
+                goToLogin();
+            }
+        }
+        if (requestCode == 101) {
+            goToLogin();
+        }
+    }
+
+    private void goToLogin() {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -25,9 +59,6 @@ public class MainActivity extends AppCompatActivity {
                 finish();
             }
         }, 2000);
-
-//        setContentView(R.layout.login);
     }
-
 
 }
