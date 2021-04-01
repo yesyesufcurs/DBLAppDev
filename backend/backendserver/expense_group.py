@@ -324,14 +324,21 @@ def removeFromExpenseGroup():
                     returnString += f"{row[1]} to {row[0]}, "
                     data.append(list(row))
                 return jsonify(error=412, text="Cannot remove as " + returnString[:-2] + "."), 412
+
+            # Remove expenses
+            query1 = """
+            DELETE FROM expense
+            WHERE user_id = ? AND expense_group_id = ?
+            """
             
             # Remove user from expense group
-            query = """
+            query2 = """
             DELETE FROM expense_group_members
             WHERE user_id = ? AND expense_group_id = ?
             """
             try:
-                cursor.execute(query, (user, expense_group_id))
+                cursor.execute(query1, (user, expense_group_id))
+                cursor.execute(query2, (user, expense_group_id))
             except Exception as e:
                 return jsonify(error=412, text="Cannot delete user from expense group"), 412
             conn.commit()
