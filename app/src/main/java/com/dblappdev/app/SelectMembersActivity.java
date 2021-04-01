@@ -43,6 +43,7 @@ public class SelectMembersActivity extends AppCompatActivity {
     String imagePath;
     int EXPENSE_ID;
     String MODE;
+    String creator;
     private ArrayList<User> users;
     private HashMap<User, Integer> amountMap = new HashMap<User, Integer>();
     Context currentContext;
@@ -73,6 +74,11 @@ public class SelectMembersActivity extends AppCompatActivity {
         if (!getIntent().hasExtra("title")) {
             throw new RuntimeException("Something went wrong with opening the expense group: no " +
                     "title.");
+        }
+
+        if (!getIntent().hasExtra("creator")) {
+            throw new RuntimeException("Something went wrong with opening the expense group: no " +
+                    "creator.");
         }
 
         if (!getIntent().hasExtra("imagePath")) {
@@ -107,6 +113,7 @@ public class SelectMembersActivity extends AppCompatActivity {
                 finish();
             }
             imagePath = bundle.getString("imagePath");
+            creator = bundle.getString("creator");
         } catch (Exception e) {
             GregService.showErrorToast("Input values not valid", currentContext);
             finish();
@@ -168,7 +175,10 @@ public class SelectMembersActivity extends AppCompatActivity {
         Bitmap bmp = imagePath == null ? null : BitmapFactory.decodeFile(imagePath);
         isRequestHappening = true;
         if (MODE.equals("ADD")) {
-            APIService.createExpense(LoggedInUser.getInstance().getApiKey(), LoggedInUser.getInstance().getUser().getUsername(), title, "" + (Math.round(amount * 100.0f) / 100.0f), bmp, "Description", "" + expenseGroupId, this,
+            APIService.createExpense(LoggedInUser.getInstance().getApiKey(),
+                    "".equals(creator) ? LoggedInUser.getInstance().getUser().getUsername() : creator,
+                    title, "" + (Math.round(amount * 100.0f) / 100.0f), bmp, "Description",
+                    "" + expenseGroupId, this,
                     new APIResponse<String>() {
                         @Override
                         public void onResponse(String data) {
@@ -345,11 +355,7 @@ public class SelectMembersActivity extends AppCompatActivity {
                         }
                         amountMap = new HashMap<>();
                         for (User user : users) {
-                            if (user.getUsername().equals(LoggedInUser.getInstance().getUser().getUsername())) {
-                                amountMap.put(user, 0);
-                            } else {
-                                amountMap.put(user, 1);
-                            }
+                           amountMap.put(user, 1);
                         }
                         if (MODE.equals("EDIT")) {
                             loadExpenseMembersActivity();
