@@ -355,11 +355,7 @@ public class SelectMembersActivity extends AppCompatActivity {
                         }
                         amountMap = new HashMap<>();
                         for (User user : users) {
-                            if (user.getUsername().equals(LoggedInUser.getInstance().getUser().getUsername())) {
-                                amountMap.put(user, 0);
-                            } else {
-                                amountMap.put(user, 1);
-                            }
+                           amountMap.put(user, 1);
                         }
                         if (MODE.equals("EDIT")) {
                             loadExpenseMembersActivity();
