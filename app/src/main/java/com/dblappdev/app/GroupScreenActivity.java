@@ -33,6 +33,9 @@ public class GroupScreenActivity extends AppCompatActivity {
     int expenseGroupID;
     public int expenseID;
 
+    private RecyclerView recView;
+    private ExpenseAdapter adapter;
+
 
     // Instance variable of GroupScreenActivity
     public static GroupScreenActivity instance;
@@ -154,6 +157,16 @@ public class GroupScreenActivity extends AppCompatActivity {
         startActivity(expenseDetailsIntent);
     }
 
+    public void onRemove(View view) {
+        // remove expense
+        String expenseID = view.getTag().toString();
+        if (!isRequestHappening) {
+            isRequestHappening = true;
+
+            removeExpense(expenseID, this);
+        }
+    }
+
     /**
      * Event handler for the search button
      * @param view The View instance of the button that was pressed
@@ -207,9 +220,10 @@ public class GroupScreenActivity extends AppCompatActivity {
                             expenses.add(expense);
                         }
                         // Set the recyclerview and its settings
-                        RecyclerView recView = (RecyclerView) findViewById(R.id.recyclerViewExpense);
-                        View.OnClickListener listener = view -> onItemClick(view);
-                        ExpenseAdapter adapter = new ExpenseAdapter(listener, expenses);
+                        recView = (RecyclerView) findViewById(R.id.recyclerViewExpense);
+                        View.OnClickListener clickListener = view -> onItemClick(view);
+                        View.OnClickListener removeListener = view -> onRemove(view);
+                        adapter = new ExpenseAdapter(clickListener, removeListener, expenses);
                         recView.setAdapter(adapter);
                         recView.setLayoutManager(new LinearLayoutManager(context));
                         // Update semaphore
@@ -233,6 +247,31 @@ public class GroupScreenActivity extends AppCompatActivity {
                     public void onResponse(List<Map<String, String>> data) {
                         String name = data.get(0).get("name");
                         ((TextView) findViewById(R.id.usernameText)).setText(name);
+                        isRequestHappening = false;
+                    }
+
+                    @Override
+                    public void onErrorResponse(VolleyError error, String errorMessage) {
+                        GregService.showErrorToast(errorMessage, context);
+                        isRequestHappening = false;
+                    }
+                });
+    }
+
+    private void removeExpense(String expenseID, Context context) {
+        APIService.removeExpense(LoggedInUser.getInstance().getApiKey(), expenseID, context,
+                new APIResponse<String>() {
+                    @Override
+                    public void onResponse(String data) {
+                        GregService.showErrorToast("Successfully removed expense!", context);
+                        for (Expense exp : expenses) {
+                            if (Integer.toString(exp.getId()).equals(expenseID)) {
+                                recView.removeViewAt(expenses.indexOf(exp));
+                                adapter.notifyItemRemoved(expenses.indexOf(exp));
+                                adapter.notifyItemRangeChanged(expenses.indexOf(exp), expenses.size());
+                                expenses.remove(exp);
+                            }
+                        }
                         isRequestHappening = false;
                     }
 
