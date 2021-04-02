@@ -162,7 +162,7 @@ public class SelectMembersActivity extends AppCompatActivity {
             } catch (JSONException e) {
                 throw new IllegalStateException("Cannot set expenseIOUJSON");
             }
-        } else{
+        } else {
             try {
                 for (User user : amountMap.keySet()) {
                     expenseIOU.put(user.getUsername(), 0f);
@@ -217,11 +217,15 @@ public class SelectMembersActivity extends AppCompatActivity {
                 this, new APIResponse<List<Map<String, String>>>() {
                     @Override
                     public void onResponse(List<Map<String, String>> data) {
-                        float min = minimumAmount(data);
+                        float[] minTotal = minimumAmount(data);
                         for (Map<String, String> entry : data) {
                             for (User user : users) {
                                 if (user.getUsername().equals(entry.get("user_id"))) {
-                                    amountMap.put(user, Math.round(Float.parseFloat(entry.get("amount")) / min));
+                                    if (minTotal[1] > 0.001f) {
+                                        amountMap.put(user, Math.round(Float.parseFloat(entry.get("amount")) / minTotal[0]));
+                                    } else {
+                                        amountMap.put(user, 0);
+                                    }
                                     break;
                                 }
                             }
@@ -239,14 +243,17 @@ public class SelectMembersActivity extends AppCompatActivity {
                 });
     }
 
-    private float minimumAmount(List<Map<String, String>> data) {
+    private float[] minimumAmount(List<Map<String, String>> data) {
         float min = (float) 100001;
+        float total = 0.0f;
         for (Map<String, String> entry : data) {
             if (Float.parseFloat(entry.get("amount")) < min && Float.parseFloat(entry.get("amount")) > 0.001) {
-                min = Float.parseFloat(entry.get("amount"));
+                float number = Float.parseFloat(entry.get("amount"));
+                min = number;
+                total += number;
             }
         }
-        return min;
+        return new float[]{min, total};
     }
 
     /**
@@ -355,7 +362,7 @@ public class SelectMembersActivity extends AppCompatActivity {
                         }
                         amountMap = new HashMap<>();
                         for (User user : users) {
-                           amountMap.put(user, 1);
+                            amountMap.put(user, 1);
                         }
                         if (MODE.equals("EDIT")) {
                             loadExpenseMembersActivity();
