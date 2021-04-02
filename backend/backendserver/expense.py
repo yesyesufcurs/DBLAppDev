@@ -319,7 +319,7 @@ def createExpenseIOU(iouJson):
                 expense_id = request.headers.get('expense_id')
             except Exception as e:
                 return jsonify(error=412, text="Cannot get expense id"), 412
-            
+
             try: 
                 isExpenseCreator2 = isExpenseCreator(user_id, expense_id, cursor)
             except Exception as e:
@@ -579,7 +579,8 @@ def getExpenseDetails():
                 if not(isMember(user_id, expense_group_id, cursor)):
                     return jsonify(error=412, text="User must be member of the expense group to see expense details."), 412
             except Exception as e:
-                return jsonify(error=412, text="Cannot determine if caller has permissions"), 412
+                # return jsonify(error=412, text="Cannot determine if caller has permissions"), 412
+                raise e
             # Get expense details
             query = ''' SELECT id, user_id, title, amount, content, timestamp, expense_group_id FROM expense WHERE id = ?'''
             try:
