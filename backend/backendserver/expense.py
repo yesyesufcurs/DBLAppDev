@@ -319,15 +319,20 @@ def createExpenseIOU(iouJson):
                 expense_id = request.headers.get('expense_id')
             except Exception as e:
                 return jsonify(error=412, text="Cannot get expense id"), 412
-
-            # Check permissions of caller
-            try:
+            
+            try: 
                 isExpenseCreator2 = isExpenseCreator(user_id, expense_id, cursor)
-                if not(isExpenseCreator2 or
-                 isModerator(user_id, getExpenseGroup(expense_id, cursor), cursor)):
-                    return jsonify(error=412, text="User must be the creator of the expense to add this."), 412
             except Exception as e:
-                return jsonify(error=412, text="Cannot determine if caller has permissions"), 412
+                return jsonify(error=412, text="Cannot check permissions"), 412
+
+            # # Check permissions of caller
+            # try:
+            #     isExpenseCreator2 = isExpenseCreator(user_id, expense_id, cursor)
+            #     if not(isExpenseCreator2 or
+            #      isModerator(user_id, getExpenseGroup(expense_id, cursor), cursor)):
+            #         return jsonify(error=412, text="User must be the creator of the expense to add this."), 412
+            # except Exception as e:
+            #     return jsonify(error=412, text="Cannot determine if caller has permissions"), 412
 
             # Iterate through iouJson and add each Accured Expense to db.
             for key in iou:
