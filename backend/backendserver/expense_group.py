@@ -265,7 +265,7 @@ def addToExpenseGroup():
             except Exception as e:
                 return jsonify(error=412, text="Cannot get number of expense group members."), 412
             # Check requirement of at most 50 members.
-            if number_of_members >= 50:
+            if number_of_members >= 2:
                 return jsonify(error=412, text="Expense group full, can only have at most 50 members."), 412
             query = '''
             INSERT INTO expense_group_members(expense_group_id, user_id) VALUES (?, ?)'''
