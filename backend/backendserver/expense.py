@@ -310,6 +310,7 @@ def createExpenseIOU(iouJson):
         def api_operation(self, user_id, conn):
             cursor = conn.cursor()
             iou = json.loads(iouJson)
+            isExpenseCreator2 = False
             expense_id = ""
             query = ''' INSERT INTO accured_expenses VALUES (?, ?, ?, ?) '''
             queryRemove = "DELETE FROM accured_expenses WHERE expense_id = ? AND user_id = ?"
@@ -319,9 +320,15 @@ def createExpenseIOU(iouJson):
             except Exception as e:
                 return jsonify(error=412, text="Cannot get expense id"), 412
 
+            try: 
+                isExpenseCreator2 = isExpenseCreator(user_id, expense_id, cursor)
+            except Exception as e:
+                return jsonify(error=412, text="Cannot check permissions"), 412
+
             # # Check permissions of caller
             # try:
-            #     if not(isExpenseCreator(user_id, expense_id, cursor) or
+            #     isExpenseCreator2 = isExpenseCreator(user_id, expense_id, cursor)
+            #     if not(isExpenseCreator2 or
             #      isModerator(user_id, getExpenseGroup(expense_id, cursor), cursor)):
             #         return jsonify(error=412, text="User must be the creator of the expense to add this."), 412
             # except Exception as e:
@@ -333,7 +340,7 @@ def createExpenseIOU(iouJson):
                     # Make sure that this iou does not exist.
                     cursor.execute(queryRemove, (expense_id, key))
                     # Add a new iou.
-                    cursor.execute(query, (expense_id, key, iou[key], (-0.01 < float(iou[key]) < 0.01) or key == iou[key]))
+                    cursor.execute(query, (expense_id, key, iou[key], (-0.01 < float(iou[key]) < 0.01) or isExpenseCreator2))
                 except Exception as e:
                     return jsonify(error=412, text="Cannot add transaction"), 412
             conn.commit()
