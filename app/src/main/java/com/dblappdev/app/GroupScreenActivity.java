@@ -86,14 +86,13 @@ public class GroupScreenActivity extends AppCompatActivity {
         } else {
             String name = bundle.getString("EXPENSE_GROUP_NAME");
             ((TextView) findViewById(R.id.usernameText)).setText(name);
-        }
-
-        // Get all the expense groups the logged in user is part of
-        if (!isRequestHappening) {
-            // Update semaphore
-            isRequestHappening = true;
-            // This method will also deal with the instantiating of the recycler view
-            getExpenses(this);
+            // Get all the expense groups the logged in user is part of
+            if (!isRequestHappening) {
+                // Update semaphore
+                isRequestHappening = true;
+                // This method will also deal with the instantiating of the recycler view
+                getExpenses(this);
+            }
         }
     }
 
@@ -233,7 +232,8 @@ public class GroupScreenActivity extends AppCompatActivity {
                     public void onResponse(List<Map<String, String>> data) {
                         String name = data.get(0).get("name");
                         ((TextView) findViewById(R.id.usernameText)).setText(name);
-                        isRequestHappening = false;
+                        getExpenses(context);
+//                        isRequestHappening = false;
                     }
 
                     @Override
