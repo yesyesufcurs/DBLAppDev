@@ -22,6 +22,7 @@ import com.dblappdev.app.dataClasses.User;
 import com.dblappdev.app.gregservice.GregService;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -264,12 +265,11 @@ public class GroupScreenActivity extends AppCompatActivity {
                     @Override
                     public void onResponse(String data) {
                         GregService.showErrorToast("Successfully removed expense!", context);
-                        for (Expense exp : expenses) {
+                        for (Iterator<Expense> iterator = expenses.iterator(); iterator.hasNext();) {
+                            Expense exp = iterator.next();
                             if (Integer.toString(exp.getId()).equals(expenseID)) {
-                                recView.removeViewAt(expenses.indexOf(exp));
-                                adapter.notifyItemRemoved(expenses.indexOf(exp));
-                                adapter.notifyItemRangeChanged(expenses.indexOf(exp), expenses.size());
-                                expenses.remove(exp);
+                                iterator.remove();
+                                adapter.notifyDataSetChanged();
                             }
                         }
                         isRequestHappening = false;
