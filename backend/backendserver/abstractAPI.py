@@ -10,6 +10,7 @@ import time
 import inspect
 
 # Last API Request
+lastAPIRequestHeaders = None
 lastAPIRequestName = None
 lastAPIRequestTime = 0.0
 # Last API Request response
@@ -28,7 +29,7 @@ class AbstractAPI(object):
 
     def template_method(self, headers):
         # Get global variables
-        global lastAPIRequestName, lastAPIRequestTime, lastAPIRequestResponse, lastAPIRequestUserID
+        global lastAPIRequestName, lastAPIRequestTime, lastAPIRequestResponse, lastAPIRequestUserID, lastAPIRequestHeaders
         # Get apiRequestName
         apiRequestName = inspect.stack()[1][3]
         # Get API key from headers
@@ -43,7 +44,7 @@ class AbstractAPI(object):
             return jsonify(error=412, text="API key invalid"), 412
 
         # Check for Android Voley bug
-        if (user_id == lastAPIRequestUserID and time.time() - lastAPIRequestTime < 2 and apiRequestName == lastAPIRequestName):
+        if (user_id == lastAPIRequestUserID and time.time() - lastAPIRequestTime < 2 and apiRequestName == lastAPIRequestName and lastAPIRequestHeaders == headers):
             return lastAPIRequestResponse
 
         # Establish general database connection
@@ -59,6 +60,7 @@ class AbstractAPI(object):
         lastAPIRequestUserID = user_id
         lastAPIRequestName = apiRequestName
         lastAPIRequestTime = time.time()
+        lastAPIRequestHeaders = headers
         return lastAPIRequestResponse
 
     def verify_api_key(self, api_key):
