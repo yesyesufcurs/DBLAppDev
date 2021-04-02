@@ -182,7 +182,7 @@ public class SelectMembersActivity extends AppCompatActivity {
                     new APIResponse<String>() {
                         @Override
                         public void onResponse(String data) {
-                            addExpenseIOU(expenseIOU);
+                            addExpenseIOU(expenseIOU, Integer.parseInt(data));
                         }
 
                         @Override
@@ -195,7 +195,7 @@ public class SelectMembersActivity extends AppCompatActivity {
                     new APIResponse<String>() {
                         @Override
                         public void onResponse(String data) {
-                            addExpenseIOU(expenseIOU);
+                            addExpenseIOU(expenseIOU, EXPENSE_ID);
                         }
 
                         @Override
@@ -261,28 +261,39 @@ public class SelectMembersActivity extends AppCompatActivity {
      *
      * @param expenseIOU expenseIOU to be added
      */
-    private void addExpenseIOU(JSONObject expenseIOU) {
-        APIService.createExpenseIOU(LoggedInUser.getInstance().getApiKey(), "" + EXPENSE_ID, expenseIOU, this, new APIResponse<String>() {
-            @Override
-            public void onResponse(String data) {
-                // Get ExpenseGroupName
-                APIService.getExpenseGroup(LoggedInUser.getInstance().getApiKey(), "" + expenseGroupId, currentContext, new APIResponse<List<Map<String, String>>>() {
+    private void addExpenseIOU(JSONObject expenseIOU, int expenseID) {
+        APIService.createExpenseIOU(LoggedInUser.getInstance().getApiKey(),
+                "" + expenseID, expenseIOU, this, new APIResponse<String>() {
                     @Override
-                    public void onResponse(List<Map<String, String>> data) {
-                        ExpenseDetailsActivity.currentContext.finish();
-                        // Finish group screen
-                        GroupScreenActivity.instance.finish();
-                        // Redirect to group screen
-                        Intent groupScreenIntent = new Intent(currentContext, GroupScreenActivity.class);
-                        // Link the ExpenseGroup by adding the group ID as extra on the intent
-                        groupScreenIntent.putExtra("EXPENSE_GROUP_ID", expenseGroupId);
-                        String name = data.get(0).get("name");
-                        // Link the ExpenseGroup name
-                        groupScreenIntent.putExtra("EXPENSE_GROUP_NAME", name);
-                        startActivity(groupScreenIntent);
-                        isRequestHappening = false;
-                        // Redirect to the group screen
-                        finish();
+                    public void onResponse(String data) {
+                        // Get ExpenseGroupName
+                        APIService.getExpenseGroup(LoggedInUser.getInstance().getApiKey()
+                                , "" + expenseGroupId, currentContext,
+                                new APIResponse<List<Map<String, String>>>() {
+                                    @Override
+                                    public void onResponse(List<Map<String, String>> data) {
+                                        ExpenseDetailsActivity.currentContext.finish();
+                                        // Finish group screen
+                                        GroupScreenActivity.instance.finish();
+                                        // Redirect to group screen
+                                        Intent groupScreenIntent = new Intent(currentContext, GroupScreenActivity.class);
+                                        // Link the ExpenseGroup by adding the group ID as extra on the intent
+                                        groupScreenIntent.putExtra("EXPENSE_GROUP_ID", expenseGroupId);
+                                        String name = data.get(0).get("name");
+                                        // Link the ExpenseGroup name
+                                        groupScreenIntent.putExtra("EXPENSE_GROUP_NAME", name);
+                                        startActivity(groupScreenIntent);
+                                        isRequestHappening = false;
+                                        // Redirect to the group screen
+                                        finish();
+                                    }
+
+                                    @Override
+                                    public void onErrorResponse(VolleyError error, String errorMessage) {
+                                        GregService.showErrorToast(errorMessage, currentContext);
+                                        isRequestHappening = false;
+                                    }
+                                });
                     }
 
                     @Override
@@ -291,14 +302,6 @@ public class SelectMembersActivity extends AppCompatActivity {
                         isRequestHappening = false;
                     }
                 });
-            }
-
-            @Override
-            public void onErrorResponse(VolleyError error, String errorMessage) {
-                GregService.showErrorToast(errorMessage, currentContext);
-                isRequestHappening = false;
-            }
-        });
 
     }
 
