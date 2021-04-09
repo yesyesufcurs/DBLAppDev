@@ -10,7 +10,7 @@ import android.widget.EditText;
 
 import com.android.volley.VolleyError;
 import com.dblappdev.app.api.APIResponse;
-import com.dblappdev.app.api.APIService;
+import com.dblappdev.app.api.ExpenseGroupService;
 import com.dblappdev.app.dataClasses.LoggedInUser;
 import com.dblappdev.app.gregservice.GregService;
 
@@ -100,7 +100,7 @@ public class AddJoinGroupActivity extends AppCompatActivity {
     }
 
     private void joinGroupRequest(String expenseGroupID, Context context) {
-        APIService.addToExpenseGroup(LoggedInUser.getInstance().getApiKey(),
+        ExpenseGroupService.addToExpenseGroup(LoggedInUser.getInstance().getApiKey(),
                 LoggedInUser.getInstance().getUser().getUsername(), expenseGroupID, context,
                 new APIResponse<String>() {
                     @Override
@@ -124,7 +124,7 @@ public class AddJoinGroupActivity extends AppCompatActivity {
     }
 
     private void createGroupRequest(String name, Context context) {
-        APIService.createExpenseGroup(LoggedInUser.getInstance().getApiKey(), name, context,
+        ExpenseGroupService.createExpenseGroup(LoggedInUser.getInstance().getApiKey(), name, context,
                 new APIResponse<String>() {
                     @Override
                     public void onResponse(String data) {
