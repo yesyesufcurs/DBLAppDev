@@ -45,7 +45,7 @@ public class ExpenseService {
         // Check preconditions
         if (apiKey == null || title == null || amount == null ||
                 description == null || expenseGroupId == null) {
-            throw new IllegalArgumentException("APIService.createExpense.pre: apiKey or " +
+            throw new IllegalArgumentException("ExpenseService.createExpense.pre: apiKey or " +
                     "title or amount or description or expenseGroupId is null");
         }
         // Initialize base64 string of picture
@@ -104,7 +104,7 @@ public class ExpenseService {
         if (apiKey == null || title == null || amount == null ||
                 description == null || expenseGroupId == null || context == null ||
                 response == null) {
-            throw new IllegalArgumentException("APIService.modifyExpense.pre: apiKey or " +
+            throw new IllegalArgumentException("ExpenseService.modifyExpense.pre: apiKey or " +
                     "title or amount or description or expenseGroupId or expenseId is null");
         }
 
@@ -152,7 +152,7 @@ public class ExpenseService {
         // Check preconditions
         if (apiKey == null || expenseId == null || context == null ||
                 response == null) {
-            throw new IllegalArgumentException("APIService.removeExpense.pre: apiKey or " +
+            throw new IllegalArgumentException("ExpenseService.removeExpense.pre: apiKey or " +
                     "expenseId is null");
         }
 
@@ -222,7 +222,7 @@ public class ExpenseService {
                                         Context context, APIResponse<String> response) {
         // Check preconditions
         if (apiKey == null || expenseId == null || iouJson == null) {
-            throw new IllegalArgumentException("APIService.createExpenseIOU.pre: apiKey or " +
+            throw new IllegalArgumentException("ExpenseService.createExpenseIOU.pre: apiKey or " +
                     "expenseId or iouJson is null");
         }
 
@@ -254,7 +254,7 @@ public class ExpenseService {
                                      APIResponse<List<Map<String, String>>> response) {
         // Check preconditions
         if (apiKey == null || expenseId == null) {
-            throw new IllegalArgumentException("APIService.getExpenseIOU.pre: apiKey or " +
+            throw new IllegalArgumentException("ExpenseService.getExpenseIOU.pre: apiKey or " +
                     "expenseId or iouJson is null");
         }
         // Set headers
@@ -287,7 +287,7 @@ public class ExpenseService {
                                                APIResponse<List<Map<String, String>>> response) {
         // Check preconditions
         if (apiKey == null || expenseGroupId == null) {
-            throw new IllegalArgumentException("APIService.getExpenseGroupExpenses.pre: " +
+            throw new IllegalArgumentException("ExpenseService.getExpenseGroupExpenses.pre: " +
                     "apiKey or expenseGroupId is null");
         }
 
@@ -319,7 +319,7 @@ public class ExpenseService {
                                          APIResponse<List<Map<String, String>>> response) {
         // Check preconditions
         if (apiKey == null || expenseId == null) {
-            throw new IllegalArgumentException("APIService.getExpenseDetails.pre: " +
+            throw new IllegalArgumentException("ExpenseService.getExpenseDetails.pre: " +
                     "apiKey or expenseId is null.");
         }
 
@@ -352,7 +352,7 @@ public class ExpenseService {
                                         APIResponse<List<Map<String, String>>> response) {
         // Check preconditions
         if (apiKey == null || expenseGroupId == null) {
-            throw new IllegalArgumentException("APIService.getUserOwedTotal.pre: apiKey" +
+            throw new IllegalArgumentException("ExpenseService.getUserOwedTotal.pre: apiKey" +
                     " or expenseGroupId is null");
         }
 

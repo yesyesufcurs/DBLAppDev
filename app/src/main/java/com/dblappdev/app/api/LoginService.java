@@ -31,7 +31,7 @@ public class LoginService {
                                 APIResponse<String> response) {
         // Check preconditions
         if (username == null || password == null || email == null) {
-            throw new IllegalArgumentException("APIService.register.pre: username, password or " +
+            throw new IllegalArgumentException("LoginService.register.pre: username, password or " +
                     "email is null.");
         }
         if (username.length() >= 30) {
@@ -126,7 +126,7 @@ public class LoginService {
                              APIResponse<String> response) {
         //Check preconditions
         if (username == null || password == null) {
-            throw new IllegalArgumentException("APIService.login.pre: username or password" +
+            throw new IllegalArgumentException("LoginService.login.pre: username or password" +
                     "is null");
         }
 
