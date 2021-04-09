@@ -158,3 +158,4 @@ def showAllExpenseGroupMembers():
         drow = dict(zip(row.keys(), row))
         json_result.append(drow)
     return jsonify(json_result)
+    
