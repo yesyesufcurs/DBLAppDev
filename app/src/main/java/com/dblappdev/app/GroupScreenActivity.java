@@ -12,11 +12,10 @@ import android.widget.TextView;
 
 import com.android.volley.VolleyError;
 import com.dblappdev.app.adapters.ExpenseAdapter;
-import com.dblappdev.app.adapters.ExpenseGroupAdapter;
 import com.dblappdev.app.api.APIResponse;
-import com.dblappdev.app.api.APIService;
+import com.dblappdev.app.api.ExpenseGroupService;
+import com.dblappdev.app.api.ExpenseService;
 import com.dblappdev.app.dataClasses.Expense;
-import com.dblappdev.app.dataClasses.ExpenseGroup;
 import com.dblappdev.app.dataClasses.LoggedInUser;
 import com.dblappdev.app.dataClasses.User;
 import com.dblappdev.app.gregservice.GregService;
@@ -200,7 +199,7 @@ public class GroupScreenActivity extends AppCompatActivity {
      * @param context Context in which the API request and RecyclerView instantiating happens
      */
     private void getExpenses(Context context) {
-        APIService.getExpenseGroupExpenses(LoggedInUser.getInstance().getApiKey(),
+        ExpenseService.getExpenseGroupExpenses(LoggedInUser.getInstance().getApiKey(),
                 Integer.toString(expenseGroupID), context,
                 new APIResponse<List<Map<String, String>>>() {
                     @Override
@@ -240,7 +239,7 @@ public class GroupScreenActivity extends AppCompatActivity {
     }
 
     private void getExpenseGroupName(Context context) {
-        APIService.getExpenseGroup(LoggedInUser.getInstance().getApiKey(), Integer.toString(expenseGroupID),
+        ExpenseGroupService.getExpenseGroup(LoggedInUser.getInstance().getApiKey(), Integer.toString(expenseGroupID),
                 context,
                 new APIResponse<List<Map<String, String>>>() {
                     @Override
@@ -260,7 +259,7 @@ public class GroupScreenActivity extends AppCompatActivity {
     }
 
     private void removeExpense(String expenseID, Context context) {
-        APIService.removeExpense(LoggedInUser.getInstance().getApiKey(), expenseID, context,
+        ExpenseService.removeExpense(LoggedInUser.getInstance().getApiKey(), expenseID, context,
                 new APIResponse<String>() {
                     @Override
                     public void onResponse(String data) {

@@ -9,19 +9,15 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.volley.VolleyError;
-import com.dblappdev.app.adapters.ExpenseAdapter;
-import com.dblappdev.app.adapters.ExpenseGroupAdapter;
 import com.dblappdev.app.adapters.MemberWeightAdapter;
 import com.dblappdev.app.api.APIResponse;
-import com.dblappdev.app.api.APIService;
-import com.dblappdev.app.dataClasses.Expense;
+import com.dblappdev.app.api.ExpenseGroupService;
+import com.dblappdev.app.api.ExpenseService;
 import com.dblappdev.app.dataClasses.LoggedInUser;
 import com.dblappdev.app.dataClasses.User;
 import com.dblappdev.app.gregservice.GregService;
@@ -175,7 +171,7 @@ public class SelectMembersActivity extends AppCompatActivity {
         Bitmap bmp = imagePath == null ? null : BitmapFactory.decodeFile(imagePath);
         isRequestHappening = true;
         if (MODE.equals("ADD")) {
-            APIService.createExpense(LoggedInUser.getInstance().getApiKey(),
+            ExpenseService.createExpense(LoggedInUser.getInstance().getApiKey(),
                     "".equals(creator) ? LoggedInUser.getInstance().getUser().getUsername() : creator,
                     title, "" + (Math.round(amount * 100.0f) / 100.0f), bmp, "Description",
                     "" + expenseGroupId, this,
@@ -191,7 +187,7 @@ public class SelectMembersActivity extends AppCompatActivity {
                         }
                     });
         } else {
-            APIService.modifyExpense(LoggedInUser.getInstance().getApiKey(), title, "" + (Math.round(amount * 100.0f) / 100.0f), bmp, "Description", "" + expenseGroupId, "" + EXPENSE_ID, this,
+            ExpenseService.modifyExpense(LoggedInUser.getInstance().getApiKey(), title, "" + (Math.round(amount * 100.0f) / 100.0f), bmp, "Description", "" + expenseGroupId, "" + EXPENSE_ID, this,
                     new APIResponse<String>() {
                         @Override
                         public void onResponse(String data) {
@@ -212,7 +208,7 @@ public class SelectMembersActivity extends AppCompatActivity {
      * Load expense members activity data from backend when MODE == "EDIT"
      */
     private void loadExpenseMembersActivity() {
-        APIService.getExpenseIOU(LoggedInUser.getInstance().getApiKey(),
+        ExpenseService.getExpenseIOU(LoggedInUser.getInstance().getApiKey(),
                 "" + EXPENSE_ID,
                 this, new APIResponse<List<Map<String, String>>>() {
                     @Override
@@ -262,12 +258,12 @@ public class SelectMembersActivity extends AppCompatActivity {
      * @param expenseIOU expenseIOU to be added
      */
     private void addExpenseIOU(JSONObject expenseIOU, int expenseID) {
-        APIService.createExpenseIOU(LoggedInUser.getInstance().getApiKey(),
+        ExpenseService.createExpenseIOU(LoggedInUser.getInstance().getApiKey(),
                 "" + expenseID, expenseIOU, this, new APIResponse<String>() {
                     @Override
                     public void onResponse(String data) {
                         // Get ExpenseGroupName
-                        APIService.getExpenseGroup(LoggedInUser.getInstance().getApiKey()
+                        ExpenseGroupService.getExpenseGroup(LoggedInUser.getInstance().getApiKey()
                                 , "" + expenseGroupId, currentContext,
                                 new APIResponse<List<Map<String, String>>>() {
                                     @Override
@@ -352,7 +348,7 @@ public class SelectMembersActivity extends AppCompatActivity {
     }
 
     public void getUsers(Context context) {
-        APIService.getExpenseGroupMembers(LoggedInUser.getInstance().getApiKey(),
+        ExpenseGroupService.getExpenseGroupMembers(LoggedInUser.getInstance().getApiKey(),
                 Integer.toString(expenseGroupId), context,
                 new APIResponse<List<Map<String, String>>>() {
                     @Override

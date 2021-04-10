@@ -5,13 +5,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.android.volley.VolleyError;
 import com.dblappdev.app.api.APIResponse;
-import com.dblappdev.app.api.APIService;
+import com.dblappdev.app.api.LoginService;
 import com.dblappdev.app.dataClasses.LoggedInUser;
 import com.dblappdev.app.gregservice.GregService;
 
@@ -35,8 +34,7 @@ public class LoginActivity extends AppCompatActivity {
      * If any of these fail to hold, this method should create and show a Toast message notifying
      *             the user that the input is invalid.
      * Otherwise, if all of the constraints have been met, this method should make a register
-     *             APIRequest ({@link com.dblappdev.app.api.APIService#login(String, String,
-     *             Context, APIResponse)}).
+     *             APIRequest ({@link LoginService#login(String, String, Context, APIResponse)}).
      * If this request returns an error, this method should create and show a Toast message
      *             containing the received error message.
      * If this request is successful, this method should store the received apiKey in the
@@ -66,7 +64,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     void loginAPICall(String username, String password, Context context) {
-        APIService.login(username, password, context,
+        LoginService.login(username, password, context,
                 new APIResponse<String>() {
                     @Override
                     public void onResponse(String data) {

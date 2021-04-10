@@ -9,12 +9,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.volley.VolleyError;
 import com.dblappdev.app.adapters.ExpenseGroupAdapter;
 import com.dblappdev.app.api.APIResponse;
-import com.dblappdev.app.api.APIService;
+import com.dblappdev.app.api.ExpenseGroupService;
 import com.dblappdev.app.dataClasses.ExpenseGroup;
 import com.dblappdev.app.dataClasses.LoggedInUser;
 import com.dblappdev.app.dataClasses.User;
@@ -155,7 +154,7 @@ public class HomeScreenActivity extends AppCompatActivity {
      * @param context Context in which the API request and RecyclerView instantiating happens
      */
     private void getExpenseGroups(Context context) {
-        APIService.getExpenseGroups(LoggedInUser.getInstance().getApiKey(), context,
+        ExpenseGroupService.getExpenseGroups(LoggedInUser.getInstance().getApiKey(), context,
                 new APIResponse<List<Map<String, String>>>() {
                     @Override
                     public void onResponse(List<Map<String, String>> data) {
