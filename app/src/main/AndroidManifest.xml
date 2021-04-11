@@ -32,7 +32,6 @@
         <activity android:name=".DisplayImageActivity"/>
         <activity android:name=".GroupSettingsActivity" />
         <activity android:name=".GroupScreenActivity" />
-        <activity android:name=".EditProfileActivity" />
         <activity android:name=".HomeScreenActivity" />
         <activity android:name=".CreateProfileActivity" />
         <activity android:name=".RegisterActivity" />
