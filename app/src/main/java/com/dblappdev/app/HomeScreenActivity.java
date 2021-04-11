@@ -72,20 +72,6 @@ public class HomeScreenActivity extends AppCompatActivity {
     }
 
     /**
-     * This method gets called when the user presses the account button on the home screen.
-     * When the user does so, a new EditProfile activity should be created and started.
-     * The current activity should not be closed, such that the user gets redirected to this screen
-     * when they perform a backPress action in the newly created EditProfile activity.
-     * Event handler for the account button
-     * @param view The View instance of the button that was pressed
-     */
-    public void onAccount(View view) {
-        // Redirect to the edit profile screen
-        Intent editProfileIntent = new Intent(this, EditProfileActivity.class);
-        startActivity(editProfileIntent);
-    }
-
-    /**
      * This method gets called when the user presses the add button on the home screen.
      * When the user does so, a new AddJoinGroup activity should be created and started.
      * The current activity should not be closed, such that the user gets redirected to this screen

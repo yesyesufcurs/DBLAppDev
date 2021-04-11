@@ -51,6 +51,7 @@ public class SelectMembersActivity extends AppCompatActivity {
 
         currentContext = this;
 
+        // Check whether bundle contains all necessary information
         if (LoggedInUser.getInstance() == null) {
             throw new RuntimeException("Something went wrong with logging in: no loggged in user" +
                     " found upon creation of the home screen!");
@@ -95,6 +96,8 @@ public class SelectMembersActivity extends AppCompatActivity {
                         "EXPENSE_ID.");
             }
         }
+
+        // Get the needed information from the bundle
         try {
             title = bundle.getString("title");
             if (title.equals("")) {
@@ -131,7 +134,7 @@ public class SelectMembersActivity extends AppCompatActivity {
 
     /**
      * Event handler for the back button
-     *
+     * Quite intuitively, this should just finish the current activity
      * @param view The View instance of the button that was pressed
      */
     public void onBack(View view) {
@@ -139,8 +142,9 @@ public class SelectMembersActivity extends AppCompatActivity {
     }
 
     /**
-     * Event handler for the back button
-     *
+     * Event handler for the checkmark button
+     * When the user clicks on this, the entire expense should be saved / updated, depending on
+     * the state of this activity.
      * @param view The View instance of the button that was pressed
      */
     public void onCheckmark(View view) {
@@ -149,6 +153,7 @@ public class SelectMembersActivity extends AppCompatActivity {
             totalAmount += amountMap.get(user);
         }
 
+        // Create JSON for the distribution of the expense
         JSONObject expenseIOU = new JSONObject();
         if (totalAmount != 0) {
             try {
@@ -170,6 +175,8 @@ public class SelectMembersActivity extends AppCompatActivity {
 
         Bitmap bmp = imagePath == null ? null : BitmapFactory.decodeFile(imagePath);
         isRequestHappening = true;
+        // If the mode is ADD, we call a createExpense API request
+        // Otherwise, the mode will be EDIT and thus we call a modifyExpense request
         if (MODE.equals("ADD")) {
             ExpenseService.createExpense(LoggedInUser.getInstance().getApiKey(),
                     "".equals(creator) ? LoggedInUser.getInstance().getUser().getUsername() : creator,
