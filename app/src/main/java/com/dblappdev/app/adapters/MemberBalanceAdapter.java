@@ -52,7 +52,10 @@ public class MemberBalanceAdapter extends RecyclerView.Adapter<GregViewHolder> {
     @Override
     public GregViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
         // Create a new view, which defines the UI of the list item
-        View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.recycler_view_item_memberlist, viewGroup, false);
+        View view = LayoutInflater.from(
+                viewGroup.getContext()).inflate(R.layout.recycler_view_item_memberlist,
+                viewGroup,
+                false);
         view.findViewById(R.id.removeButton).setOnClickListener(removeListener);
         return new GregViewHolder(view);
     }
@@ -70,7 +73,8 @@ public class MemberBalanceAdapter extends RecyclerView.Adapter<GregViewHolder> {
             balanceString = "€--,--";
         }
         viewHolder.getTextViewBalance().setText(balanceString);
-        viewHolder.getView().findViewById(R.id.removeButton).setTag(userList.get(position).getUsername());
+        viewHolder.getView().findViewById(
+                R.id.removeButton).setTag(userList.get(position).getUsername());
     }
 
     // Return the size of your dataset (invoked by the layout manager)
