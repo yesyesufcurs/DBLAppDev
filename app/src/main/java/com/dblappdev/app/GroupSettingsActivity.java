@@ -96,13 +96,15 @@ public class GroupSettingsActivity extends AppCompatActivity {
     }
 
     /**
-     * This method gets called when the user presses the remove button in an item in the member list.
-     * When this happens, this method should make a request to remove the user that is linked to
-     * the clicked item in the member list from the expense group that is linked to this activity.
+     * This method gets called when the user presses the remove button in an item in the member
+     * list. When this happens, this method should make a request to remove the user that is
+     * linked to the clicked item in the member list from the expense group that is linked to
+     * this activity.
      * If this request gives an error, a Toast with the error message should be displayed.
      * If this request is successful, a Toast message saying the user has been removed should be
      * displayed.
-     * TODO: Possibly, the RecyclerView can be updated, but this is not needed for the initial implementation.
+     * TODO: Possibly, the RecyclerView can be updated,
+     * TODO: but this is not needed for the initial implementation.
      * Event handler for removing a user
      * @param view
      */
@@ -115,7 +117,9 @@ public class GroupSettingsActivity extends AppCompatActivity {
             isRequestHappening = true;
             removeFromGroup(username, expenseGroupID, this);
         } else {
-            GregService.showErrorToast("Only a moderator can perform this action!", this);
+            GregService.showErrorToast(
+                    "Only a moderator can perform this action!",
+                    this);
         }
     }
 
@@ -137,7 +141,9 @@ public class GroupSettingsActivity extends AppCompatActivity {
             int expenseGroupID = getIntent().getExtras().getInt("EXPENSE_GROUP_ID");
             removeGroup(expenseGroupID, this);
         } else {
-            GregService.showErrorToast("Only a moderator can perform this action!", this);
+            GregService.showErrorToast(
+                    "Only a moderator can perform this action!",
+                    this);
         }
     }
 
@@ -204,7 +210,8 @@ public class GroupSettingsActivity extends AppCompatActivity {
                             }
                         }
                         // Set the recyclerview and its settings
-                        RecyclerView recView = (RecyclerView) findViewById(R.id.recyclerViewMembersBalance);
+                        RecyclerView recView =
+                                (RecyclerView) findViewById(R.id.recyclerViewMembersBalance);
                         View.OnClickListener listener = view -> onRemove(view);
                         MemberBalanceAdapter adapter = new MemberBalanceAdapter(listener,
                                 expenseGroup.getUsers(), expenseGroup.getBalance());
@@ -280,12 +287,16 @@ public class GroupSettingsActivity extends AppCompatActivity {
     }
 
     private void removeFromGroup(String username, int expenseGroupID, Context context) {
-        ExpenseGroupService.removeFromExpenseGroup(LoggedInUser.getInstance().getApiKey(),
-                username, Integer.toString(expenseGroupID), context,
+        ExpenseGroupService.removeFromExpenseGroup(
+                LoggedInUser.getInstance().getApiKey(),
+                username,
+                Integer.toString(expenseGroupID),
+                context,
                 new APIResponse<String>() {
                     @Override
                     public void onResponse(String data) {
-                        GregService.showErrorToast("User " + username + " has been " +
+                        GregService.showErrorToast(
+                                "User " + username + " has been " +
                                 "removed from the group!", context);
                         isRequestHappening = false;
                         // As group settings screen must be updated close it
@@ -301,8 +312,10 @@ public class GroupSettingsActivity extends AppCompatActivity {
     }
 
     private void leaveGroup(int expenseGroupID, Context context) {
-        ExpenseGroupService.removeFromExpenseGroup(LoggedInUser.getInstance().getApiKey(),
-                LoggedInUser.getInstance().getUser().getUsername(), Integer.toString(expenseGroupID),
+        ExpenseGroupService.removeFromExpenseGroup(
+                LoggedInUser.getInstance().getApiKey(),
+                LoggedInUser.getInstance().getUser().getUsername(),
+                Integer.toString(expenseGroupID),
                 context,
                 new APIResponse<String>() {
                     @Override
