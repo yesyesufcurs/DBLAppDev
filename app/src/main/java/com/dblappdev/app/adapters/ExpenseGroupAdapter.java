@@ -34,7 +34,10 @@ public class ExpenseGroupAdapter extends RecyclerView.Adapter<GregViewHolder> {
     @Override
     public GregViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
         // Create a new view, which defines the UI of the list item
-        View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.recycler_view_item, viewGroup, false);
+        View view = LayoutInflater.from(
+                viewGroup.getContext()).inflate(R.layout.recycler_view_item,
+                viewGroup,
+                false);
         view.setOnClickListener(onClickListener);
 
         return new GregViewHolder(view);
@@ -43,7 +46,8 @@ public class ExpenseGroupAdapter extends RecyclerView.Adapter<GregViewHolder> {
     /**
      * This method should replace the contents of a view (invoked by the layout manager)
      * This means it should set {@link GregViewHolder#getTextViewName()} to the
-     * {@link ExpenseGroup#getTitle()} and set {@link GregViewHolder#getTextViewBalance()} to '(mod)'
+     * {@link ExpenseGroup#getTitle()} and
+     *  set {@link GregViewHolder#getTextViewBalance()} to '(mod)'
      * if and only if the currently logged in user is the moderator of the ExpenseGroup.
      * Lastly, it should also link the {@link ExpenseGroup#getId()} with the view such that it can
      * be used in the onClickListener of the ViewHolder.
