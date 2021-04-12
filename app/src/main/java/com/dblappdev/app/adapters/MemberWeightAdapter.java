@@ -48,8 +48,11 @@ public class MemberWeightAdapter extends RecyclerView.Adapter<MemberWeightAdapte
     /**
      * Initialize the dataset of the adapter
      */
-    public MemberWeightAdapter(View.OnClickListener plusListener, View.OnClickListener minusListener,
-                               ArrayList<User> users, HashMap<User, Integer> amountMap) {
+    public MemberWeightAdapter(
+            View.OnClickListener plusListener,
+            View.OnClickListener minusListener,
+            ArrayList<User> users,
+            HashMap<User, Integer> amountMap) {
 
         this.userList = users;
         this.amountMap = amountMap;
@@ -63,7 +66,10 @@ public class MemberWeightAdapter extends RecyclerView.Adapter<MemberWeightAdapte
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
         // Create a new view, which defines the UI of the list item
-        View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.recycler_view_item_members, viewGroup, false);
+        View view = LayoutInflater.from(viewGroup.getContext()).inflate(
+                R.layout.recycler_view_item_members,
+                viewGroup,
+                false);
         // Bind the on click listeners for the plus and minus buttons
         view.findViewById(R.id.plus_button).setOnClickListener(plusListener);
         view.findViewById(R.id.minus_button).setOnClickListener(minusListener);
