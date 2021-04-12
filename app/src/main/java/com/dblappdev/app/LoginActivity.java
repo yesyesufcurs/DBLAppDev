@@ -108,11 +108,18 @@ public class LoginActivity extends AppCompatActivity {
 
     /**
      * Checks whether the supplied strings make up valid input for logging in
-     * @return {@code true} iff the strings conform to the specification explained at {@link #onLoginClick(View)}
+     * @return {@code true} iff the strings conform to the
+     *      specification explained at {@link #onLoginClick(View)}
      */
     private boolean isValidInput(String username, String password) {
-        boolean validUsername = username.length() >= 1 && username.length() < 30 && GregService.isASCII(username);
-        boolean validPassword = password.length() >= 6 && password.length() < 30 && GregService.isASCII(password);
+        boolean validUsername =
+                username.length() >= 1 &&
+                username.length() < 30 &&
+                GregService.isASCII(username);
+        boolean validPassword =
+                password.length() >= 6 &&
+                password.length() < 30 &&
+                GregService.isASCII(password);
 
         return validUsername && validPassword;
     }
