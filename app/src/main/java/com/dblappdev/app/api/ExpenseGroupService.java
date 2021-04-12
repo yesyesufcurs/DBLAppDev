@@ -28,7 +28,8 @@ public class ExpenseGroupService {
                                        APIResponse<List<Map<String, String>>> response) {
         // Check preconditions
         if (apiKey == null || expenseGroupId == null) {
-            throw new IllegalArgumentException("ExpenseGroupService.getExpenseGroup.pre: apiKey or" +
+            throw new IllegalArgumentException(
+                    "ExpenseGroupService.getExpenseGroup.pre: apiKey or" +
                     "expenseGroupId is null");
         }
 
@@ -58,7 +59,8 @@ public class ExpenseGroupService {
                                         APIResponse<List<Map<String, String>>> response) {
         // Check preconditions
         if (apiKey == null) {
-            throw new IllegalArgumentException("ExpenseGroupService.getExpenseGroups.pre: apiKey is null");
+            throw new IllegalArgumentException(
+                    "ExpenseGroupService.getExpenseGroups.pre: apiKey is null");
         }
 
         // Set headers
@@ -80,7 +82,8 @@ public class ExpenseGroupService {
      * @param response         contains a callback method that is called on (un)successful request.
      * @throws IllegalArgumentException if {@code apiKey == null || expenseGroupName == null ||
      *                                  context == null || response == null}}
-     * @pre {@code apiKey != null && expenseGroupName != null && context != null && response != null}
+     * @pre {@code apiKey != null && expenseGroupName != null &&
+     *          context != null && response != null}
      * @post {@code APIResponse.data == expenseGroups}
      */
     public static void createExpenseGroup(String apiKey, String expenseGroupName, Context
@@ -88,7 +91,8 @@ public class ExpenseGroupService {
                                           APIResponse<String> response) {
         // Check preconditions
         if (apiKey == null || expenseGroupName == null) {
-            throw new IllegalArgumentException("ExpenseGroupService.createExpenseGroup.pre: apiKey or " +
+            throw new IllegalArgumentException(
+                    "ExpenseGroupService.createExpenseGroup.pre: apiKey or " +
                     "expenseGroupName is null");
         }
 
@@ -119,7 +123,8 @@ public class ExpenseGroupService {
                                           APIResponse<String> response) {
         // Check preconditions
         if (apiKey == null || expenseGroupId == null) {
-            throw new IllegalArgumentException("ExpenseGroupService.removeExpenseGroup.pre: apiKey or " +
+            throw new IllegalArgumentException(
+                    "ExpenseGroupService.removeExpenseGroup.pre: apiKey or " +
                     "expenseGroupId is null");
         }
 
@@ -150,7 +155,8 @@ public class ExpenseGroupService {
                                               APIResponse<List<Map<String, String>>> response) {
         // Check preconditions
         if (apiKey == null || expenseGroupId == null) {
-            throw new IllegalArgumentException("ExpenseGroupService.getExpenseGroupMembers.pre: apiKey or" +
+            throw new IllegalArgumentException(
+                    "ExpenseGroupService.getExpenseGroupMembers.pre: apiKey or" +
                     "expenseGroupId is null");
         }
 
@@ -230,7 +236,5 @@ public class ExpenseGroupService {
         // Do request
         new StringAPIRequest(AbstractAPIRequest.getAPIUrl() + "removeFromExpenseGroup",
                 Request.Method.GET, params, null).run(context, response);
-
-
     }
 }
