@@ -28,9 +28,12 @@ public class MainActivity extends AppCompatActivity {
 
         // Ask for camera permissions if they have not yet been granted, otherwise go to the login
         // screen.
-        if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CAMERA)
+        if (ContextCompat.checkSelfPermission(
+                MainActivity.this,
+                Manifest.permission.CAMERA)
                 == PackageManager.PERMISSION_DENIED) {
-            ActivityCompat.requestPermissions(MainActivity.this,
+            ActivityCompat.requestPermissions(
+                    MainActivity.this,
                     new String[]{Manifest.permission.CAMERA},
                     100);
         } else {
@@ -42,13 +45,19 @@ public class MainActivity extends AppCompatActivity {
      * Callback method for when the user grants or denies the permissions that were asked for
      */
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults)
-    {
+    public void onRequestPermissionsResult(
+            int requestCode,
+            String[] permissions,
+            int[] grantResults) {
+
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if ( requestCode == 100) {
-            if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE)
+            if (ContextCompat.checkSelfPermission(
+                    MainActivity.this,
+                    Manifest.permission.READ_EXTERNAL_STORAGE)
                     == PackageManager.PERMISSION_DENIED) {
-                ActivityCompat.requestPermissions(MainActivity.this,
+                ActivityCompat.requestPermissions(
+                        MainActivity.this,
                         new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
                         101);
             } else {
