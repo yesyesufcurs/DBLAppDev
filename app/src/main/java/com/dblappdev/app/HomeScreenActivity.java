@@ -54,7 +54,8 @@ public class HomeScreenActivity extends AppCompatActivity {
 
         // Check if the Singleton class LoggedInUser is initialized
         if (LoggedInUser.getInstance() == null) {
-            throw new RuntimeException("Something went wrong with logging in: no logged in user" +
+            throw new RuntimeException(
+                    "Something went wrong with logging in: no logged in user" +
                     " found upon creation of the home screen!");
         }
 
@@ -81,7 +82,9 @@ public class HomeScreenActivity extends AppCompatActivity {
      */
     public void onAdd(View view) {
         // Redirect to add/join group screen
-        Intent addJoinGroupScreenIntent = new Intent(this, AddJoinGroupActivity.class);
+        Intent addJoinGroupScreenIntent = new Intent(
+                this,
+                AddJoinGroupActivity.class);
         startActivity(addJoinGroupScreenIntent);
     }
 
@@ -153,9 +156,13 @@ public class HomeScreenActivity extends AppCompatActivity {
                             expenseGroups.add(expenseGroup);
                         }
                         // Set the recyclerview and its settings
-                        RecyclerView recView = (RecyclerView) findViewById(R.id.recyclerViewExpenseGroup);
+                        //todo explain variables
+                        RecyclerView recView =
+                                (RecyclerView) findViewById(R.id.recyclerViewExpenseGroup);
                         View.OnClickListener listener = view -> onItemClick(view);
-                        ExpenseGroupAdapter adapter = new ExpenseGroupAdapter(listener, expenseGroups);
+                        ExpenseGroupAdapter adapter = new ExpenseGroupAdapter(
+                                listener,
+                                expenseGroups);
                         recView.setAdapter(adapter);
                         recView.setLayoutManager(new LinearLayoutManager(context));
                         // Update semaphore
