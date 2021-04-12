@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+//TODO split into seperate modules, too large
 public class SelectMembersActivity extends AppCompatActivity {
 
     boolean isRequestHappening = false;
