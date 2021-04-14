@@ -48,7 +48,8 @@ public class ExpenseGroup {
 
     /**
      * adds expenses to the expense list of the expense group
-     * @post {@code \forall expense; expenses.contains(expense); this.expenses.contains(expense) == true}
+     * @post {@code \forall expense; expenses.contains(expense);
+     *      this.expenses.contains(expense) == true}
      */
     public void setExpenses(List<Expense> expenses) {
         for (Expense expense : expenses) {

@@ -39,9 +39,17 @@ public class ExpenseService {
      * response != null}
      * @post {@code APIResponse.data in getExpenseGroupExpenses(apiKey, expenseGroupId)}
      */
-    public static void createExpense(String apiKey, String userId, String title, String amount, Bitmap
-            picture, String description, String expenseGroupId, Context context,
-                                     APIResponse<String> response) {
+    public static void createExpense(
+            String apiKey,
+            String userId,
+            String title,
+            String amount,
+            Bitmap
+            picture,
+            String description,
+            String expenseGroupId,
+            Context context,
+            APIResponse<String> response) {
         // Check preconditions
         if (apiKey == null || title == null || amount == null ||
                 description == null || expenseGroupId == null) {
@@ -364,6 +372,5 @@ public class ExpenseService {
         // Do API Request
         new JSONAPIRequest(AbstractAPIRequest.getAPIUrl() + "getUserOwedTotal",
                 Request.Method.GET, params, null).run(context, response);
-
     }
 }

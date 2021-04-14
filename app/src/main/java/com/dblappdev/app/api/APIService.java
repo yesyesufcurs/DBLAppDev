@@ -26,8 +26,11 @@ public abstract class APIService {
      * response != null}
      * @post {\result == Bitmap object of picture}
      */
-    public static void getExpensePicture(String apiKey, String expenseId, Context context,
-                                         APIResponse<Bitmap> response) {
+    public static void getExpensePicture(
+            String apiKey,
+            String expenseId,
+            Context context,
+            APIResponse<Bitmap> response) {
         if (apiKey == null || expenseId == null) {
             throw new IllegalArgumentException("APIService.getExpensePicture.pre: apiKey or " +
                     "expenseId is null");
@@ -44,7 +47,6 @@ public abstract class APIService {
             return;
         }
         response.onResponse(picture);
-
     }
 
     /**
@@ -55,8 +57,11 @@ public abstract class APIService {
      * @param context  context of request, often AppActivity (instance of calling object)
      * @param response contains a callback method that is called on (un)successful request.
      */
-    public static void detectText(String apiKey, Bitmap picture, Context context,
-                                  APIResponse<String> response) {
+    public static void detectText(
+            String apiKey,
+            Bitmap picture,
+            Context context,
+            APIResponse<String> response) {
         if (apiKey == null || picture == null) {
             throw new IllegalArgumentException("APIService.getPictureText.pre: " +
                     "apiKey or picture is null");
@@ -81,7 +86,8 @@ public abstract class APIService {
         params.put("picture", pictureBase64);
 
         // Do API Request
-        new StringAPIRequest(AbstractAPIRequest.getAPIUrl() + "detectText",
+        new StringAPIRequest(
+                AbstractAPIRequest.getAPIUrl() + "detectText",
                 Request.Method.POST, headers, params).run(context, response);
     }
 
@@ -136,8 +142,12 @@ public abstract class APIService {
      * @post {@code APIResponse.data == expenseGroupExpenses.search(query) :
      * expenseGroupExpenses.expenseGroupId == expenseGroupId}
      */
-    public static void searchExpense(String apiKey, String expenseGroupId, String query, Context context,
-                                     APIResponse<List<Map<String, String>>> response) {
+    public static void searchExpense(
+            String apiKey,
+            String expenseGroupId,
+            String query,
+            Context context,
+            APIResponse<List<Map<String, String>>> response) {
         // Check preconditions
         if (apiKey == null || expenseGroupId == null || query == null) {
             throw new IllegalArgumentException("APIService.searchExpense.pre: apiKey or " +

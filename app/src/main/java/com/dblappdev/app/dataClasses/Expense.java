@@ -14,7 +14,15 @@ public class Expense {
     private String content;
     private HashMap<User, Integer> distribution;
 
-    public Expense(int id, int expenseGroupId, User creator, float amount, String description, String content, HashMap<User, Integer> distribution) {
+    public Expense(
+            int id,
+            int expenseGroupId,
+            User creator,
+            float amount,
+            String description,
+            String content,
+            HashMap<User, Integer> distribution) {
+
         this.id = id;
         this.expenseGroupId = expenseGroupId;
         this.creator = creator;

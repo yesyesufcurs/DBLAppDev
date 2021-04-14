@@ -31,7 +31,8 @@ public class LoginService {
                                 APIResponse<String> response) {
         // Check preconditions
         if (username == null || password == null || email == null) {
-            throw new IllegalArgumentException("LoginService.register.pre: username, password or " +
+            throw new IllegalArgumentException(
+                    "LoginService.register.pre: username, password or " +
                     "email is null.");
         }
         if (username.length() >= 30) {
@@ -59,7 +60,8 @@ public class LoginService {
         }
 
         // Source: https://emailregex.com/
-        if (!email.matches("(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}" +
+        if (!email.matches(
+                "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}" +
                 "~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\" +
                 "[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?" +
                 "\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9]" +

@@ -54,7 +54,12 @@ public class JSONAPIRequest extends AbstractAPIRequest<JSONArray, List<Map<Strin
     @Override
     protected Request<JSONArray> doAPIRequest(Response.Listener<JSONArray> responseListener,
                                               Response.ErrorListener errorListener) {
-        return new JsonArrayRequest(method, url, null, responseListener, errorListener) {
+        return new JsonArrayRequest(
+                method,
+                url,
+                null,
+                responseListener,
+                errorListener) {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
                 return headers;

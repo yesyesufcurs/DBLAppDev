@@ -40,7 +40,8 @@ public class AddJoinGroupActivity extends AppCompatActivity {
      * This method should try and join the group whose ID is equal to the value in
      * join_group_input_text.
      * This means that this method should perform a request to join the group with the given ID.
-     * If the request returns an error, this method should show a Toast displaying the error message.
+     * If the request returns an error,
+     * this method should show a Toast displaying the error message.
      * If the request is successful, this method should open a new GroupScreen activity of the newly
      * joined group and should finish this activity.
      * Since this method uses the LoggedInUser to check which user to add to the expense, this
@@ -52,18 +53,18 @@ public class AddJoinGroupActivity extends AppCompatActivity {
      * @param view The View instance of the button that was pressed
      */
     public void onJoinGroup(View view) {
+        //todo explain variables
         EditText givenIDET = findViewById(R.id.join_group_input_text);
         int givenID = Integer.parseInt(givenIDET.getText().toString());
 
         // Check if the Singleton class LoggedInUser is initialized
         if (LoggedInUser.getInstance() == null) {
-            throw new RuntimeException("Something went wrong with logging in: no loggged in user" +
+            throw new RuntimeException("Something went wrong with logging in: no logged in user" +
                     " found!");
         }
 
         if (!isRequestHappening) {
             isRequestHappening = true;
-
             joinGroupRequest(Integer.toString(givenID), this);
         }
     }
@@ -72,17 +73,20 @@ public class AddJoinGroupActivity extends AppCompatActivity {
      * This method should create a new group with the name given in create_group_input_text.
      * This means that this method should perform a request to create a new group with the given
      * name.
-     * If the request returns an error, this method should show a Toast displaying the error message.
+     * If the request returns an error,
+     * this method should show a Toast displaying the error message.
      * If the request is successful, this method should open a new GroupScreen activity of the newly
      * created group and should finish this activity.
-     * Since this method uses the LoggedInUser to check which user to add to the expense, this method
-     * should check whether the singleton instance is defined, and throw an exception otherwise.
+     * Since this method uses the LoggedInUser to check which user to add to the expense,
+     * this method should check whether the singleton instance is defined,
+     * and throw an exception otherwise.
      * @pre {@code {@link LoggedInUser#getInstance()} != null}
      * @throws RuntimeException if {@code {@link LoggedInUser#getInstance()} == null}
      * Event handler for the create group button
      * @param view The View instance of the button that was pressed
      */
     public void onCreateGroup(View view) {
+        //todo explain variables
         EditText nameET = findViewById(R.id.create_group_input_text);
         String name = nameET.getText().toString();
 
@@ -100,15 +104,20 @@ public class AddJoinGroupActivity extends AppCompatActivity {
     }
 
     private void joinGroupRequest(String expenseGroupID, Context context) {
-        ExpenseGroupService.addToExpenseGroup(LoggedInUser.getInstance().getApiKey(),
-                LoggedInUser.getInstance().getUser().getUsername(), expenseGroupID, context,
+        ExpenseGroupService.addToExpenseGroup(
+                LoggedInUser.getInstance().getApiKey(),
+                LoggedInUser.getInstance().getUser().getUsername(),
+                expenseGroupID,
+                context,
                 new APIResponse<String>() {
                     @Override
                     public void onResponse(String data) {
                         // Redirect to group screen
                         Intent groupScreenIntent = new Intent(context, GroupScreenActivity.class);
                         // Link the group ID
-                        groupScreenIntent.putExtra("EXPENSE_GROUP_ID", Integer.parseInt(expenseGroupID));
+                        groupScreenIntent.putExtra(
+                                "EXPENSE_GROUP_ID",
+                                Integer.parseInt(expenseGroupID));
                         startActivity(groupScreenIntent);
                         finish();
                         // Update semaphore
@@ -124,7 +133,10 @@ public class AddJoinGroupActivity extends AppCompatActivity {
     }
 
     private void createGroupRequest(String name, Context context) {
-        ExpenseGroupService.createExpenseGroup(LoggedInUser.getInstance().getApiKey(), name, context,
+        ExpenseGroupService.createExpenseGroup(
+                LoggedInUser.getInstance().getApiKey(),
+                name,
+                context,
                 new APIResponse<String>() {
                     @Override
                     public void onResponse(String data) {
@@ -132,7 +144,9 @@ public class AddJoinGroupActivity extends AppCompatActivity {
                         Intent groupScreenIntent = new Intent(context, GroupScreenActivity.class);
                         // Link the group ID
 //                        System.out.print(data);
-                        groupScreenIntent.putExtra("EXPENSE_GROUP_ID", Integer.parseInt(data));
+                        groupScreenIntent.putExtra(
+                                "EXPENSE_GROUP_ID",
+                                Integer.parseInt(data));
                         startActivity(groupScreenIntent);
                         finish();
                         isRequestHappening = false;

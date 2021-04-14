@@ -30,9 +30,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+//TODO split into seperate modules, too large
 public class SelectMembersActivity extends AppCompatActivity {
 
     boolean isRequestHappening = false;
+
+    //todo explain variables
     int expenseGroupId;
     String title;
     float amount;
@@ -53,38 +56,45 @@ public class SelectMembersActivity extends AppCompatActivity {
 
         // Check whether bundle contains all necessary information
         if (LoggedInUser.getInstance() == null) {
-            throw new RuntimeException("Something went wrong with logging in: no loggged in user" +
+            throw new RuntimeException(
+                    "Something went wrong with logging in: no loggged in user" +
                     " found upon creation of the home screen!");
         }
 
         Bundle bundle = getIntent().getExtras();
         if (!getIntent().hasExtra("expenseGroupId")) {
-            throw new RuntimeException("Something went wrong with opening the expense group: no " +
+            throw new RuntimeException(
+                    "Something went wrong with opening the expense group: no " +
                     "expense group selected.");
         }
 
         if (!getIntent().hasExtra("price")) {
-            throw new RuntimeException("Something went wrong with opening the expense group: no " +
+            throw new RuntimeException(
+                    "Something went wrong with opening the expense group: no " +
                     "price.");
         }
 
         if (!getIntent().hasExtra("title")) {
-            throw new RuntimeException("Something went wrong with opening the expense group: no " +
+            throw new RuntimeException(
+                    "Something went wrong with opening the expense group: no " +
                     "title.");
         }
 
         if (!getIntent().hasExtra("creator")) {
-            throw new RuntimeException("Something went wrong with opening the expense group: no " +
+            throw new RuntimeException(
+                    "Something went wrong with opening the expense group: no " +
                     "creator.");
         }
 
         if (!getIntent().hasExtra("imagePath")) {
-            throw new RuntimeException("Something went wrong with opening the expense group: no " +
+            throw new RuntimeException(
+                    "Something went wrong with opening the expense group: no " +
                     "image.");
         }
 
         if (!getIntent().hasExtra("MODE")) {
-            throw new RuntimeException("Something went wrong with opening the expense group: no " +
+            throw new RuntimeException(
+                    "Something went wrong with opening the expense group: no " +
                     "mode.");
         }
 
@@ -92,7 +102,8 @@ public class SelectMembersActivity extends AppCompatActivity {
 
         if (MODE.equals("EDIT")) {
             if (!getIntent().hasExtra("EXPENSE_ID")) {
-                throw new RuntimeException("Something went wrong with opening the expense group: no " +
+                throw new RuntimeException(
+                        "Something went wrong with opening the expense group: no " +
                         "EXPENSE_ID.");
             }
         }
@@ -101,20 +112,26 @@ public class SelectMembersActivity extends AppCompatActivity {
         try {
             title = bundle.getString("title");
             if (title.equals("")) {
-                GregService.showErrorToast("Title should not be empty.", currentContext);
+                GregService.showErrorToast(
+                        "Title should not be empty.",
+                        currentContext);
                 finish();
             }
             expenseGroupId = bundle.getInt("expenseGroupId");
             String priceString = bundle.getString("price");
             amount = Float.parseFloat(priceString);
             if (amount >= 100000f) {
-                GregService.showErrorToast("Amount should not be higher than 100000", currentContext);
+                GregService.showErrorToast(
+                        "Amount should not be higher than 100000",
+                        currentContext);
                 finish();
             }
             imagePath = bundle.getString("imagePath");
             creator = bundle.getString("creator");
         } catch (Exception e) {
-            GregService.showErrorToast("Input values not valid", currentContext);
+            GregService.showErrorToast(
+                    "Input values not valid",
+                    currentContext);
             finish();
         }
         if (MODE.equals("EDIT")) {
@@ -158,7 +175,11 @@ public class SelectMembersActivity extends AppCompatActivity {
         if (totalAmount != 0) {
             try {
                 for (User user : amountMap.keySet()) {
-                    expenseIOU.put(user.getUsername(), Float.toString((Math.round(amount * amountMap.get(user) / totalAmount) * 100.0f) / 100.0f));
+                    expenseIOU.put(
+                            user.getUsername(),
+                            Float.toString(
+                                    (Math.round(amount * amountMap.get(user) / totalAmount)
+                                            * 100.0f) / 100.0f));
                 }
             } catch (JSONException e) {
                 throw new IllegalStateException("Cannot set expenseIOUJSON");
@@ -178,10 +199,15 @@ public class SelectMembersActivity extends AppCompatActivity {
         // If the mode is ADD, we call a createExpense API request
         // Otherwise, the mode will be EDIT and thus we call a modifyExpense request
         if (MODE.equals("ADD")) {
-            ExpenseService.createExpense(LoggedInUser.getInstance().getApiKey(),
-                    "".equals(creator) ? LoggedInUser.getInstance().getUser().getUsername() : creator,
-                    title, "" + (Math.round(amount * 100.0f) / 100.0f), bmp, "Description",
-                    "" + expenseGroupId, this,
+            ExpenseService.createExpense(
+                    LoggedInUser.getInstance().getApiKey(),
+                    "".equals(creator) ?LoggedInUser.getInstance().getUser().getUsername(): creator,
+                    title,
+                    "" + (Math.round(amount * 100.0f) / 100.0f),
+                    bmp,
+                    "Description",
+                    "" + expenseGroupId,
+                    this,
                     new APIResponse<String>() {
                         @Override
                         public void onResponse(String data) {
@@ -194,7 +220,15 @@ public class SelectMembersActivity extends AppCompatActivity {
                         }
                     });
         } else {
-            ExpenseService.modifyExpense(LoggedInUser.getInstance().getApiKey(), title, "" + (Math.round(amount * 100.0f) / 100.0f), bmp, "Description", "" + expenseGroupId, "" + EXPENSE_ID, this,
+            ExpenseService.modifyExpense(
+                    LoggedInUser.getInstance().getApiKey(),
+                    title,
+                    "" + (Math.round(amount * 100.0f) / 100.0f),
+                    bmp,
+                    "Description",
+                    "" + expenseGroupId,
+                    "" + EXPENSE_ID,
+                    this,
                     new APIResponse<String>() {
                         @Override
                         public void onResponse(String data) {
@@ -215,9 +249,11 @@ public class SelectMembersActivity extends AppCompatActivity {
      * Load expense members activity data from backend when MODE == "EDIT"
      */
     private void loadExpenseMembersActivity() {
-        ExpenseService.getExpenseIOU(LoggedInUser.getInstance().getApiKey(),
+        ExpenseService.getExpenseIOU(
+                LoggedInUser.getInstance().getApiKey(),
                 "" + EXPENSE_ID,
-                this, new APIResponse<List<Map<String, String>>>() {
+                this,
+                new APIResponse<List<Map<String, String>>>() {
                     @Override
                     public void onResponse(List<Map<String, String>> data) {
                         float[] minTotal = minimumAmount(data);
@@ -225,7 +261,10 @@ public class SelectMembersActivity extends AppCompatActivity {
                             for (User user : users) {
                                 if (user.getUsername().equals(entry.get("user_id"))) {
                                     if (minTotal[1] > 0.001f) {
-                                        amountMap.put(user, Math.round(Float.parseFloat(entry.get("amount")) / minTotal[0]));
+                                        amountMap.put(
+                                                user,
+                                                Math.round(Float.parseFloat(entry.get("amount"))
+                                                        / minTotal[0]));
                                     } else {
                                         amountMap.put(user, 0);
                                     }
@@ -240,7 +279,9 @@ public class SelectMembersActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void onErrorResponse(VolleyError error, String errorMessage) {
+                    public void onErrorResponse(
+                            VolleyError error,
+                            String errorMessage) {
 
                     }
                 });
@@ -250,7 +291,9 @@ public class SelectMembersActivity extends AppCompatActivity {
         float min = (float) 100001;
         float total = 0.0f;
         for (Map<String, String> entry : data) {
-            if (Float.parseFloat(entry.get("amount")) < min && Float.parseFloat(entry.get("amount")) > 0.001) {
+            if (
+                    Float.parseFloat(entry.get("amount")) < min &&
+                    Float.parseFloat(entry.get("amount")) > 0.001) {
                 float number = Float.parseFloat(entry.get("amount"));
                 min = number;
                 total += number;
@@ -265,8 +308,12 @@ public class SelectMembersActivity extends AppCompatActivity {
      * @param expenseIOU expenseIOU to be added
      */
     private void addExpenseIOU(JSONObject expenseIOU, int expenseID) {
-        ExpenseService.createExpenseIOU(LoggedInUser.getInstance().getApiKey(),
-                "" + expenseID, expenseIOU, this, new APIResponse<String>() {
+        ExpenseService.createExpenseIOU(
+                LoggedInUser.getInstance().getApiKey(),
+                "" + expenseID,
+                expenseIOU,
+                this,
+                new APIResponse<String>() {
                     @Override
                     public void onResponse(String data) {
                         // Get ExpenseGroupName
@@ -279,12 +326,19 @@ public class SelectMembersActivity extends AppCompatActivity {
                                         // Finish group screen
                                         GroupScreenActivity.instance.finish();
                                         // Redirect to group screen
-                                        Intent groupScreenIntent = new Intent(currentContext, GroupScreenActivity.class);
-                                        // Link the ExpenseGroup by adding the group ID as extra on the intent
-                                        groupScreenIntent.putExtra("EXPENSE_GROUP_ID", expenseGroupId);
+                                        Intent groupScreenIntent = new Intent(
+                                                currentContext,
+                                                GroupScreenActivity.class);
+                                        // Link the ExpenseGroup by adding the
+                                        // group ID as extra on the intent
+                                        groupScreenIntent.putExtra(
+                                                "EXPENSE_GROUP_ID",
+                                                expenseGroupId);
                                         String name = data.get(0).get("name");
                                         // Link the ExpenseGroup name
-                                        groupScreenIntent.putExtra("EXPENSE_GROUP_NAME", name);
+                                        groupScreenIntent.putExtra(
+                                                "EXPENSE_GROUP_NAME",
+                                                name);
                                         startActivity(groupScreenIntent);
                                         isRequestHappening = false;
                                         // Redirect to the group screen
@@ -292,7 +346,9 @@ public class SelectMembersActivity extends AppCompatActivity {
                                     }
 
                                     @Override
-                                    public void onErrorResponse(VolleyError error, String errorMessage) {
+                                    public void onErrorResponse(
+                                            VolleyError error,
+                                            String errorMessage) {
                                         GregService.showErrorToast(errorMessage, currentContext);
                                         isRequestHappening = false;
                                     }
@@ -355,8 +411,10 @@ public class SelectMembersActivity extends AppCompatActivity {
     }
 
     public void getUsers(Context context) {
-        ExpenseGroupService.getExpenseGroupMembers(LoggedInUser.getInstance().getApiKey(),
-                Integer.toString(expenseGroupId), context,
+        ExpenseGroupService.getExpenseGroupMembers(
+                LoggedInUser.getInstance().getApiKey(),
+                Integer.toString(expenseGroupId),
+                context,
                 new APIResponse<List<Map<String, String>>>() {
                     @Override
                     public void onResponse(List<Map<String, String>> data) {
@@ -399,6 +457,5 @@ public class SelectMembersActivity extends AppCompatActivity {
                 users, amountMap);
         recView.setAdapter(adapter);
         recView.setLayoutManager(new LinearLayoutManager(context));
-
     }
 }
