@@ -19,3 +19,6 @@ backend/backendserver/__pycache__
 .vscode
 .settings/org.eclipse.buildship.core.prefs
 .project
+App.und/settings.xml
+App.csv
+App.und/id.txt
