@@ -5,6 +5,7 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.CAMERA" />
     <uses-feature
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="18"
@@ -31,7 +32,6 @@
         <activity android:name=".DisplayImageActivity"/>
         <activity android:name=".GroupSettingsActivity" />
         <activity android:name=".GroupScreenActivity" />
-        <activity android:name=".EditProfileActivity" />
         <activity android:name=".HomeScreenActivity" />
         <activity android:name=".CreateProfileActivity" />
         <activity android:name=".RegisterActivity" />

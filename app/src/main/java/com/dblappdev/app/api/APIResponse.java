@@ -14,6 +14,7 @@ import com.android.volley.VolleyError;
  * since retrieving the errorMessage form a VolleyError is highly non-trivial.
  */
 public abstract class APIResponse<T> {
+
     /**
      * Callback method that is called when the backend responds correctly, with the data
      * send from the backend.

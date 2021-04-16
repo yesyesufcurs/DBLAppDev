@@ -15,17 +15,35 @@ public class ExpenseAdapter extends RecyclerView.Adapter<GregViewHolder> {
 
     // click event listener for the list entries
     private View.OnClickListener onClickListener;
+    private View.OnClickListener onRemoveListener;
 
     // dataset used in the recyclerview
     private ArrayList<Expense> localDataSet;
 
     /**
-     * Initialize the dataset of the adapter
-     * @param listener View.OnClickListener that deals with the on click event
-     * TODO: Update this to fit with the loading in of the data (should be added as a parameter)
+     * Extended version of the ViewHolder that adds support for the remove button
      */
-    public ExpenseAdapter(View.OnClickListener listener, ArrayList<Expense> expenses) {
-        onClickListener = listener;
+//    public static class ViewHolder extends GregViewHolder {
+//        private final ImageButton removeButton;
+//
+//        public ViewHolder(View view) {
+//            super(view);
+//
+//            removeButton = (ImageButton) view.findViewById(R.id.removeButton);
+//        }
+//
+//        public ImageButton getRemoveButton() { return removeButton; }
+//    }
+
+    /**
+     * Initialize the dataset of the adapter
+     */
+    public ExpenseAdapter(
+            View.OnClickListener clickListener,
+            View.OnClickListener removeListener,
+            ArrayList<Expense> expenses) {
+        onClickListener = clickListener;
+        onRemoveListener = removeListener;
         localDataSet = expenses;
     }
 
@@ -33,8 +51,12 @@ public class ExpenseAdapter extends RecyclerView.Adapter<GregViewHolder> {
     @Override
     public GregViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
         // Create a new view, which defines the UI of the list item
-        View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.recycler_view_item, viewGroup, false);
+        View view = LayoutInflater.from(
+                viewGroup.getContext()).inflate(R.layout.recycler_view_item_memberlist,
+                viewGroup,
+                false);
         view.setOnClickListener(onClickListener);
+        view.findViewById(R.id.removeButton).setOnClickListener(onRemoveListener);
 
         return new GregViewHolder(view);
     }
@@ -46,6 +68,8 @@ public class ExpenseAdapter extends RecyclerView.Adapter<GregViewHolder> {
         viewHolder.getTextViewName().setText(localDataSet.get(position).getDescription());
         viewHolder.getTextViewBalance().setText("€" + localDataSet.get(position).getAmount());
         viewHolder.getView().setTag(localDataSet.get(position).getId());
+        viewHolder.getView().findViewById(
+                R.id.removeButton).setTag(localDataSet.get(position).getId());
     }
 
     // Return the size of your dataset (invoked by the layout manager)

@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify, Response
 from backendserver import app, db_file, create_connection
 from backendserver.abstractAPI import AbstractAPI
-from backendserver.permissionChecks import number_expense_group_members, isModerator, isMember, owesMoney, owesAnyMoney
+from backendserver.permissionChecks import number_expense_group_members, isModerator, isMember, owesMoney, owesAnyMoney, isValidGroup
 import sqlite3
 import json
 import hashlib
@@ -31,7 +31,7 @@ def getExpenseGroups():
             result = cursor.fetchall()
             return self.generateJson(self, result)
 
-    return GetExpenseGroups.template_method(GetExpenseGroups, request.headers["api_key"] if "api_key" in request.headers else None)
+    return GetExpenseGroups.template_method(GetExpenseGroups, request.headers)
 
 @app.route("/getExpenseGroup")
 def getExpenseGroup():
@@ -58,7 +58,7 @@ def getExpenseGroup():
             result = cursor.fetchall()
             return self.generateJson(self, result)
 
-    return GetExpenseGroup.template_method(GetExpenseGroup, request.headers["api_key"] if "api_key" in request.headers else None)
+    return GetExpenseGroup.template_method(GetExpenseGroup, request.headers)
 
 
 @app.route("/getAllExpenseGroups")
@@ -78,7 +78,7 @@ def getAllExpenseGroups():
                 return jsonify(error=412, text="Cannot retrieve expense groups"), 412
             result = cursor.fetchall()
             return self.generateJson(self, result)
-    return GetAllExpenseGroups.template_method(GetAllExpenseGroups, request.headers["api_key"] if "api_key" in request.headers else None)
+    return GetAllExpenseGroups.template_method(GetAllExpenseGroups, request.headers)
 
 
 @app.route("/createExpenseGroup")
@@ -92,6 +92,7 @@ def createExpenseGroup():
     '''
     class CreateExpenseGroup(AbstractAPI):
         def api_operation(self, user_id, conn):
+            global lastCreatedExpenseGroupId, lastCreatedExpenseGroupTime, lastCreatedExpenseGroupUserID
             cursor = conn.cursor()
             expense_group_name = ""
             expense_group_id = 0
@@ -117,7 +118,7 @@ def createExpenseGroup():
             conn.commit()
             return jsonify(expense_group_id)
 
-    return CreateExpenseGroup.template_method(CreateExpenseGroup, request.headers["api_key"] if "api_key" in request.headers else None)
+    return CreateExpenseGroup.template_method(CreateExpenseGroup, request.headers)
 
 @app.route("/removeExpenseGroup")
 def removeExpenseGroup():
@@ -184,7 +185,7 @@ def removeExpenseGroup():
                 return jsonify(error=412, text="Cannot remove expense group"), 412
             conn.commit()
             return jsonify("Removed successfully.")
-    return RemoveExpenseGroup.template_method(RemoveExpenseGroup, request.headers["api_key"] if "api_key" in request.headers else None)
+    return RemoveExpenseGroup.template_method(RemoveExpenseGroup, request.headers)
 
 @app.route("/getExpenseGroupMembers")
 def getExpenseGroupMembers():
@@ -218,7 +219,7 @@ def getExpenseGroupMembers():
                 return jsonify(error=412, text="Cannot retrieve expense group members"), 412
             result = cursor.fetchall()
             return self.generateJson(self, result)
-    return GetExpenseGroupMembers.template_method(GetExpenseGroupMembers, request.headers["api_key"] if "api_key" in request.headers else None)
+    return GetExpenseGroupMembers.template_method(GetExpenseGroupMembers, request.headers)
 
 
 @app.route("/addToExpenseGroup")
@@ -251,6 +252,12 @@ def addToExpenseGroup():
                 return jsonify(error=412, text="Cannot determine if caller has permissions."), 412
             if not(hasPermission):
                 return jsonify(error=412, text="Only the moderator can add other people to an expense group."), 412
+            # Check if expense group exists
+            try:
+                if not isValidGroup(expense_group_id, cursor):
+                    raise Exception("")
+            except Exception as e:
+                return jsonify(error=412, text="This expense group does not exist."), 412
             # Add person to expense group.
             try:
                 number_of_members = number_expense_group_members(
@@ -268,7 +275,7 @@ def addToExpenseGroup():
                 return jsonify(error=412, text="Cannot add user to expense group"), 412
             conn.commit()
             return jsonify("Added successfully")
-    return AddToExpenseGroup.template_method(AddToExpenseGroup, request.headers["api_key"] if "api_key" in request.headers else None)
+    return AddToExpenseGroup.template_method(AddToExpenseGroup, request.headers)
 
 @app.route("/removeFromExpenseGroup")
 def removeFromExpenseGroup():
@@ -317,19 +324,26 @@ def removeFromExpenseGroup():
                     returnString += f"{row[1]} to {row[0]}, "
                     data.append(list(row))
                 return jsonify(error=412, text="Cannot remove as " + returnString[:-2] + "."), 412
+
+            # Remove expenses
+            query1 = """
+            DELETE FROM expense
+            WHERE user_id = ? AND expense_group_id = ?
+            """
             
             # Remove user from expense group
-            query = """
+            query2 = """
             DELETE FROM expense_group_members
             WHERE user_id = ? AND expense_group_id = ?
             """
             try:
-                cursor.execute(query, (user, expense_group_id))
+                cursor.execute(query1, (user, expense_group_id))
+                cursor.execute(query2, (user, expense_group_id))
             except Exception as e:
                 return jsonify(error=412, text="Cannot delete user from expense group"), 412
             conn.commit()
             return jsonify("Removed successfully.")
-    return RemoveFromExpenseGroup.template_method(RemoveFromExpenseGroup, request.headers["api_key"] if "api_key" in request.headers else None)
+    return RemoveFromExpenseGroup.template_method(RemoveFromExpenseGroup, request.headers)
 
 def generate_expense_group_id(cursor):
     '''

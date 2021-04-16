@@ -65,6 +65,8 @@ public class StringAPIRequest extends AbstractAPIRequest<String, String> {
 
     @Override
     protected String convertData(String data) {
-        return data.replaceAll("^[\"']+|[\"']+$", "").replaceAll("\n", "");
+        return data.replaceAll(
+                "^[\"']+|[\"']+$",
+                "").replaceAll("\n", "");
     }
 }

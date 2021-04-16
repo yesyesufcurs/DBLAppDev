@@ -9,9 +9,6 @@ import com.android.volley.VolleyError;
 
 import org.json.JSONObject;
 
-import java.util.HashMap;
-import java.util.Map;
-
 
 /**
  * Abstract API Request using template design pattern.
@@ -25,9 +22,13 @@ public abstract class AbstractAPIRequest<T, K> {
 //    private final static String api_url = "http://10.0.2.2:5000/";
     // For deployment
     private final static String api_url = "http://94.130.144.25:5000/";
-    protected Response.Listener<T> responseListener;
-    protected Response.ErrorListener errorListener;
-    protected String errorMessage = "Something went wrong.";
+    private Response.Listener<T> responseListener;
+    private Response.ErrorListener errorListener;
+    private String errorMessage = "Something went wrong.";
+    // Semaphore preventing multiple requests to API.
+    private static boolean isRequestHappening = false;
+    // Counter, counting retries of a request
+    static int retryCount = 0;
 
     /**
      * Primitive method to be overwritten by implementer.
@@ -58,9 +59,8 @@ public abstract class AbstractAPIRequest<T, K> {
      */
     protected abstract K convertData(T data);
 
-
     /**
-     * Template method to be executed to run the API request.
+     * Template method to be executed to run the API request, with default behaviour.
      *
      * @param context     Context of caller
      * @param apiResponse APIResponse of caller
@@ -68,16 +68,41 @@ public abstract class AbstractAPIRequest<T, K> {
      * @pre {@code context != null && apiResponse != null}
      */
     public void run(Context context, APIResponse<K> apiResponse) {
+        run(context, apiResponse, null);
+    }
+
+    /**
+     * Template method to be executed to run the API request.
+     *
+     * @param context     Context of caller
+     * @param apiResponse APIResponse of caller
+     * @param onEmulatorBugResponse responseCode when there is an emulator bug as explained here
+     *                              https://github.com/google/volley/issues/92
+     * @throws IllegalArgumentException if {@code context == null || apiResponse == null}
+     * @pre {@code context != null && apiResponse != null}
+     */
+    public void run(Context context, APIResponse<K> apiResponse,
+                    APIResponse<K> onEmulatorBugResponse) {
         if (context == null) {
             throw new IllegalArgumentException("AbstractAPIRequest.run.pre: context is null.");
         }
         if (apiResponse == null) {
             throw new IllegalArgumentException("AbstractAPIRequest.run.pre: apiResponse is null.");
         }
+        if (isRequestHappening) {
+            // Do not do anything.
+            return;
+        }
+        // Set semaphore
+        isRequestHappening = true;
 
         responseListener = new Response.Listener<T>() {
             @Override
             public void onResponse(T response) {
+                // Update semaphore
+                isRequestHappening = false;
+                // Successful request, so reset retry counter
+                retryCount = 0;
                 K convertedData;
                 try {
                     convertedData = convertData(response);
@@ -92,12 +117,23 @@ public abstract class AbstractAPIRequest<T, K> {
         errorListener = new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
+                // Update semaphore
+                isRequestHappening = false;
                 // Try to retrieve server error response.
                 try {
                     String responseNetworkData = new String(error.networkResponse.data,
                             "utf-8");
                     errorMessage = new JSONObject(responseNetworkData).optString("text");
                 } catch (Exception e) {
+                    // Not caused by a backend error, retry request if retryCount is under 10 times
+                    if (retryCount < 10 && onEmulatorBugResponse == null) {
+                        retryCount++;
+                        run(context, apiResponse, null);
+                        return;
+                    } else if (onEmulatorBugResponse != null) {
+                        onEmulatorBugResponse.onResponse(null);
+                        return;
+                    }
                 }
                 // Check if error was a TimeoutError
                 if (error.getClass().getSimpleName().equals("TimeoutError")) {

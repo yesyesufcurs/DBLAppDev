@@ -1,10 +1,6 @@
 package com.dblappdev.app;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.FileProvider;
-
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -14,12 +10,14 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.TextView;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
 
 import com.android.volley.VolleyError;
 import com.dblappdev.app.api.APIResponse;
-import com.dblappdev.app.api.APIService;
+import com.dblappdev.app.api.ExpenseServiceQueries;
 import com.dblappdev.app.dataClasses.LoggedInUser;
 import com.dblappdev.app.gregservice.GregService;
 
@@ -35,12 +33,14 @@ import java.util.Map;
 
 public class ExpenseDetailsActivity extends AppCompatActivity {
 
+    //todo explain variables
     String currentImagePath = null;
     int expenseGroupId;
     String MODE;
     int EXPENSE_ID;
     private static final int IMAGE_REQUEST = 1;
     public static Activity currentContext;
+    boolean newImage = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,60 +50,47 @@ public class ExpenseDetailsActivity extends AppCompatActivity {
         currentContext = this;
 
         if (LoggedInUser.getInstance() == null) {
-            throw new RuntimeException("Something went wrong with logging in: no loggged in user" +
+            throw new RuntimeException(
+                    "Something went wrong with logging in: no logged in user" +
                     " found upon creation of the home screen!");
         }
 
         Bundle bundle = getIntent().getExtras();
 
         if (!getIntent().hasExtra("MODE")) {
-            throw new RuntimeException("Something went wrong with opening the expense details: no " +
+            throw new RuntimeException(
+                    "Something went wrong with opening the expense details: no " +
                     "mode selected.");
         }
         MODE = bundle.getString("MODE");
         if (!getIntent().hasExtra("EXPENSE_GROUP_ID")) {
-            throw new RuntimeException("Something went wrong with opening the expense details: no " +
+            throw new RuntimeException(
+                    "Something went wrong with opening the expense details: no " +
                     "expense group selected.");
         }
         expenseGroupId = bundle.getInt("EXPENSE_GROUP_ID");
         if (bundle.get("MODE").equals("EDIT")) {
             if (!getIntent().hasExtra("EXPENSE_ID")) {
-                throw new RuntimeException("Something went wrong with opening the expense details: no " +
+                throw new RuntimeException(
+                        "Something went wrong with opening the expense details: no " +
                         "expense selected.");
             }
             EXPENSE_ID = bundle.getInt("EXPENSE_ID");
             ((TextView) findViewById(R.id.topBarText)).setText("Edit expense");
-            APIService.getExpenseDetails(LoggedInUser.getInstance().getApiKey(), "" + bundle.getInt("EXPENSE_ID"), this, new APIResponse<List<Map<String, String>>>() {
+            ExpenseServiceQueries.getExpenseDetails(
+                    LoggedInUser.getInstance().getApiKey(),
+                    "" + bundle.getInt("EXPENSE_ID"),
+                    this, new APIResponse<List<Map<String, String>>>() {
+
                 @Override
                 public void onResponse(List<Map<String, String>> data) {
                     Map<String, String> ourData = data.get(0);
-                    ((EditText) findViewById(R.id.expense_name_input_text)).setText(ourData.get("title"));
-                    ((EditText) findViewById(R.id.expense_price_input_text)).setText(ourData.get("amount"));
-                    Bitmap picture = weblinkToBitmap(
-                            "http://94.130.144.25:5000/getExpensePicture/" + ourData.get("id") + "/" + LoggedInUser.getInstance().getApiKey()
-                    );
-                    //create a file to write bitmap data
-                    if (picture != null) {
-                        try {
-                            File f = new File(currentContext.getCacheDir(), "tempicture");
-                            f.createNewFile();
-
-                            //Convert bitmap to byte array
-
-                            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                            picture.compress(Bitmap.CompressFormat.PNG, 0 /*ignored for PNG*/, bos);
-                            byte[] bitmapdata = bos.toByteArray();
-
-                            //write the bytes in file
-                            FileOutputStream fos = new FileOutputStream(f);
-                            fos.write(bitmapdata);
-                            fos.flush();
-                            fos.close();
-                            currentImagePath = f.getAbsolutePath();
-                        } catch (Exception e) {
-                            throw new IllegalStateException("Cannot save picture");
-                        }
-                    }
+                    ((EditText) findViewById(R.id.expense_name_input_text)).setText(
+                            ourData.get("title"));
+                    ((EditText) findViewById(R.id.expense_price_input_text)).setText(
+                            ourData.get("amount"));
+                    ((EditText) findViewById(R.id.creator_input_text)).setText(
+                            ourData.get("user_id"));
                 }
 
                 @Override
@@ -152,11 +139,18 @@ public class ExpenseDetailsActivity extends AppCompatActivity {
 
         // Redirect to the select members screen
         Intent selectMembersIntent = new Intent(this, SelectMembersActivity.class);
-        selectMembersIntent.putExtra("title", ((TextView) findViewById(R.id.expense_name_input_text)).getText().toString());
-        selectMembersIntent.putExtra("price", ((TextView) findViewById(R.id.expense_price_input_text)).getText().toString());
-        selectMembersIntent.putExtra("imagePath", currentImagePath);
-        selectMembersIntent.putExtra("expenseGroupId", expenseGroupId);
-        selectMembersIntent.putExtra("MODE", MODE);
+        selectMembersIntent.putExtra("title",
+                ((TextView) findViewById(R.id.expense_name_input_text)).getText().toString());
+        selectMembersIntent.putExtra("price",
+                ((TextView) findViewById(R.id.expense_price_input_text)).getText().toString());
+        selectMembersIntent.putExtra("creator",
+                ((TextView) findViewById(R.id.creator_input_text)).getText().toString());
+        selectMembersIntent.putExtra("imagePath",
+                currentImagePath);
+        selectMembersIntent.putExtra("expenseGroupId",
+                expenseGroupId);
+        selectMembersIntent.putExtra("MODE",
+                MODE);
         if (MODE.equals("EDIT")) {
             selectMembersIntent.putExtra("EXPENSE_ID", EXPENSE_ID);
         }
@@ -185,6 +179,7 @@ public class ExpenseDetailsActivity extends AppCompatActivity {
             cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
             startActivityForResult(cameraIntent, IMAGE_REQUEST);
         }
+        newImage = true;
     }
 
     /**
@@ -194,11 +189,47 @@ public class ExpenseDetailsActivity extends AppCompatActivity {
      * @param view The View instance of the button that was pressed
      */
     public void onDisplayImage(View view) {
+        Bitmap picture = weblinkToBitmap(
+                "http://94.130.144.25:5000/getExpensePicture/" +
+                        EXPENSE_ID +
+                        "/" + LoggedInUser.getInstance().getApiKey()
+        );
+
+        //create a file to write bitmap data
+        if (!newImage && picture != null) {
+            try {
+                //todo explain variables
+                File f = new File(currentContext.getCacheDir(), "tempicture");
+                f.createNewFile();
+
+                //Convert bitmap to byte array
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                picture.compress(Bitmap.CompressFormat.PNG, 0 /*ignored for PNG*/, bos);
+                byte[] bitmapdata = bos.toByteArray();
+
+                //write the bytes in file
+                FileOutputStream fos = new FileOutputStream(f);
+                fos.write(bitmapdata);
+                fos.flush();
+                fos.close();
+                currentImagePath = f.getAbsolutePath();
+                newImage = true;
+            } catch (Exception e) {
+                throw new IllegalStateException("Cannot save picture");
+            }
+        }
+
         Intent intent = new Intent(this, DisplayImageActivity.class);
         intent.putExtra("image_path", currentImagePath);
         startActivity(intent);
     }
 
+    /**
+     * Retrieves a File object containing the image from an external storage (outside app scope)
+     * and sets the currentImagePath towards this file.
+     * @return File object containing an image
+     * @throws IOException
+     */
     private File getImageFile() throws IOException {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageName = "jpg_" + timeStamp + "_";

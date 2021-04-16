@@ -1,7 +1,5 @@
 package com.dblappdev.app;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -9,9 +7,11 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.android.volley.VolleyError;
 import com.dblappdev.app.api.APIResponse;
-import com.dblappdev.app.api.APIService;
+import com.dblappdev.app.api.LoginService;
 import com.dblappdev.app.dataClasses.LoggedInUser;
 import com.dblappdev.app.gregservice.GregService;
 
@@ -38,13 +38,14 @@ public class RegisterActivity extends AppCompatActivity {
      * If any of these fail to hold, this method should create and show a Toast message notifying
      *             the user that the input is invalid.
      * Otherwise, if all of the constraints have been met, this method should make a register
-     *             APIRequest ({@link com.dblappdev.app.api.APIService#register(String, String, String, Context, APIResponse)}).
+     *             APIRequest ({@link LoginService#register(
+     *             String, String, String, Context, APIResponse)}).
      * If this request returns an error, this method should create and show a Toast message
      *             containing the received error message.
      * If this request is successful, this method should store the received apiKey in the
-     *             LoggedInUser class ({@link com.dblappdev.app.dataClasses.LoggedInUser}) and create
-     *             a new HomeScreen activity, navigate towards that activity and finally finish
-     *             this activity.
+     *             LoggedInUser class ({@link com.dblappdev.app.dataClasses.LoggedInUser}) and
+     *             create a new HomeScreen activity, navigate towards that activity and finally
+     *             finish this activity.
      */
     public void onRegisterClick(View view) {
 
@@ -84,18 +85,31 @@ public class RegisterActivity extends AppCompatActivity {
 
     /**
      * Checks whether the supplied strings make up valid input for registering
-     * @return {@code true} iff the strings conform to the specification explained at {@link #onRegisterClick(View)}
+     * @return {@code true} iff the strings conform to the
+     * specification explained at {@link #onRegisterClick(View)}
      */
-    private boolean isValidInput(String username, String email, String password, String passwordConfirm) {
-        boolean validUsername = username.length() >= 1 && username.length() < 30 && GregService.isASCII(username);
-        boolean validEmail = email.matches("(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}" +
+    private boolean isValidInput(
+            String username,
+            String email,
+            String password,
+            String passwordConfirm) {
+
+        boolean validUsername =
+                username.length() >= 1 &&
+                username.length() < 30 &&
+                GregService.isASCII(username);
+        boolean validEmail = email.matches(
+                "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}" +
                 "~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\" +
                 "[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?" +
                 "\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9]" +
                 "[0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:" +
                 "[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b" +
                 "\\x0c\\x0e-\\x7f])+)\\])");
-        boolean validPassword = password.length() >= 6 && password.length() < 30 && GregService.isASCII(password);
+        boolean validPassword =
+                password.length() >= 6 &&
+                password.length() < 30 &&
+                GregService.isASCII(password);
         boolean validPassWordConfirm = passwordConfirm.equals(password);
 
         return validUsername && validEmail && validPassword && validPassWordConfirm;
@@ -110,7 +124,7 @@ public class RegisterActivity extends AppCompatActivity {
      * @param context Context to be used in the request
      */
     private void registerAPICall(String username, String password, String email, Context context) {
-        APIService.register(username, password, email, context,
+        LoginService.register(username, password, email, context,
                 new APIResponse<String>() {
                     @Override
                     public void onResponse(String data) {

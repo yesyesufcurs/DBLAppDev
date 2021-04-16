@@ -111,7 +111,7 @@ def createExpense():
             conn.commit()
             # Return expense id
             return jsonify(expense_id)
-    return CreateExpense.template_method(CreateExpense, request.headers["api_key"] if "api_key" in request.headers else None)
+    return CreateExpense.template_method(CreateExpense, request.headers)
 
 @app.route("/modifyExpense", methods=["POST"])
 def modifyExpense():
@@ -185,7 +185,7 @@ def modifyExpense():
             conn.commit()
             # Return expense id
             return jsonify("Updated Successfully")
-    return ModifyExpense.template_method(ModifyExpense, request.headers["api_key"] if "api_key" in request.headers else None)
+    return ModifyExpense.template_method(ModifyExpense, request.headers)
 
 @app.route("/removeExpense")
 def removeExpense():
@@ -228,7 +228,7 @@ def removeExpense():
                 return jsonify(error=412, text="Cannot remove expense"), 412
             conn.commit()
             return jsonify("Removed successfully")
-    return RemoveExpense.template_method(RemoveExpense, request.headers["api_key"] if "api_key" in request.headers else None)
+    return RemoveExpense.template_method(RemoveExpense, request.headers)
 
 
 @app.route("/getExpensePicture/<expenseid>/<apikey>", methods=["GET", "POST"])
@@ -269,7 +269,7 @@ def getExpensePicture(expenseid, apikey):
             return send_file(BytesIO(pictureBytes),
                              attachment_filename=f"expense_id_{expense_id}",
                              mimetype='image/jpg')
-    return GetExpensePicture.template_method(GetExpensePicture, apikey)
+    return GetExpensePicture.template_method(GetExpensePicture, {'api_key': apikey})
 
 @app.route("/detectText", methods=["GET", "POST"])
 def detectText():
@@ -294,7 +294,7 @@ def detectText():
                 return jsonify(error=412, text="Cannot use text detection."), 412
             foundText = foundText.replace("\n", " ")
             return jsonify(foundText)
-    return DetectText.template_method(DetectText, request.headers["api_key"] if "api_key" in request.headers else None)
+    return DetectText.template_method(DetectText, request.headers)
     
 @app.route("/createExpenseIOU/<iouJson>")
 def createExpenseIOU(iouJson):
@@ -310,6 +310,7 @@ def createExpenseIOU(iouJson):
         def api_operation(self, user_id, conn):
             cursor = conn.cursor()
             iou = json.loads(iouJson)
+            isExpenseCreator2 = False
             expense_id = ""
             query = ''' INSERT INTO accured_expenses VALUES (?, ?, ?, ?) '''
             queryRemove = "DELETE FROM accured_expenses WHERE expense_id = ? AND user_id = ?"
@@ -319,13 +320,19 @@ def createExpenseIOU(iouJson):
             except Exception as e:
                 return jsonify(error=412, text="Cannot get expense id"), 412
 
-            # Check permissions of caller
-            try:
-                if not(isExpenseCreator(user_id, expense_id, cursor) or
-                 isModerator(user_id, getExpenseGroup(expense_id, cursor), cursor)):
-                    return jsonify(error=412, text="User must be the creator of the expense to add this."), 412
+            try: 
+                isExpenseCreator2 = isExpenseCreator(user_id, expense_id, cursor)
             except Exception as e:
-                return jsonify(error=412, text="Cannot determine if caller has permissions"), 412
+                return jsonify(error=412, text="Cannot check permissions"), 412
+
+            # # Check permissions of caller
+            # try:
+            #     isExpenseCreator2 = isExpenseCreator(user_id, expense_id, cursor)
+            #     if not(isExpenseCreator2 or
+            #      isModerator(user_id, getExpenseGroup(expense_id, cursor), cursor)):
+            #         return jsonify(error=412, text="User must be the creator of the expense to add this."), 412
+            # except Exception as e:
+            #     return jsonify(error=412, text="Cannot determine if caller has permissions"), 412
 
             # Iterate through iouJson and add each Accured Expense to db.
             for key in iou:
@@ -333,12 +340,12 @@ def createExpenseIOU(iouJson):
                     # Make sure that this iou does not exist.
                     cursor.execute(queryRemove, (expense_id, key))
                     # Add a new iou.
-                    cursor.execute(query, (expense_id, key, iou[key], False))
+                    cursor.execute(query, (expense_id, key, iou[key], (-0.01 < float(iou[key]) < 0.01) or (isExpenseCreator2 and key == user_id)))
                 except Exception as e:
                     return jsonify(error=412, text="Cannot add transaction"), 412
             conn.commit()
             return jsonify("Added successfully")
-    return CreateExpenseIOU.template_method(CreateExpenseIOU, request.headers["api_key"] if "api_key" in request.headers else None)
+    return CreateExpenseIOU.template_method(CreateExpenseIOU, request.headers)
 
 @app.route("/getExpenseIOU")
 def getExpenseIOU():
@@ -371,7 +378,7 @@ def getExpenseIOU():
             except Exception as e:
                 return jsonify(error=412, text="Cannot retrieve the expense information"), 412
             return self.generateJson(self, cursor.fetchall())
-    return GetExpenseIOU.template_method(GetExpenseIOU, request.headers["api_key"] if "api_key" in request.headers else None)
+    return GetExpenseIOU.template_method(GetExpenseIOU, request.headers)
 
 @app.route("/searchExpense")
 def searchExpense():
@@ -412,7 +419,7 @@ def searchExpense():
             except Exception as e:
                 return jsonify(error=412, text="Cannot execute query"), 412
             return self.generateJson(self, cursor.fetchall())
-    return SearchExpense.template_method(SearchExpense, request.headers["api_key"] if "api_key" in request.headers else None)
+    return SearchExpense.template_method(SearchExpense, request.headers)
 
 @app.route("/getExpenseGroupExpenses")
 def getExpenseGroupExpenses():
@@ -449,7 +456,7 @@ def getExpenseGroupExpenses():
                 return jsonify(error=412, text="Cannot get expense_group_expenses"), 412
             result = cursor.fetchall()
             return self.generateJson(self, result)
-    return ExpenseGroupExpenses.template_method(ExpenseGroupExpenses, request.headers["api_key"] if "api_key" in request.headers else None)
+    return ExpenseGroupExpenses.template_method(ExpenseGroupExpenses, request.headers)
 
 
 @app.route("/getUsersExpenses")
@@ -472,7 +479,7 @@ def getUsersExpenses():
                 return jsonify(error=412, text="Cannot get expenses"), 412
             result = cursor.fetchall()
             return self.generateJson(self, result)
-    return GetUsersExpenses.template_method(GetUsersExpenses, request.headers["api_key"] if "api_key" in request.headers else None)
+    return GetUsersExpenses.template_method(GetUsersExpenses, request.headers)
 
 
 @app.route("/getUserOwedExpenses")
@@ -495,7 +502,7 @@ def getUserOwedExpenses():
                 return jsonify(error=412, text="Cannot get owed expenses for user"), 412
             result = cursor.fetchall()
             return self.generateJson(self, result)
-    return GetUserOwedExpenses.template_method(GetUserOwedExpenses, request.headers["api_key"] if "api_key" in request.headers else None)
+    return GetUserOwedExpenses.template_method(GetUserOwedExpenses, request.headers)
 
 @app.route("/getUserOwedTotal")
 def getUserOwedTotal():
@@ -521,7 +528,7 @@ def getUserOwedTotal():
             except Exception as e:
                 return jsonify(error=412, text="Cannot get the owed amounts")
             return self.generateJson(self, result)
-    return GetUserOwedTotal.template_method(GetUserOwedTotal, request.headers["api_key"] if "api_key" in request.headers else None)
+    return GetUserOwedTotal.template_method(GetUserOwedTotal, request.headers)
 
 @app.route("/getUserDebitTotal")
 def getUserDebitTotal():
@@ -547,7 +554,7 @@ def getUserDebitTotal():
             except Exception as e:
                 return jsonify(error=412, text="Cannot get the owed amounts")
             return self.generateJson(self, result)
-    return GetUserDebitTotal.template_method(GetUserDebitTotal, request.headers.get("api_key"))
+    return GetUserDebitTotal.template_method(GetUserDebitTotal, request.headers)
 
 @app.route("/getExpenseDetails")
 def getExpenseDetails():
@@ -572,7 +579,8 @@ def getExpenseDetails():
                 if not(isMember(user_id, expense_group_id, cursor)):
                     return jsonify(error=412, text="User must be member of the expense group to see expense details."), 412
             except Exception as e:
-                return jsonify(error=412, text="Cannot determine if caller has permissions"), 412
+                # return jsonify(error=412, text="Cannot determine if caller has permissions"), 412
+                raise e
             # Get expense details
             query = ''' SELECT id, user_id, title, amount, content, timestamp, expense_group_id FROM expense WHERE id = ?'''
             try:
@@ -580,8 +588,10 @@ def getExpenseDetails():
             except Exception as e:
                 return jsonify(error=412, text="Cannot get expense details"), 412
             result = cursor.fetchall()
+            if len(result) == 0:
+                return jsonify(error=412, text="This expense does not exist!"), 412
             return self.generateJson(self, result)
-    return GetExpenseDetails.template_method(GetExpenseDetails, request.headers["api_key"] if "api_key" in request.headers else None)
+    return GetExpenseDetails.template_method(GetExpenseDetails, request.headers)
 
 
 @app.route("/getOwedExpenses")
@@ -619,7 +629,7 @@ def getOwedExpenses():
                 return jsonify(error=412, text="Cannot get expense details"), 412
             result = cursor.fetchall()
             return self.generateJson(self, result)
-    return GetOwedExpenses.template_method(GetOwedExpenses, request.headers["api_key"] if "api_key" in request.headers else None)
+    return GetOwedExpenses.template_method(GetOwedExpenses, request.headers)
 
 @app.route("/removeOwedExpense")
 def removeOwedExpense():
@@ -661,7 +671,7 @@ def removeOwedExpense():
                 return jsonify(error=412, text="Cannot remove accured expense"), 412
             cursor.commit()
             return jsonify("Removed successfully")
-    return RemoveOwedExpense.template_method(RemoveOwedExpense, request.headers["api_key"] if "api_key" in request.headers else None)
+    return RemoveOwedExpense.template_method(RemoveOwedExpense, request.headers)
 
 @app.route("/setUserPaidExpense")
 def setUserPaidExpense():
@@ -715,5 +725,5 @@ def setUserPaidExpense():
                 return jsonify(error=412, text="Cannot set paid value to true"), 412
             conn.commit()
             return jsonify("Set successfully")
-    return SetUserPaidExpense.template_method(SetUserPaidExpense, request.headers["api_key"] if "api_key" in request.headers else None)
+    return SetUserPaidExpense.template_method(SetUserPaidExpense, request.headers)
 

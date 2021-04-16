@@ -3,9 +3,7 @@ package com.dblappdev.app.api;
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
-import com.android.volley.toolbox.StringRequest;
 import com.google.gson.Gson;
 
 import org.json.JSONArray;
@@ -54,7 +52,12 @@ public class JSONAPIRequest extends AbstractAPIRequest<JSONArray, List<Map<Strin
     @Override
     protected Request<JSONArray> doAPIRequest(Response.Listener<JSONArray> responseListener,
                                               Response.ErrorListener errorListener) {
-        return new JsonArrayRequest(method, url, null, responseListener, errorListener) {
+        return new JsonArrayRequest(
+                method,
+                url,
+                null,
+                responseListener,
+                errorListener) {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
                 return headers;

@@ -1,20 +1,19 @@
 package com.dblappdev.app;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.volley.VolleyError;
 import com.dblappdev.app.adapters.ExpenseGroupAdapter;
 import com.dblappdev.app.api.APIResponse;
-import com.dblappdev.app.api.APIService;
+import com.dblappdev.app.api.ExpenseGroupService;
 import com.dblappdev.app.dataClasses.ExpenseGroup;
 import com.dblappdev.app.dataClasses.LoggedInUser;
 import com.dblappdev.app.dataClasses.User;
@@ -30,6 +29,8 @@ public class HomeScreenActivity extends AppCompatActivity {
     // interfering with each other
     boolean isRequestHappening = false;
 
+    //  Publicly accessible variable for this HomeScreenActivity.
+    public static HomeScreenActivity instance;
     // List containing the expense groups to be shown
     private ArrayList<ExpenseGroup> expenseGroups = new ArrayList<>();
 
@@ -53,9 +54,13 @@ public class HomeScreenActivity extends AppCompatActivity {
 
         // Check if the Singleton class LoggedInUser is initialized
         if (LoggedInUser.getInstance() == null) {
-            throw new RuntimeException("Something went wrong with logging in: no logged in user" +
+            throw new RuntimeException(
+                    "Something went wrong with logging in: no logged in user" +
                     " found upon creation of the home screen!");
         }
+
+        // Set instance variable
+        instance = this;
 
         // Get all the expense groups the logged in user is part of
         if (!isRequestHappening) {
@@ -64,20 +69,7 @@ public class HomeScreenActivity extends AppCompatActivity {
             // This method will also deal with the instantiating of the recycler view
             getExpenseGroups(this);
         }
-    }
 
-    /**
-     * This method gets called when the user presses the account button on the home screen.
-     * When the user does so, a new EditProfile activity should be created and started.
-     * The current activity should not be closed, such that the user gets redirected to this screen
-     * when they perform a backPress action in the newly created EditProfile activity.
-     * Event handler for the account button
-     * @param view The View instance of the button that was pressed
-     */
-    public void onAccount(View view) {
-        // Redirect to the edit profile screen
-        Intent editProfileIntent = new Intent(this, EditProfileActivity.class);
-        startActivity(editProfileIntent);
     }
 
     /**
@@ -90,7 +82,9 @@ public class HomeScreenActivity extends AppCompatActivity {
      */
     public void onAdd(View view) {
         // Redirect to add/join group screen
-        Intent addJoinGroupScreenIntent = new Intent(this, AddJoinGroupActivity.class);
+        Intent addJoinGroupScreenIntent = new Intent(
+                this,
+                AddJoinGroupActivity.class);
         startActivity(addJoinGroupScreenIntent);
     }
 
@@ -149,7 +143,7 @@ public class HomeScreenActivity extends AppCompatActivity {
      * @param context Context in which the API request and RecyclerView instantiating happens
      */
     private void getExpenseGroups(Context context) {
-        APIService.getExpenseGroups(LoggedInUser.getInstance().getApiKey(), context,
+        ExpenseGroupService.getExpenseGroups(LoggedInUser.getInstance().getApiKey(), context,
                 new APIResponse<List<Map<String, String>>>() {
                     @Override
                     public void onResponse(List<Map<String, String>> data) {
@@ -162,9 +156,13 @@ public class HomeScreenActivity extends AppCompatActivity {
                             expenseGroups.add(expenseGroup);
                         }
                         // Set the recyclerview and its settings
-                        RecyclerView recView = (RecyclerView) findViewById(R.id.recyclerViewExpenseGroup);
+                        //todo explain variables
+                        RecyclerView recView =
+                                (RecyclerView) findViewById(R.id.recyclerViewExpenseGroup);
                         View.OnClickListener listener = view -> onItemClick(view);
-                        ExpenseGroupAdapter adapter = new ExpenseGroupAdapter(listener, expenseGroups);
+                        ExpenseGroupAdapter adapter = new ExpenseGroupAdapter(
+                                listener,
+                                expenseGroups);
                         recView.setAdapter(adapter);
                         recView.setLayoutManager(new LinearLayoutManager(context));
                         // Update semaphore

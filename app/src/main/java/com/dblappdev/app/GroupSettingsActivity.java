@@ -1,21 +1,20 @@
 package com.dblappdev.app;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.android.volley.VolleyError;
-import com.dblappdev.app.adapters.ExpenseAdapter;
 import com.dblappdev.app.adapters.MemberBalanceAdapter;
 import com.dblappdev.app.api.APIResponse;
-import com.dblappdev.app.api.APIService;
-import com.dblappdev.app.dataClasses.Expense;
+import com.dblappdev.app.api.ExpenseGroupService;
+import com.dblappdev.app.api.ExpenseServiceQueries;
 import com.dblappdev.app.dataClasses.ExpenseGroup;
 import com.dblappdev.app.dataClasses.LoggedInUser;
 import com.dblappdev.app.dataClasses.User;
@@ -30,6 +29,8 @@ public class GroupSettingsActivity extends AppCompatActivity {
     ExpenseGroup expenseGroup;
     // Some actions on this screen are only allowed to be performed by a moderator
     User moderator;
+
+    private String apiKey;
 
     /**
      * This method gets invoked by Android upon the creation of a GroupScreenActivity
@@ -51,6 +52,8 @@ public class GroupSettingsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_group_settings);
+
+        apiKey = LoggedInUser.getInstance().getApiKey();
 
         // Get the linked expense group ID and check if it was properly defined
         Bundle bundle = getIntent().getExtras();
@@ -97,13 +100,15 @@ public class GroupSettingsActivity extends AppCompatActivity {
     }
 
     /**
-     * This method gets called when the user presses the remove button in an item in the member list.
-     * When this happens, this method should make a request to remove the user that is linked to
-     * the clicked item in the member list from the expense group that is linked to this activity.
+     * This method gets called when the user presses the remove button in an item in the member
+     * list. When this happens, this method should make a request to remove the user that is
+     * linked to the clicked item in the member list from the expense group that is linked to
+     * this activity.
      * If this request gives an error, a Toast with the error message should be displayed.
      * If this request is successful, a Toast message saying the user has been removed should be
      * displayed.
-     * TODO: Possibly, the RecyclerView can be updated, but this is not needed for the initial implementation.
+     * TODO: Possibly, the RecyclerView can be updated,
+     * TODO: but this is not needed for the initial implementation.
      * Event handler for removing a user
      * @param view
      */
@@ -116,7 +121,9 @@ public class GroupSettingsActivity extends AppCompatActivity {
             isRequestHappening = true;
             removeFromGroup(username, expenseGroupID, this);
         } else {
-            GregService.showErrorToast("Only a moderator can perform this action!", this);
+            GregService.showErrorToast(
+                    "Only a moderator can perform this action!",
+                    this);
         }
     }
 
@@ -134,12 +141,13 @@ public class GroupSettingsActivity extends AppCompatActivity {
         User loggedInUser = LoggedInUser.getInstance().getUser();
         if (loggedInUser.getUsername().equals(moderator.getUsername())) {
             // User is the moderator and can thus make the remove group request
-            // TODO : Fix expensegroupactivity closure
             isRequestHappening = true;
             int expenseGroupID = getIntent().getExtras().getInt("EXPENSE_GROUP_ID");
             removeGroup(expenseGroupID, this);
         } else {
-            GregService.showErrorToast("Only a moderator can perform this action!", this);
+            GregService.showErrorToast(
+                    "Only a moderator can perform this action!",
+                    this);
         }
     }
 
@@ -154,7 +162,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
      * @param expenseGroupID id of the group this screen was opened for
      */
     private void getUsers(Context context, int expenseGroupID) {
-        APIService.getExpenseGroupMembers(LoggedInUser.getInstance().getApiKey(),
+        ExpenseGroupService.getExpenseGroupMembers(apiKey,
                 Integer.toString(expenseGroupID), context,
                 new APIResponse<List<Map<String, String>>>() {
                     @Override
@@ -189,7 +197,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
      * @param expenseGroupID id of the group this screen was opened for
      */
     private void getBalance(Context context, int expenseGroupID) {
-        APIService.getUserOwedTotal(LoggedInUser.getInstance().getApiKey(),
+        ExpenseServiceQueries.getUserOwedTotal(apiKey,
                 Integer.toString(expenseGroupID), context,
                 new APIResponse<List<Map<String, String>>>() {
                     @Override
@@ -206,7 +214,8 @@ public class GroupSettingsActivity extends AppCompatActivity {
                             }
                         }
                         // Set the recyclerview and its settings
-                        RecyclerView recView = (RecyclerView) findViewById(R.id.recyclerViewMembersBalance);
+                        RecyclerView recView =
+                                (RecyclerView) findViewById(R.id.recyclerViewMembersBalance);
                         View.OnClickListener listener = view -> onRemove(view);
                         MemberBalanceAdapter adapter = new MemberBalanceAdapter(listener,
                                 expenseGroup.getUsers(), expenseGroup.getBalance());
@@ -235,7 +244,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
      * @param expenseGroupID id of the group this screen was opened for
      */
     private void getExpenseGroup(Context context, int expenseGroupID) {
-        APIService.getExpenseGroup(LoggedInUser.getInstance().getApiKey(),
+        ExpenseGroupService.getExpenseGroup(apiKey,
                 Integer.toString(expenseGroupID),
                 context,
                 new APIResponse<List<Map<String, String>>>() {
@@ -260,12 +269,15 @@ public class GroupSettingsActivity extends AppCompatActivity {
     }
 
     private void removeGroup(int expenseGroupID, Context context) {
-        APIService.removeExpenseGroup(LoggedInUser.getInstance().getApiKey(),
+        ExpenseGroupService.removeExpenseGroup(apiKey,
                 Integer.toString(expenseGroupID), context
                 , new APIResponse<String>() {
                     @Override
                     public void onResponse(String data) {
-                        finishActivity(0);
+                        // Clsoe the group screen activity, since the group is removed
+                        GroupScreenActivity.instance.finish();
+                        // Update the homepage to portray the deletion of the group
+                        refreshHomepage();
                         finish();
                         isRequestHappening = false;
                     }
@@ -279,14 +291,20 @@ public class GroupSettingsActivity extends AppCompatActivity {
     }
 
     private void removeFromGroup(String username, int expenseGroupID, Context context) {
-        APIService.removeFromExpenseGroup(LoggedInUser.getInstance().getApiKey(),
-                username, Integer.toString(expenseGroupID), context,
+        ExpenseGroupService.removeFromExpenseGroup(
+                apiKey,
+                username,
+                Integer.toString(expenseGroupID),
+                context,
                 new APIResponse<String>() {
                     @Override
                     public void onResponse(String data) {
-                        GregService.showErrorToast("User " + username + " has been " +
+                        GregService.showErrorToast(
+                                "User " + username + " has been " +
                                 "removed from the group!", context);
                         isRequestHappening = false;
+                        // As group settings screen must be updated close it
+                        finish();
                     }
 
                     @Override
@@ -298,13 +316,18 @@ public class GroupSettingsActivity extends AppCompatActivity {
     }
 
     private void leaveGroup(int expenseGroupID, Context context) {
-        APIService.removeFromExpenseGroup(LoggedInUser.getInstance().getApiKey(),
-                LoggedInUser.getInstance().getUser().getUsername(), Integer.toString(expenseGroupID),
+        ExpenseGroupService.removeFromExpenseGroup(
+                apiKey,
+                LoggedInUser.getInstance().getUser().getUsername(),
+                Integer.toString(expenseGroupID),
                 context,
                 new APIResponse<String>() {
                     @Override
                     public void onResponse(String data) {
-                        finishActivity(0);
+                        // Close the group screen activity, since the group has been left
+                        GroupScreenActivity.instance.finish();
+                        // Update the home page to portray the leaving of the group
+                        refreshHomepage();
                         finish();
                         isRequestHappening = false;
                     }
@@ -315,5 +338,12 @@ public class GroupSettingsActivity extends AppCompatActivity {
                         isRequestHappening = false;
                     }
                 });
+    }
+
+    private void refreshHomepage() {
+        HomeScreenActivity.instance.finish();
+        // Open new HomeScreenActivity
+        Intent homeScreenIntent = new Intent(this, HomeScreenActivity.class);
+        startActivity(homeScreenIntent);
     }
 }
