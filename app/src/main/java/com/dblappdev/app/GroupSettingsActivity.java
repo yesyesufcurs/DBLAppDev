@@ -30,6 +30,8 @@ public class GroupSettingsActivity extends AppCompatActivity {
     // Some actions on this screen are only allowed to be performed by a moderator
     User moderator;
 
+    private String apiKey;
+
     /**
      * This method gets invoked by Android upon the creation of a GroupScreenActivity
      * Firstly, this method should check whether the logged in instance in
@@ -50,6 +52,8 @@ public class GroupSettingsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_group_settings);
+
+        apiKey = LoggedInUser.getInstance().getApiKey();
 
         // Get the linked expense group ID and check if it was properly defined
         Bundle bundle = getIntent().getExtras();
@@ -158,7 +162,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
      * @param expenseGroupID id of the group this screen was opened for
      */
     private void getUsers(Context context, int expenseGroupID) {
-        ExpenseGroupService.getExpenseGroupMembers(LoggedInUser.getInstance().getApiKey(),
+        ExpenseGroupService.getExpenseGroupMembers(apiKey,
                 Integer.toString(expenseGroupID), context,
                 new APIResponse<List<Map<String, String>>>() {
                     @Override
@@ -193,7 +197,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
      * @param expenseGroupID id of the group this screen was opened for
      */
     private void getBalance(Context context, int expenseGroupID) {
-        ExpenseServiceQueries.getUserOwedTotal(LoggedInUser.getInstance().getApiKey(),
+        ExpenseServiceQueries.getUserOwedTotal(apiKey,
                 Integer.toString(expenseGroupID), context,
                 new APIResponse<List<Map<String, String>>>() {
                     @Override
@@ -240,7 +244,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
      * @param expenseGroupID id of the group this screen was opened for
      */
     private void getExpenseGroup(Context context, int expenseGroupID) {
-        ExpenseGroupService.getExpenseGroup(LoggedInUser.getInstance().getApiKey(),
+        ExpenseGroupService.getExpenseGroup(apiKey,
                 Integer.toString(expenseGroupID),
                 context,
                 new APIResponse<List<Map<String, String>>>() {
@@ -265,7 +269,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
     }
 
     private void removeGroup(int expenseGroupID, Context context) {
-        ExpenseGroupService.removeExpenseGroup(LoggedInUser.getInstance().getApiKey(),
+        ExpenseGroupService.removeExpenseGroup(apiKey,
                 Integer.toString(expenseGroupID), context
                 , new APIResponse<String>() {
                     @Override
@@ -288,7 +292,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
 
     private void removeFromGroup(String username, int expenseGroupID, Context context) {
         ExpenseGroupService.removeFromExpenseGroup(
-                LoggedInUser.getInstance().getApiKey(),
+                apiKey,
                 username,
                 Integer.toString(expenseGroupID),
                 context,
@@ -313,7 +317,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
 
     private void leaveGroup(int expenseGroupID, Context context) {
         ExpenseGroupService.removeFromExpenseGroup(
-                LoggedInUser.getInstance().getApiKey(),
+                apiKey,
                 LoggedInUser.getInstance().getUser().getUsername(),
                 Integer.toString(expenseGroupID),
                 context,
