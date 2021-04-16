@@ -17,7 +17,8 @@ import com.android.volley.VolleyError;
 import com.dblappdev.app.adapters.MemberWeightAdapter;
 import com.dblappdev.app.api.APIResponse;
 import com.dblappdev.app.api.ExpenseGroupService;
-import com.dblappdev.app.api.ExpenseService;
+import com.dblappdev.app.api.ExpenseServiceCommands;
+import com.dblappdev.app.api.ExpenseServiceQueries;
 import com.dblappdev.app.dataClasses.LoggedInUser;
 import com.dblappdev.app.dataClasses.User;
 import com.dblappdev.app.gregservice.GregService;
@@ -199,7 +200,7 @@ public class SelectMembersActivity extends AppCompatActivity {
         // If the mode is ADD, we call a createExpense API request
         // Otherwise, the mode will be EDIT and thus we call a modifyExpense request
         if (MODE.equals("ADD")) {
-            ExpenseService.createExpense(
+            ExpenseServiceCommands.createExpense(
                     LoggedInUser.getInstance().getApiKey(),
                     "".equals(creator) ?LoggedInUser.getInstance().getUser().getUsername(): creator,
                     title,
@@ -220,7 +221,7 @@ public class SelectMembersActivity extends AppCompatActivity {
                         }
                     });
         } else {
-            ExpenseService.modifyExpense(
+            ExpenseServiceCommands.modifyExpense(
                     LoggedInUser.getInstance().getApiKey(),
                     title,
                     "" + (Math.round(amount * 100.0f) / 100.0f),
@@ -249,7 +250,7 @@ public class SelectMembersActivity extends AppCompatActivity {
      * Load expense members activity data from backend when MODE == "EDIT"
      */
     private void loadExpenseMembersActivity() {
-        ExpenseService.getExpenseIOU(
+        ExpenseServiceQueries.getExpenseIOU(
                 LoggedInUser.getInstance().getApiKey(),
                 "" + EXPENSE_ID,
                 this,
@@ -308,7 +309,7 @@ public class SelectMembersActivity extends AppCompatActivity {
      * @param expenseIOU expenseIOU to be added
      */
     private void addExpenseIOU(JSONObject expenseIOU, int expenseID) {
-        ExpenseService.createExpenseIOU(
+        ExpenseServiceCommands.createExpenseIOU(
                 LoggedInUser.getInstance().getApiKey(),
                 "" + expenseID,
                 expenseIOU,
