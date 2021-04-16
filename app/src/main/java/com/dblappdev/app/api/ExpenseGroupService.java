@@ -83,7 +83,7 @@ public class ExpenseGroupService {
      * @throws IllegalArgumentException if {@code apiKey == null || expenseGroupName == null ||
      *                                  context == null || response == null}}
      * @pre {@code apiKey != null && expenseGroupName != null &&
-     * context != null && response != null}
+     *      context != null && response != null}
      * @post {@code APIResponse.data == expenseGroups}
      */
     public static void createExpenseGroup(String apiKey, String expenseGroupName, Context
