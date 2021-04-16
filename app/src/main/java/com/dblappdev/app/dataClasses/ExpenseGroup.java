@@ -1,7 +1,7 @@
 package com.dblappdev.app.dataClasses;
 
-import java.util.HashMap;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class ExpenseGroup {
