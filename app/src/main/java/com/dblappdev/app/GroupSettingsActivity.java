@@ -1,20 +1,20 @@
 package com.dblappdev.app;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.android.volley.VolleyError;
 import com.dblappdev.app.adapters.MemberBalanceAdapter;
 import com.dblappdev.app.api.APIResponse;
 import com.dblappdev.app.api.ExpenseGroupService;
-import com.dblappdev.app.api.ExpenseService;
+import com.dblappdev.app.api.ExpenseServiceQueries;
 import com.dblappdev.app.dataClasses.ExpenseGroup;
 import com.dblappdev.app.dataClasses.LoggedInUser;
 import com.dblappdev.app.dataClasses.User;
@@ -193,7 +193,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
      * @param expenseGroupID id of the group this screen was opened for
      */
     private void getBalance(Context context, int expenseGroupID) {
-        ExpenseService.getUserOwedTotal(LoggedInUser.getInstance().getApiKey(),
+        ExpenseServiceQueries.getUserOwedTotal(LoggedInUser.getInstance().getApiKey(),
                 Integer.toString(expenseGroupID), context,
                 new APIResponse<List<Map<String, String>>>() {
                     @Override

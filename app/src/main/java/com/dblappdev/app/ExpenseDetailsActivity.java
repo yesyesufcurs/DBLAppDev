@@ -1,8 +1,5 @@
 package com.dblappdev.app;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.FileProvider;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -15,9 +12,12 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
+
 import com.android.volley.VolleyError;
 import com.dblappdev.app.api.APIResponse;
-import com.dblappdev.app.api.ExpenseService;
+import com.dblappdev.app.api.ExpenseServiceQueries;
 import com.dblappdev.app.dataClasses.LoggedInUser;
 import com.dblappdev.app.gregservice.GregService;
 
@@ -77,7 +77,7 @@ public class ExpenseDetailsActivity extends AppCompatActivity {
             }
             EXPENSE_ID = bundle.getInt("EXPENSE_ID");
             ((TextView) findViewById(R.id.topBarText)).setText("Edit expense");
-            ExpenseService.getExpenseDetails(
+            ExpenseServiceQueries.getExpenseDetails(
                     LoggedInUser.getInstance().getApiKey(),
                     "" + bundle.getInt("EXPENSE_ID"),
                     this, new APIResponse<List<Map<String, String>>>() {

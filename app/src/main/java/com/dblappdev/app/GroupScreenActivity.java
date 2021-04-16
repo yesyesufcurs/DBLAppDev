@@ -1,20 +1,21 @@
 package com.dblappdev.app;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.android.volley.VolleyError;
 import com.dblappdev.app.adapters.ExpenseAdapter;
 import com.dblappdev.app.api.APIResponse;
 import com.dblappdev.app.api.ExpenseGroupService;
-import com.dblappdev.app.api.ExpenseService;
+import com.dblappdev.app.api.ExpenseServiceCommands;
+import com.dblappdev.app.api.ExpenseServiceQueries;
 import com.dblappdev.app.dataClasses.Expense;
 import com.dblappdev.app.dataClasses.LoggedInUser;
 import com.dblappdev.app.dataClasses.User;
@@ -202,7 +203,7 @@ public class GroupScreenActivity extends AppCompatActivity {
      * @param context Context in which the API request and RecyclerView instantiating happens
      */
     private void getExpenses(Context context) {
-        ExpenseService.getExpenseGroupExpenses(
+        ExpenseServiceQueries.getExpenseGroupExpenses(
                 LoggedInUser.getInstance().getApiKey(),
                 Integer.toString(expenseGroupID),
                 context,
@@ -272,7 +273,7 @@ public class GroupScreenActivity extends AppCompatActivity {
     }
 
     private void removeExpense(String expenseID, Context context) {
-        ExpenseService.removeExpense(
+        ExpenseServiceCommands.removeExpense(
                 LoggedInUser.getInstance().getApiKey(),
                 expenseID,
                 context,
