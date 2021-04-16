@@ -1,10 +1,5 @@
 package com.dblappdev.app.dataClasses;
 
-import android.content.Context;
-
-import com.android.volley.VolleyError;
-import com.dblappdev.app.api.APIResponse;
-import com.dblappdev.app.api.APIService;
 
 public class LoggedInUser {
 
