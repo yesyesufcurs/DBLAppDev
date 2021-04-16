@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.util.Pair;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -55,50 +56,31 @@ public class SelectMembersActivity extends AppCompatActivity {
 
         currentContext = this;
 
-        // Check whether bundle contains all necessary information
+        ArrayList<Pair<String, String>> toCheck = new ArrayList<>();
+
+        toCheck.add(new Pair<>("expenseGroupId", "no expense group selected."));
+        toCheck.add(new Pair<>("price", "no price."));
+        toCheck.add(new Pair<>("title", "no title."));
+        toCheck.add(new Pair<>("creator", "no creator."));
+        toCheck.add(new Pair<>("imagePath", "no image."));
+        toCheck.add(new Pair<>("MODE", "no mode."));
+
+        for (Pair<String, String> s : toCheck) {
+            if (!getIntent().hasExtra(s.first)) {
+                throw new RuntimeException(
+                        "Something went wrong with opening the expense group: " + s.second);
+            }
+        }
+
+
+
         if (LoggedInUser.getInstance() == null) {
             throw new RuntimeException(
-                    "Something went wrong with logging in: no loggged in user" +
-                    " found upon creation of the home screen!");
+                    "Something went wrong with opening the expense group: no " +
+                    "logged in user.");
         }
 
         Bundle bundle = getIntent().getExtras();
-        if (!getIntent().hasExtra("expenseGroupId")) {
-            throw new RuntimeException(
-                    "Something went wrong with opening the expense group: no " +
-                    "expense group selected.");
-        }
-
-        if (!getIntent().hasExtra("price")) {
-            throw new RuntimeException(
-                    "Something went wrong with opening the expense group: no " +
-                    "price.");
-        }
-
-        if (!getIntent().hasExtra("title")) {
-            throw new RuntimeException(
-                    "Something went wrong with opening the expense group: no " +
-                    "title.");
-        }
-
-        if (!getIntent().hasExtra("creator")) {
-            throw new RuntimeException(
-                    "Something went wrong with opening the expense group: no " +
-                    "creator.");
-        }
-
-        if (!getIntent().hasExtra("imagePath")) {
-            throw new RuntimeException(
-                    "Something went wrong with opening the expense group: no " +
-                    "image.");
-        }
-
-        if (!getIntent().hasExtra("MODE")) {
-            throw new RuntimeException(
-                    "Something went wrong with opening the expense group: no " +
-                    "mode.");
-        }
-
         MODE = bundle.getString("MODE");
 
         if (MODE.equals("EDIT")) {
@@ -173,8 +155,8 @@ public class SelectMembersActivity extends AppCompatActivity {
 
         // Create JSON for the distribution of the expense
         JSONObject expenseIOU = new JSONObject();
-        if (totalAmount != 0) {
-            try {
+        try {
+            if (totalAmount != 0) {
                 for (User user : amountMap.keySet()) {
                     expenseIOU.put(
                             user.getUsername(),
@@ -182,19 +164,14 @@ public class SelectMembersActivity extends AppCompatActivity {
                                     (Math.round(amount * amountMap.get(user) / totalAmount)
                                             * 100.0f) / 100.0f));
                 }
-            } catch (JSONException e) {
-                throw new IllegalStateException("Cannot set expenseIOUJSON");
-            }
-        } else {
-            try {
+            } else {
                 for (User user : amountMap.keySet()) {
                     expenseIOU.put(user.getUsername(), 0f);
                 }
-            } catch (JSONException e) {
-                throw new IllegalStateException("Cannot set expenseIOUJSON");
             }
+        } catch (JSONException e) {
+            throw new IllegalStateException("Cannot set expenseIOUJSON");
         }
-
         Bitmap bmp = imagePath == null ? null : BitmapFactory.decodeFile(imagePath);
         isRequestHappening = true;
         // If the mode is ADD, we call a createExpense API request
@@ -371,20 +348,7 @@ public class SelectMembersActivity extends AppCompatActivity {
      * @param view The View instance of the member list entry that was pressed
      */
     public void onPlusClick(View view) {
-        for (User user : users) {
-            if (user.getUsername().equals(view.getTag())) {
-                amountMap.put(user, amountMap.get(user) + 1);
-
-                ViewGroup vg = (ViewGroup) view.getParent().getParent().getParent();
-                for (int i = 0; i < vg.getChildCount(); i++) {
-                    View v = vg.getChildAt(i);
-                    if (v.getId() == R.id.item_balance) {
-                        ((TextView) v).setText(Integer.toString(amountMap.get(user)));
-                    }
-                }
-                break;
-            }
-        }
+        addShares(view, 1);
     }
 
     /**
@@ -393,10 +357,14 @@ public class SelectMembersActivity extends AppCompatActivity {
      * @param view The View instance of the member list entry that was pressed
      */
     public void onMinusClick(View view) {
+        addShares(view, -1);
+    }
+
+    private void addShares(View view, int n) {
         for (User user : users) {
             if (user.getUsername().equals(view.getTag())) {
-                if (amountMap.get(user) > 0) {
-                    amountMap.put(user, amountMap.get(user) - 1);
+                if (amountMap.get(user) + n >= 0) {
+                    amountMap.put(user, amountMap.get(user) + n);
 
                     ViewGroup vg = (ViewGroup) view.getParent().getParent().getParent();
                     for (int i = 0; i < vg.getChildCount(); i++) {
