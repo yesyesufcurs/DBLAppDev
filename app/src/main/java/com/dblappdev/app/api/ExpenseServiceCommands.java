@@ -41,8 +41,7 @@ public class ExpenseServiceCommands {
             String userId,
             String title,
             String amount,
-            Bitmap
-            picture,
+            Bitmap picture,
             String description,
             String expenseGroupId,
             Context context,
@@ -51,17 +50,11 @@ public class ExpenseServiceCommands {
         if (apiKey == null || title == null || amount == null ||
                 description == null || expenseGroupId == null) {
             throw new IllegalArgumentException("ExpenseService.createExpense.pre: apiKey or " +
-                    "title or amount or description or expenseGroupId is null");
+                    "title or amount or description or expenseGroupId is null.");
         }
+
         // Initialize base64 string of picture
-        String pictureBase64;
-        try {
-            pictureBase64 = picture == null ? null : bitmapToBase64(picture);
-        } catch (IllegalArgumentException e) {
-            String errorMessage = "Picture too large, should be smaller than 10MB.";
-            response.onErrorResponse(new VolleyError(errorMessage), errorMessage);
-            return;
-        }
+        String pictureBase64 = picture == null ? null : bitmapToBase64(picture, response);
 
         // Set headers
         Map<String, String> headers = new HashMap<String, String>();
@@ -114,14 +107,7 @@ public class ExpenseServiceCommands {
         }
 
         // Initialize base64 string of picture
-        String pictureBase64;
-        try {
-            pictureBase64 = picture == null ? null : bitmapToBase64(picture);
-        } catch (IllegalArgumentException e) {
-            String errorMessage = "Picture too large, should be smaller than 10MB.";
-            response.onErrorResponse(new VolleyError(errorMessage), errorMessage);
-            return;
-        }
+        String pictureBase64 = picture == null ? null : bitmapToBase64(picture, response);
 
         // Set headers
         Map<String, String> headers = new HashMap<String, String>();
@@ -174,17 +160,20 @@ public class ExpenseServiceCommands {
     /**
      * Returns a Base64 string of Bitmap at 70% quality and checks size limit of 10MB
      *
-     * @param picture picture to be converted
+     * @param picture  picture to be converted
+     * @param response when an error needs to be thrown, throw it to repsone
      * @return Base64 string of the picture
      * @throws IllegalArgumentException if size of picture greater than 10MB
      */
-    static String bitmapToBase64(Bitmap picture) throws IllegalArgumentException {
+    static String bitmapToBase64(Bitmap picture, APIResponse<String> response) {
         // Convert Bitmap to byte array
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         picture.compress(Bitmap.CompressFormat.JPEG, 70, output);
         byte[] pictureByteArray = output.toByteArray();
         if (pictureByteArray.length > 10 * 1024 * 1024) {
-            throw new IllegalArgumentException("Size of picture greater than 10MB");
+            String errorMessage = "Picture too large, should be smaller than 10MB.";
+            response.onErrorResponse(new VolleyError(errorMessage), errorMessage);
+            return null;
         }
         return Base64.encodeToString(pictureByteArray, Base64.DEFAULT);
     }
