@@ -347,20 +347,7 @@ public class SelectMembersActivity extends AppCompatActivity {
      * @param view The View instance of the member list entry that was pressed
      */
     public void onPlusClick(View view) {
-        for (User user : users) {
-            if (user.getUsername().equals(view.getTag())) {
-                amountMap.put(user, amountMap.get(user) + 1);
-
-                ViewGroup vg = (ViewGroup) view.getParent().getParent().getParent();
-                for (int i = 0; i < vg.getChildCount(); i++) {
-                    View v = vg.getChildAt(i);
-                    if (v.getId() == R.id.item_balance) {
-                        ((TextView) v).setText(Integer.toString(amountMap.get(user)));
-                    }
-                }
-                break;
-            }
-        }
+        addShares(view, 1);
     }
 
     /**
@@ -369,10 +356,14 @@ public class SelectMembersActivity extends AppCompatActivity {
      * @param view The View instance of the member list entry that was pressed
      */
     public void onMinusClick(View view) {
+        addShares(view, -1);
+    }
+
+    private void addShares(View view, int n) {
         for (User user : users) {
             if (user.getUsername().equals(view.getTag())) {
-                if (amountMap.get(user) > 0) {
-                    amountMap.put(user, amountMap.get(user) - 1);
+                if (amountMap.get(user) + n >= 0) {
+                    amountMap.put(user, amountMap.get(user) + n);
 
                     ViewGroup vg = (ViewGroup) view.getParent().getParent().getParent();
                     for (int i = 0; i < vg.getChildCount(); i++) {
